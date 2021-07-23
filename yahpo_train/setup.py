@@ -1,0 +1,31 @@
+import sys
+from codecs import open
+from os import path
+from setuptools import (setup, find_packages)
+
+here = path.abspath(path.dirname(__file__))
+
+pypi_operations = frozenset(['register', 'upload']) & frozenset([x.lower() for x in sys.argv])
+if pypi_operations:
+    raise ValueError('Command(s) {} disabled in this example.'.format(', '.join(pypi_operations)))
+
+with open(path.join(here, 'README.md'), encoding='utf-8') as fh:
+    long_description = fh.read()
+
+__version__ = None
+exec(open('module_template/about.py').read())
+if __version__ is None:
+    raise IOError('about.py in project lacks __version__!')
+
+setup(name='yahpo_train',
+      version=__version__,
+      author='Florian Pfisterer',
+      description='Train surrogate models for the yahpo gym',
+      long_description=long_description,
+      license='LGPLv3',
+      packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+      include_package_data=True,
+      install_requires=['pytorch>=1.0.0'],
+      keywords=['module', 'train', 'yahpo'],
+      url="https://github.com/pfistfl/yahpo_gym",
+      classifiers=["Development Status :: 3 - Alpha"])

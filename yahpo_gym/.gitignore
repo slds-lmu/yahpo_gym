@@ -1,0 +1,11 @@
+# Ignore cached bytecode
+*.py[co]
+
+# Ignore Python setup.py sdist|bdist_wheel directories
+dist/
+build/
+*.egg-info
+
+# Ignore OSX finder directories
+.DS_Store
+
