@@ -160,7 +160,8 @@ class FFSurrogateModel(nn.Module):
         actns = [act_cls for _ in range(len(sizes)-2)] + [final_act]
         _layers = [LinBnDrop(sizes[i], sizes[i+1], bn=use_bn and i!=len(actns)-1, p=p, act=a, lin_first=False)
                        for i,(p,a) in enumerate(zip(ps+[0.],actns))]
-        self.layers = nn.Sequential(*_layers)
+        self.deep = nn.Sequential(*_layers)
+        self.wide = nn.Sequential(nn.Linear(sizes[0], sizes[-1]), nn.SELU())
         
     def forward(self, x_cat, x_cont=None):
         if self.n_emb != 0:
@@ -170,7 +171,7 @@ class FFSurrogateModel(nn.Module):
             xd = [e(x_cont[:,i]) for i,e in enumerate(self.embds_dbl)]
             xd = torch.cat(xd, 1)
             x = torch.cat([x, xd], 1) if self.n_emb > 0 else xd
-        return self.layers(x)
+        return self.deep(x).add(self.wide(x))
     
     def trafo_ys(self, ys):
         ys = [e(ys[:,i]) for i,e in enumerate(self.embds_tgt)]
@@ -182,6 +183,11 @@ class FFSurrogateModel(nn.Module):
         ys = torch.cat(ys, 1)
         return ys
 
+    def predict(self, x_cat, x_cont=None):
+        y = self(x_cat, x_cont)
+        return self.inv_trafo_ys(y)
+
+
 
 
 if __name__ == '__main__':
@@ -189,7 +195,7 @@ if __name__ == '__main__':
     dls = make_dataloader(file)
     ff = FFSurrogateModel(dls)
     l = SurrogateTabularLearner(dls, ff, metrics=nn.MSELoss)
-    l.fit_one_cycle(1)
+    l.fit_one_cycle(5)
 
 
 
