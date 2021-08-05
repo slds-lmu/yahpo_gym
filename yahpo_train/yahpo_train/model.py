@@ -3,22 +3,38 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import random
 from fastai.tabular.all import *
 
 from yahpo_train.embed_helpers import *
 
-def make_dataloader(file):
-    y_names = ['time', 'val_accuracy', 'val_cross_entropy', 'val_balanced_accuracy', 'test_cross_entropy', 'test_balanced_accuracy']
-    dls = TabularDataLoaders.from_csv(
-        csv = file,
-        y_names=y_names,
-        cont_names = ['epoch', 'batch_size', 'learning_rate', 'momentum', 'weight_decay', 'num_layers', 'max_units', 'max_dropout'],
-        cat_names = ['OpenML_task_id'],
+def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)
+    dls = TabularDataLoaders.from_df(
+        df = df,
+        path = config.get_path("dataset"),
+        y_names=config.y_names,
+        cont_names = config.cont_names,
+        cat_names = config.cat_names,
         procs = [Categorify, FillMissing],
-        valid_idx = [x for x in range(1000)],
-        bs = 1024
+        valid_idx = get_valid_idx(df, config),
+        bs = bs,
+        **kwargs
     )
     return dls
+
+def get_valid_idx(df, config, frac=.1, rng_seed=10):
+    "Include or exclude blocks of hyperparameters with differing fidelity"
+    # All hyperpars excluding fidelity params
+    hpars = config.cont_names+config.cat_names
+    [hpars.remove(fp) for fp in config.fidelity_params]
+    random.seed(rng_seed)
+    idx = pd.Int64Index([])
+    for _, dfg in df.groupby(hpars):
+        # Sample index blocks
+        if random.random() <= frac:
+            idx = idx.append(dfg.index)
+    return idx
 
 class SurrogateTabularLearner(Learner):
     "`Learner` for tabular data"
@@ -92,8 +108,23 @@ class FFSurrogateModel(nn.Module):
 
 if __name__ == '__main__':
     from yahpo_train.cont_normalization import ContNormalization
-    file = '~/LRZ Sync+Share/multifidelity_data/lcbench/data.csv'
-    dls = make_dataloader(file)
+    from yahpo_gym import cfg
+    from yahpo_gym.benchmarks import lcbench
+    # file = '~/LRZ Sync+Share/multifidelity_data/lcbench/data.csv'
+    # def make_dataloader(file):
+    #     y_names = ['time', 'val_accuracy', 'val_cross_entropy', 'val_balanced_accuracy', 'test_cross_entropy', 'test_balanced_accuracy']
+    #     dls = TabularDataLoaders.from_csv(
+    #         csv = file,
+    #         y_names=y_names,
+    #         cont_names = ['epoch', 'batch_size', 'learning_rate', 'momentum', 'weight_decay', 'num_layers', 'max_units', 'max_dropout'],
+    #         cat_names = ['OpenML_task_id'],
+    #         procs = [Categorify, FillMissing],
+    #         valid_idx = [x for x in range(1000)],
+    #         bs = 1024
+    #     )
+    #     return dls
+    # dls = make_dataloader(file)
+    dls = dl_from_config(cfg("lcbench"))
     ff = FFSurrogateModel(dls)
     l = SurrogateTabularLearner(dls, ff, metrics=nn.MSELoss)
     l.fit_one_cycle(1)

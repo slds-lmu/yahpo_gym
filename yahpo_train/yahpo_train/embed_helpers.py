@@ -1,4 +1,4 @@
-from fastai.tabular.all import *
+from fastai.tabular.all import ifnone
 
 def emb_sz_rule(n_cat):
     "Rule of thumb to pick embedding size corresponding to `n_cat`"

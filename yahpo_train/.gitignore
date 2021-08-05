@@ -9,3 +9,4 @@ build/
 # Ignore OSX finder directories
 .DS_Store
 
+.vscode/*
