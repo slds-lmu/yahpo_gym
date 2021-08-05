@@ -20,12 +20,12 @@ class BenchmarkInstance():
     def objective_function(self, configuration):
         if not self.active_session:
             self.set_session()
-        x_cat = torch.ones(1, 1, dtype = torch.int)
-        x_cont = torch.randn(1, len(self.config.cont_names))
+        x_cat = np.ones((1,1), dtype = np.int32)
+        x_cont = np.random.randn(1,8).astype(np.float32)
         # input & output names and dims
-        input_name = self.sess.get_inputs()[0].name
+        input_names = [x.name for x in self.sess.get_inputs()]
         output_name = self.sess.get_outputs()[0].name
-        results = self.sess.run([output_name], (x_cat, {"x_cont":x_cont}))[0]
+        results = self.sess.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0]
         return results
     
     def set_constant(self, param, value=None):
