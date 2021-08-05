@@ -1,7 +1,7 @@
 _yahpo_default_dict = {
     'basedir': "/home/flo/LRZ Sync+Share/multifidelity_data",
     'config_id': "",
-    'surrogate': "model.onnx",
+    'model': "new_model.onnx",
     'dataset': "data.csv",
     'config_space': "config_space.json",
     'y_names' : [],

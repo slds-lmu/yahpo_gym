@@ -3,6 +3,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.onnx
 import random
 from fastai.tabular.all import *
 
@@ -63,6 +64,9 @@ class SurrogateTabularLearner(Learner):
         self.loss_grad.backward()
         self._with_events(self.opt.step, 'step', CancelStepException)
         self.opt.zero_grad()
+    
+    def export_onnx(self, config):
+        return self.model.export_onnx(config)
 
 class FFSurrogateModel(nn.Module):
     def __init__(self, dls, emb_szs = None, layers = [200, 100], out_size = 8, use_bn = False, ps=[0., 0.], act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid()):
@@ -72,12 +76,12 @@ class FFSurrogateModel(nn.Module):
         self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(),) for name, cont in dls.all_cols.sample(100000)[dls.cont_names].iteritems()])
         self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range') for name, cont in dls.ys.sample(100000).iteritems()])
         self.n_emb,self.n_cont = sum(e.embedding_dim for e in self.embds_fct), len(dls.cont_names)
-        sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
-        actns = [act_cls for _ in range(len(sizes)-2)] + [final_act]
-        _layers = [LinBnDrop(sizes[i], sizes[i+1], bn=use_bn and i!=len(actns)-1, p=p, act=a, lin_first=False)
+        self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
+        actns = [act_cls for _ in range(len(self.sizes)-2)] + [final_act]
+        _layers = [LinBnDrop(self.sizes[i], self.sizes[i+1], bn=use_bn and i!=len(actns)-1, p=p, act=a, lin_first=False)
                        for i,(p,a) in enumerate(zip(ps+[0.],actns))]
         self.deep = nn.Sequential(*_layers)
-        self.wide = nn.Sequential(nn.Linear(sizes[0], sizes[-1]), nn.SELU())
+        self.wide = nn.Sequential(nn.Linear(self.sizes[0], self.sizes[-1]), nn.SELU())
         
     def forward(self, x_cat, x_cont=None, invert_ytrafo = True):
         if self.n_emb != 0:
@@ -99,9 +103,21 @@ class FFSurrogateModel(nn.Module):
         ys = torch.cat(ys, 1)
         return ys
 
-    def predict(self, x_cat, x_cont=None):
-        y = self(x_cat, x_cont)
-        return self.inv_trafo_ys(y)
+    # def predict(self, x_cat, x_cont=None):
+    #     y = self(x_cat, x_cont)
+    #     return self.inv_trafo_ys(y)
+    
+    def export_onnx(self, config):
+        self.eval()
+        torch.onnx.export(self,
+            (torch.ones(1, len(config.cat_names), dtype=torch.int), {'x_cont': torch.randn(1, len(config.cont_names))}),
+            config.get_path("model"),
+            do_constant_folding=True,
+            export_params=True,
+            input_names=['x_cat', 'x_cont'],
+            opset_version=12
+        )
+
 
 
 
@@ -110,24 +126,12 @@ if __name__ == '__main__':
     from yahpo_train.cont_normalization import ContNormalization
     from yahpo_gym import cfg
     from yahpo_gym.benchmarks import lcbench
-    # file = '~/LRZ Sync+Share/multifidelity_data/lcbench/data.csv'
-    # def make_dataloader(file):
-    #     y_names = ['time', 'val_accuracy', 'val_cross_entropy', 'val_balanced_accuracy', 'test_cross_entropy', 'test_balanced_accuracy']
-    #     dls = TabularDataLoaders.from_csv(
-    #         csv = file,
-    #         y_names=y_names,
-    #         cont_names = ['epoch', 'batch_size', 'learning_rate', 'momentum', 'weight_decay', 'num_layers', 'max_units', 'max_dropout'],
-    #         cat_names = ['OpenML_task_id'],
-    #         procs = [Categorify, FillMissing],
-    #         valid_idx = [x for x in range(1000)],
-    #         bs = 1024
-    #     )
-    #     return dls
-    # dls = make_dataloader(file)
-    dls = dl_from_config(cfg("lcbench"))
+    cfg = cfg("lcbench")
+    dls = dl_from_config(cfg)
     ff = FFSurrogateModel(dls)
     l = SurrogateTabularLearner(dls, ff, metrics=nn.MSELoss)
-    l.fit_one_cycle(1)
+    l.fit_one_cycle(5)
+    l.export_onnx(cfg)
 
 
 
