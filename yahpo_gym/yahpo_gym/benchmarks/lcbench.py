@@ -12,9 +12,6 @@ config_dict.update({'lcbench' : _lcbench_dict})
 
 if __name__ == '__main__':
     from yahpo_gym.benchmark_instance import BenchmarkInstance
-    #b = BenchmarkInstance("lcbench")
-
-    file = cfg("lcbench").get_path("model_old")
-    print(file)
-    import onnxruntime 
-    onnxruntime.InferenceSession(file)
+    b = BenchmarkInstance("lcbench")
+    hposet = {'OpenML_task_id': 3, 'epoch':100, 'batch_size':10, 'learning_rate':.1, 'momentum':.9, 'weight_decay':.01, 'num_layers':3, 'max_units':100, 'max_dropout':.6}
+    b.objective_function(hposet)

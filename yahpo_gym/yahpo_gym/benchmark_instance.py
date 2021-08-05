@@ -1,6 +1,7 @@
 from yahpo_gym.configuration import cfg
 from ConfigSpace.read_and_write import json
 import numpy as np
+import torch
 import onnxruntime as rt
 
 class BenchmarkInstance():
@@ -22,8 +23,9 @@ class BenchmarkInstance():
         x_cat = torch.ones(1, 1, dtype = torch.int)
         x_cont = torch.randn(1, len(self.config.cont_names))
         # input & output names and dims
-        input_name = sess.get_inputs()[0].name
-        results = sess.run([output_name], (x_cat, {"x_cont":x_cont}))[0]
+        input_name = self.sess.get_inputs()[0].name
+        output_name = self.sess.get_outputs()[0].name
+        results = self.sess.run([output_name], (x_cat, {"x_cont":x_cont}))[0]
         return results
     
     def set_constant(self, param, value=None):
