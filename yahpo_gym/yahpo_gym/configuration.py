@@ -1,5 +1,5 @@
 _yahpo_default_dict = {
-    'basedir': "/home/flo/LRZ Sync+Share/multifidelity_data",
+    'basedir': "/home/flo/lrz_synchshare/multifidelity_data",
     'config_id': "",
     'model': "new_model.onnx",
     'dataset': "data.csv",
@@ -8,7 +8,8 @@ _yahpo_default_dict = {
     'cont_names': [],
     'cat_names': [],
     'fidelity_params': [],
-    'runtime_name': ""
+    'runtime_name': "",
+    'model_old': "model.onnx"
 }
 
 class Configuration():

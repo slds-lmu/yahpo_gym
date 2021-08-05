@@ -75,6 +75,7 @@ class ContNormalization(nn.Module):
         else:
             x = torch.pow(x * lmbda + 1, 1 / lmbda) - 1.
         return x
+    
     def inv_neg(self, x,  lmbda):
         if torch.abs(lmbda - 2.) < self.eps:
             x = -torch.exp(x)+1

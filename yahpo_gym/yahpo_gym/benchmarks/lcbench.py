@@ -11,4 +11,10 @@ _lcbench_dict = {
 config_dict.update({'lcbench' : _lcbench_dict})
 
 if __name__ == '__main__':
-    print(cfg("lcbench"))
+    from yahpo_gym.benchmark_instance import BenchmarkInstance
+    #b = BenchmarkInstance("lcbench")
+
+    file = cfg("lcbench").get_path("model_old")
+    print(file)
+    import onnxruntime 
+    onnxruntime.InferenceSession(file)
