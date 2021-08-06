@@ -11,6 +11,7 @@ from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
     df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)
+    # FIXME: This should order columns according to x_cat, x_cont, y_names
     dls = TabularDataLoaders.from_df(
         df = df,
         path = config.get_path("dataset"),
@@ -102,10 +103,6 @@ class FFSurrogateModel(nn.Module):
         ys = [e.invert(ys[:,i]) for i,e in enumerate(self.embds_tgt)]
         ys = torch.cat(ys, 1)
         return ys
-
-    # def predict(self, x_cat, x_cont=None):
-    #     y = self(x_cat, x_cont)
-    #     return self.inv_trafo_ys(y)
     
     def export_onnx(self, config):
         self.eval()
