@@ -11,7 +11,7 @@ from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
     df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)
-    # FIXME: This should order columns according to x_cat, x_cont, y_names
+    df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     dls = TabularDataLoaders.from_df(
         df = df,
         path = config.config_path,
@@ -25,12 +25,12 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
     )
     return dls
 
-def get_valid_idx(df, config, frac=.1, rng_seed=10):
+def get_valid_idx(df, config, frac=.05, rng_seed=10):
     "Include or exclude blocks of hyperparameters with differing fidelity"
     # All hyperpars excluding fidelity params
     hpars = config.cont_names+config.cat_names
     [hpars.remove(fp) for fp in config.fidelity_params]
-    random.seed(rng_seed)
+    # random.seed(rng_seed)
     idx = pd.Int64Index([])
     for _, dfg in df.groupby(hpars):
         # Sample index blocks

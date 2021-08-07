@@ -11,7 +11,7 @@ class ContNormalization(nn.Module):
     def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .03):
         super(ContNormalization, self).__init__()
         self.eps = eps
-        self.normalize, self.sigmoid_p = normalize, sigmoid_p
+        self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
         if not lmbda:
             self.lmbda  = self.est_params(to_tensor(x_sample))
         else:
