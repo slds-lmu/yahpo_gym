@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import scipy
+from scipy import optimize
 
 class ContNormalization(nn.Module):
     """
@@ -8,12 +8,12 @@ class ContNormalization(nn.Module):
     Learns the transformation during initialization and
     outputs the transformation afterwards.
     """
-    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .01):
+    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .03):
         super(ContNormalization, self).__init__()
         self.eps = eps
         self.normalize, self.sigmoid_p = normalize, sigmoid_p
         if not lmbda:
-            self.lmbda  = self.est_params(x_sample)
+            self.lmbda  = self.est_params(to_tensor(x_sample))
         else:
             self.lmbda = to_tensor(lmbda)
         xt = self.trafo_yj(x_sample, self.lmbda)
@@ -29,13 +29,13 @@ class ContNormalization(nn.Module):
             x = (x - self.mu) / torch.sqrt(self.sigma)
         elif self.normalize == 'range':
             x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.sigmoid_p)) + self.sigmoid_p
-        return x.unsqueeze(1)
+        return x.float()
 
     def invert(self, x):
         if self.normalize == 'scale':
             x = x  * torch.sqrt(self.sigma) + self.mu
         elif self.normalize == 'range':
-            x = (x - self.sigmoid_p) * ((self.max - self.min) / (1. - 2*self.sigmoid_p)) + self.mi
+            x = (x - self.sigmoid_p) * ((self.max - self.min) / (1. - 2*self.sigmoid_p)) + self.min
         x = self.inverse_trafo_yj(x, self.lmbda) 
         return x
 
@@ -46,16 +46,19 @@ class ContNormalization(nn.Module):
         if torch.abs(lmbda) < self.eps:
             x = torch.log1p(x)
         else:
-            x = (torch.pow(x + 1., lmbda) - 1) / lmbda 
+            x = (torch.float_power(x + 1., lmbda) - 1) / lmbda 
         return x
     def scale_neg(self, x, lmbda):
         if torch.abs(lmbda - 2.) <= self.eps:
             x = torch.log1p(-x)
         else:
-            x = (torch.pow(-x + 1, 2. - lmbda) - 1.) / (2. - lmbda)
+            x = (torch.float_power(-x + 1, 2. - lmbda) - 1.) / (2. - lmbda)
         return -x
 
     def _neg_loglik(self, lmbda, x_sample):
+        """
+        Negative Log-Likelihood optimized inside Yeo-Johnson transform 
+        """
         xt = self.trafo_yj(x_sample, to_tensor([lmbda]))
         xt_var, _ = torch.var_mean(xt, dim=0, unbiased=False)
         loglik = - 0.5 * x_sample.shape[0] * torch.log(xt_var)
@@ -63,7 +66,7 @@ class ContNormalization(nn.Module):
         return - loglik
 
     def est_params(self, x_sample):
-        res = scipy.optimize.minimize_scalar(lambda x: self._neg_loglik(x, x_sample), bounds=(-10, 10), method='bounded')
+        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-10, 10), method='bounded')
         return to_tensor(res.x)
 
     def inverse_trafo_yj(self, x, lmbda):
@@ -73,14 +76,14 @@ class ContNormalization(nn.Module):
         if torch.abs(lmbda) < self.eps:
             x = torch.expm1(x)
         else:
-            x = torch.pow(x * lmbda + 1, 1 / lmbda) - 1.
+            x = torch.float_power(x * lmbda + 1, 1 / lmbda) - 1.
         return x
     
     def inv_neg(self, x,  lmbda):
         if torch.abs(lmbda - 2.) < self.eps:
             x = -torch.exp(x)+1
         else:
-            x = 1 - torch.pow(-(2.-lmbda) * x + 1. , 1. / (2. - lmbda))
+            x = 1 - torch.float_power(-(2.-lmbda) * x + 1. , 1. / (2. - lmbda))
         return x
 
 def to_tensor(x):
