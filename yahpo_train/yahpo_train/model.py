@@ -10,7 +10,7 @@ from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace).sample(frac=1)
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     dls = TabularDataLoaders.from_df(
         df = df,
@@ -21,6 +21,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
         procs = [Categorify, FillMissing],
         valid_idx = get_valid_idx(df, config),
         bs = bs,
+        shuffle=True,
         **kwargs
     )
     return dls
