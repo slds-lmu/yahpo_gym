@@ -83,6 +83,7 @@ class ContNormalization(nn.Module):
         if torch.abs(lmbda - 2.) < self.eps:
             x = -torch.exp(x)+1
         else:
+            # FIXME: check this
             x = 1 - torch.float_power(-(2.-lmbda) * x + 1. , 1. / (2. - lmbda))
         return x
 
