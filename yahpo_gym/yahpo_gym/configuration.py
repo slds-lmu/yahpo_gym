@@ -1,16 +1,16 @@
 _yahpo_default_dict = {
-    'basedir': "/home/flo/lrz_synchshare/multifidelity_data",
-    'config_id': "",
-    'model': "new_model.onnx",
-    'dataset': "data.csv",
-    'config_space': "config_space.json",
+    'basedir': '/home/flo/lrz_synchshare/multifidelity_data',
+    'config_id': '',
+    'model': 'new_model.onnx',
+    'dataset': 'data.csv',
+    'config_space': 'config_space.json',
     'y_names' : [],
     'cont_names': [],
     'cat_names': [],
     'fidelity_params': [],
-    'runtime_name': "",
-    'task_name': "",
-    'model_old': "model.onnx"
+    'runtime_name': '',
+    'task_name': '',
+    'model_old': 'model.onnx'
 }
 
 class Configuration():
@@ -20,22 +20,22 @@ class Configuration():
         self.config = config
         
         # Set attributes
-        self.config_id = self.config["config_id"]
-        self.y_names = self.config["y_names"]
-        self.cat_names = self.config["cat_names"]
-        self.cont_names = self.config["cont_names"]
-        self.fidelity_params = self.config["fidelity_params"]
-        self.task_name = self.config["task_name"]
+        self.config_id = self.config['config_id']
+        self.y_names = self.config['y_names']
+        self.cat_names = self.config['cat_names']
+        self.cont_names = self.config['cont_names']
+        self.fidelity_params = self.config['fidelity_params']
+        self.task_name = self.config['task_name']
         
     def get_path(self, key):
-        return f"{self.config_path}/{self.config[key]}"
+        return f'{self.config_path}/{self.config[key]}'
     
     @property
     def config_path(self):
-        return f"{self.config['basedir']}/{self.config['config_id']}"
+        return f'{self.config['basedir']}/{self.config['config_id']}'
      
     def __repr__(self): 
-        return f"Configuration: ({self.config['config_id']})"
+        return f'Configuration: ({self.config['config_id']})'
 
     def __str__(self):
         return self.config.__str__()
