@@ -1,5 +1,7 @@
+from yahpo_gym.local_config import local_config
+
 _yahpo_default_dict = {
-    'basedir': '/home/flo/lrz_synchshare/multifidelity_data',
+    'basedir': local_config.data_path,
     'config_id': '',
     'model': 'new_model.onnx',
     'dataset': 'data.csv',
@@ -29,13 +31,13 @@ class Configuration():
         
     def get_path(self, key):
         return f'{self.config_path}/{self.config[key]}'
-    
+
     @property
     def config_path(self):
-        return f'{self.config['basedir']}/{self.config['config_id']}'
+        return f"{self.config['basedir']}/{self.config['config_id']}"
      
     def __repr__(self): 
-        return f'Configuration: ({self.config['config_id']})'
+        return f"Configuration: ({self.config['config_id']})"
 
     def __str__(self):
         return self.config.__str__()
@@ -54,7 +56,6 @@ class ConfigDict():
     
     def __str__(self):
         return self.configs.__str__()
-
 
 def cfg(config_id = None):
     if config_id is not None:

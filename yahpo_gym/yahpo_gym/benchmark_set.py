@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import onnxruntime as rt
 
-class BenchmarkInstance():
+class BenchmarkSet():
 
     def __init__(self, config_id = None, active_session = True):
         """
@@ -35,7 +35,7 @@ class BenchmarkInstance():
         # FIXME: This should check whether the value is valid.
         self.constants[param] = value
     
-    def set_task(self, value):
+    def set_instance(self, value):
         self.set_constant(self.config.task_name, value)
 
     def _config_to_xs(self, configuration):
@@ -45,8 +45,6 @@ class BenchmarkInstance():
         # FIXME: Here we should check and update the configuration with the ConfigSpace  
         x_cat = np.array([configuration[x] for x in self.config.cat_names]).reshape(1, -1).astype(np.int32)
         x_cont = np.array([configuration[x] for x in self.config.cont_names]).reshape(1, -1).astype(np.float32)
-        # x_cat = np.ones((1,1), dtype = np.int32)
-        # x_cont = np.random.randn(1,8).astype(np.float32)
         return x_cont, x_cat
 
     def _get_config_space(self):
@@ -63,8 +61,12 @@ class BenchmarkInstance():
         print(model_path)
         self.sess = rt.InferenceSession(model_path)
 
+    @property
+    def instances(self):
+        pass
+
 
 if __name__ == '__main__':
     import yahpo_gym.benchmarks.lcbench
-    print(BenchmarkInstance("lcbench").config_space)
+    print(BenchmarkSet("lcbench").config_space)
 

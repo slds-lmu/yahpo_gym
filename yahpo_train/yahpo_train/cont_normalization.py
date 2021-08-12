@@ -8,10 +8,12 @@ class ContNormalization(nn.Module):
     Learns the transformation during initialization and
     outputs the transformation afterwards.
     """
-    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .03):
+    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .03, clip_outliers=True):
         super(ContNormalization, self).__init__()
         self.eps = eps
         self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
+        if clip_outliers:
+            x_sample = self.clip_outliers(x_sample)
         if not lmbda:
             self.lmbda  = self.est_params(to_tensor(x_sample))
         else:
@@ -66,26 +68,35 @@ class ContNormalization(nn.Module):
         return - loglik
 
     def est_params(self, x_sample):
-        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-10, 10), method='bounded')
+        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-2, 2), method='bounded')
         return to_tensor(res.x)
 
     def inverse_trafo_yj(self, x, lmbda):
         return torch.where(x >= 0, self.inv_pos(x, lmbda), self.inv_neg(x, lmbda))
 
     def inv_pos(self, x, lmbda):
-        if torch.abs(lmbda) < self.eps:
+        if torch.abs(lmbda) <= self.eps:
             x = torch.expm1(x)
         else:
-            x = torch.float_power(x * lmbda + 1, 1 / lmbda) - 1.
+            # FIXME: replace with float_power once opset allows for this
+            x = torch.pow(x * lmbda + 1, 1. / lmbda) - 1.
         return x
     
     def inv_neg(self, x,  lmbda):
         if torch.abs(lmbda - 2.) < self.eps:
-            x = -torch.exp(x)+1
+            x = -torch.exp(x)+1.
         else:
-            # FIXME: check this
-            x = 1 - torch.float_power(-(2.-lmbda) * x + 1. , 1. / (2. - lmbda))
+            # FIXME: replace with float_power once opset allows for this
+            x = 1. - torch.pow(-(2.-lmbda) * x + 1. , 1. / (2. - lmbda))
         return x
+    
+    def clip_outliers(self, x_sample):
+        q = .999
+        q1, q0 = torch.quantile(x_sample, q), torch.quantile(x_sample, 1.-q)
+        iqr = q1 - q0
+        x_sample = torch.where(x_sample > q1 + iqr, q1, x_sample)
+        x_sample = torch.where(x_sample < q0 - iqr, q0, x_sample)
+        return x_sample
 
 def to_tensor(x):
     if torch.is_tensor(x):

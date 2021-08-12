@@ -1,4 +1,4 @@
 from .about import __version__
+from yahpo_gym.local_config import local_config 
 from yahpo_gym.configuration import cfg
-__version__  # Silence unused import warning.
-
+from yahpo_gym.benchmarks import *

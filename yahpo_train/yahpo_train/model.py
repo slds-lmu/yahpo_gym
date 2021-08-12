@@ -1,16 +1,16 @@
+import random
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.onnx
-import random
 from fastai.tabular.all import *
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+
 from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace).sample(frac=1)
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)# emb.sample(frac=.05).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     dls = TabularDataLoaders.from_df(
         df = df,
@@ -137,33 +137,15 @@ class FFSurrogateModel(nn.Module):
             opset_version=12
         )
 
-class AvgTfedMetric(Metric):
-    """
-    Average the values of `func` taking into account potential different batch sizes.
-    Specializes to "transformed metrics saved during get_one_batch
-    """
-    def __init__(self, func):  self.func = func
-    def reset(self):           self.total,self.count = 0.,0
-    def accumulate(self, learn):
-        bs = find_bs(learn.tfyb)
-        # print(torch.max(learn.pred))
-        self.total += learn.to_detach(self.func(*learn.tfyb, learn.tfpred, multioutput="raw_values"))*bs
-        self.count += bs
-    @property
-    def value(self): return self.total/self.count if self.count != 0 else None
-    @property
-    def name(self):  return self.func.func.__name__ if hasattr(self.func, 'func') else  self.func.__name__
 
 if __name__ == '__main__':
     from yahpo_train.cont_normalization import ContNormalization
     from yahpo_gym import cfg
     from yahpo_gym.benchmarks import lcbench
-    from torchsummary import summary
     cfg = cfg("lcbench")
     dls = dl_from_config(cfg)
     ff = FFSurrogateModel(dls)
     l = SurrogateTabularLearner(dls, ff, metrics=nn.MSELoss)
-    l.metrics = AvgTfedMetric(mean_absolute_error)
     l.lr_find()
     l.fit_one_cycle(5)
     # l.export_onnx(cfg)
