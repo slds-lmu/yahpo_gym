@@ -10,7 +10,8 @@ from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)#.sample(frac=.05).reset_index()
+    # We shuffle the DataFrame before haning it to the dataloader to ensure mixed batches
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace).sample(frac=1.).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     dls = TabularDataLoaders.from_df(
         df = df,
@@ -164,11 +165,14 @@ if __name__ == '__main__':
     from yahpo_gym.benchmarks import lcbench
     cfg = cfg("lcbench")
     dls = dl_from_config(cfg)
-    ff = FFSurrogateModel(dls)
-    l = SurrogateTabularLearner(dls, ff, metrics=nn.MSELoss)
-    l.lr_find()
-    l.fit_one_cycle(5)
-    # l.export_onnx(cfg)
+    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
+    l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
+    l.add_cb(MixHandler)
+    l.fit_one_cycle(5, 1e-4)
+    for p in l.model.wide.parameters():
+        p.requires_grad = False
+    l.fit_flat_cos(5, 1e-4)
+    l.export_onnx(cfg)
 
 
 
