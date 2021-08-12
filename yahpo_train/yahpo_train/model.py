@@ -10,7 +10,7 @@ from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)# emb.sample(frac=.05).reset_index()
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace)#.sample(frac=.05).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     dls = TabularDataLoaders.from_df(
         df = df,
@@ -74,29 +74,40 @@ class SurrogateTabularLearner(Learner):
         return self.model.export_onnx(config)
 
 class FFSurrogateModel(nn.Module):
-    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], out_size = 8, use_bn = False, ps=[0.1, 0.1], act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid()):
+    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False):
         super(FFSurrogateModel, self).__init__()
+
+        if not (len(layers) | len(deeper) | wide):
+            raise Exception("One of layers, deeper or wide has to be set!")
+
         emb_szs = get_emb_sz(dls.train_ds, {} if emb_szs is None else emb_szs)
         self.embds_fct = nn.ModuleList([Embedding(ni, nf) for ni, nf in emb_szs])
-        self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(),) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
-        self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range') for name, cont in dls.ys.iteritems()])
+        self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), clip_outliers=False) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
+        self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range', clip_outliers=True) for name, cont in dls.ys.iteritems()])
         self.n_emb,self.n_cont = sum(e.embedding_dim for e in self.embds_fct), len(dls.cont_names)
         self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
-        actns = [act_cls for _ in range(len(self.sizes)-2)] + [None]
-        _layers_deep = [LinBnDrop(self.sizes[i], self.sizes[i+1], bn=use_bn and i!=len(actns)-1, p=p, act=a, lin_first=False)
-                       for i,(p,a) in enumerate(zip(ps+[0.],actns))]
-        self.deep = nn.Sequential(*_layers_deep)
+
+        self.deep, self.deeper, self.wide = nn.Sequential(), nn.Sequential(), nn.Sequential()
+        # Deep Part
+        if len(layers):
+            ps1 = [ps for i in layers]
+            self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
+            actns = [act_cls for _ in range(len(self.sizes)-2)] + [None]
+            _layers_deep = [LinBnDrop(self.sizes[i], self.sizes[i+1], bn=use_bn and i!=len(actns)-1, p=p, act=a, lin_first=lin_first)
+                        for i,(p,a) in enumerate(zip(ps1+[0.],actns))]
+            self.deep = nn.Sequential(*_layers_deep)
 
         # Deeper part
         if len(deeper):
+            ps2 = [ps for i in deeper]
             self.deeper_sizes = [self.n_emb + self.n_cont] + deeper + [dls.ys.shape[1]]
-            deeper_actns = [act_cls for _ in range(len(deeper)-2)] + [None]
-            ps = [ps[1] for x in deeper]
-            _layers_deeper = [LinBnDrop(self.deeper_sizes[i], self.deeper_sizes[i+1], bn=use_bn and i!=len(deeper_actns)-1, p=p, act=a, lin_first=False)
-                for i,(p,a) in enumerate(zip(ps+[0.],deeper_actns))]
+            deeper_actns = [act_cls for _ in range(len(deeper))] + [None]
+            _layers_deeper = [LinBnDrop(self.deeper_sizes[i], self.deeper_sizes[i+1], bn=use_bn and i!=len(deeper_actns)-1, p=p, act=a, lin_first=lin_first) for i,(p,a) in enumerate(zip(ps2+[0.],deeper_actns))]
             self.deeper = nn.Sequential(*_layers_deeper)
-        
-        self.wide = nn.Sequential(nn.Linear(self.sizes[0], self.sizes[-1]))
+
+        if wide:
+            self.wide = nn.Sequential(nn.Linear(self.sizes[0], self.sizes[-1]))
+
         self.final_act = final_act
         
     def forward(self, x_cat, x_cont=None, invert_ytrafo = True):
@@ -107,10 +118,16 @@ class FFSurrogateModel(nn.Module):
             xd = [e(x_cont[:,i]).unsqueeze(1) for i,e in enumerate(self.embds_dbl)]
             xd = torch.cat(xd, 1)
             x = torch.cat([x, xd], 1) if self.n_emb > 0 else xd
-        x = self.deep(x).add(self.wide(x))
-        # if self.has_deeper:
-        #     x = x.add(self.deeper(x))
-        y = self.final_act(x)
+        
+        xs = torch.zeros(x.shape[0], self.sizes[-1])
+        if len(self.wide):
+            xs = xs.add(self.wide(x))
+        if len(self.deep):
+            xs = xs.add(self.deep(x))
+        if len(self.deeper):
+            xs = xs.add(self.deeper(x))
+
+        y = self.final_act(xs)
         if invert_ytrafo:
             return self.inv_trafo_ys(y)
         else:
@@ -127,6 +144,9 @@ class FFSurrogateModel(nn.Module):
         return ys
     
     def export_onnx(self, config):
+        """
+        Export model to an ONNX file. We can safely ignore tracing errors with respect to lambda since lambda will be constant during inference.
+        """
         self.eval()
         torch.onnx.export(self,
             (torch.ones(1, len(config.cat_names), dtype=torch.int), {'x_cont': torch.randn(1, len(config.cont_names))}),

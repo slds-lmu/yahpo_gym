@@ -12,21 +12,23 @@ class ContNormalization(nn.Module):
         super(ContNormalization, self).__init__()
         self.eps = eps
         self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
+        # Clip strong outliers
         if clip_outliers:
             x_sample = self.clip_outliers(x_sample)
+        # Trafo
         if not lmbda:
             self.lmbda  = self.est_params(to_tensor(x_sample))
         else:
             self.lmbda = to_tensor(lmbda)
         xt = self.trafo_yj(x_sample, self.lmbda)
-
+        # Rescaling
         if self.normalize == 'scale':
             self.sigma, self.mu = torch.var_mean(xt)
         elif self.normalize == 'range':
             self.min, self.max = torch.min(xt), torch.max(xt)
             
     def forward(self, x):
-        x = self.trafo_yj(x.float(), self.lmbda)
+        x = self.trafo_yj(x.double(), self.lmbda)
         if self.normalize == 'scale':
             x = (x - self.mu) / torch.sqrt(self.sigma)
         elif self.normalize == 'range':
@@ -38,7 +40,7 @@ class ContNormalization(nn.Module):
             x = x  * torch.sqrt(self.sigma) + self.mu
         elif self.normalize == 'range':
             x = (x - self.sigmoid_p) * ((self.max - self.min) / (1. - 2*self.sigmoid_p)) + self.min
-        x = self.inverse_trafo_yj(x, self.lmbda) 
+        x = self.inverse_trafo_yj(x.double(), self.lmbda) 
         return x
 
     def trafo_yj(self, x, lmbda):   
@@ -48,13 +50,13 @@ class ContNormalization(nn.Module):
         if torch.abs(lmbda) < self.eps:
             x = torch.log1p(x)
         else:
-            x = (torch.float_power(x + 1., lmbda) - 1) / lmbda 
+            x = (_float_power(x + 1., lmbda) - 1) / lmbda 
         return x
     def scale_neg(self, x, lmbda):
         if torch.abs(lmbda - 2.) <= self.eps:
             x = torch.log1p(-x)
         else:
-            x = (torch.float_power(-x + 1, 2. - lmbda) - 1.) / (2. - lmbda)
+            x = (_float_power(-x + 1, 2. - lmbda) - 1.) / (2. - lmbda)
         return -x
 
     def _neg_loglik(self, lmbda, x_sample):
@@ -68,7 +70,7 @@ class ContNormalization(nn.Module):
         return - loglik
 
     def est_params(self, x_sample):
-        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-2, 2), method='bounded')
+        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-5, 5), method='bounded')
         return to_tensor(res.x)
 
     def inverse_trafo_yj(self, x, lmbda):
@@ -78,22 +80,23 @@ class ContNormalization(nn.Module):
         if torch.abs(lmbda) <= self.eps:
             x = torch.expm1(x)
         else:
-            # FIXME: replace with float_power once opset allows for this
-            x = torch.pow(x * lmbda + 1, 1. / lmbda) - 1.
+            x = _float_power(x * lmbda + 1., 1. / lmbda) - 1.
         return x
     
     def inv_neg(self, x,  lmbda):
         if torch.abs(lmbda - 2.) < self.eps:
             x = -torch.exp(x)+1.
         else:
-            # FIXME: replace with float_power once opset allows for this
-            x = 1. - torch.pow(-(2.-lmbda) * x + 1. , 1. / (2. - lmbda))
+            x = 1. - _float_power(-(2.-lmbda) * x + 1., 1. / (2. - lmbda))
         return x
     
     def clip_outliers(self, x_sample):
+        """
+        Clip values that are greater than some quantile by at least IQR (and vice versa for smaller.)
+        """
         q = .999
         q1, q0 = torch.quantile(x_sample, q), torch.quantile(x_sample, 1.-q)
-        iqr = q1 - q0
+        iqr = torch.abs(q1 - q0)
         x_sample = torch.where(x_sample > q1 + iqr, q1, x_sample)
         x_sample = torch.where(x_sample < q0 - iqr, q0, x_sample)
         return x_sample
@@ -103,3 +106,13 @@ def to_tensor(x):
         return x
     else:
         return torch.as_tensor(x, dtype=torch.float64)
+
+# FIXME: replace with torch.float_power once ONNX opset allows for this
+def _float_power(base, exp):
+    """
+    This is currently problematic due to numerical imprecision. torch.float_power would solve the problem 
+    but currently can not be converted to ONNX.
+    """
+    out = torch.pow(base.to(torch.double), exp.to(torch.double))
+    return out.to(torch.float64)
+

@@ -17,7 +17,7 @@ def test_cont_norm():
     xs2 = torch.cat((torch.rand(50, 1), torch.rand(1,1) + torch.Tensor([10000.]), torch.Tensor([-1000.]).unsqueeze(1)))
     for xs in xss:
         for normalize in ["scale", "range", None]:
-            lim = 1e-2
+            lim = 1e-4
             tfm = ContNormalization(xs, normalize = normalize)
             xt = tfm(xs)
             xsn = tfm.invert(xt)            
@@ -55,4 +55,4 @@ if __name__ == '__main__':
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
     test_cont_norm()
-    test_cont_norm_pd()
+    # test_cont_norm_pd()
