@@ -11,8 +11,6 @@ class AvgTfedMetric(Metric):
     def reset(self):           self.total,self.count = 0.,0
     def accumulate(self, learn):
         bs = find_bs(learn.tfyb)
-        if torch.any(torch.isnan(learn.tfpred)):
-            import pdb; pdb.set_trace()
         self.total += learn.to_detach(self.func(*learn.tfyb, learn.tfpred))*bs
         self.count += bs
     @property

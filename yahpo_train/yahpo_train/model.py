@@ -10,7 +10,8 @@ from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
-    # We shuffle the DataFrame before haning it to the dataloader to ensure mixed batches
+    # We shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
+    # All relevant info is obtained from the 'config'
     df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace).sample(frac=1.).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     dls = TabularDataLoaders.from_df(
@@ -20,15 +21,20 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
         cont_names = config.cont_names,
         cat_names = config.cat_names,
         procs = [Categorify, FillMissing],
-        valid_idx = get_valid_idx(df, config),
+        valid_idx = _get_valid_idx(df, config),
         bs = bs,
         shuffle=True,
         **kwargs
     )
     return dls
 
-def get_valid_idx(df, config, frac=.05, rng_seed=10):
-    "Include or exclude blocks of hyperparameters with differing fidelity"
+def _get_valid_idx(df, config, frac=.05, rng_seed=10):
+    """
+    Include or exclude blocks of hyperparameters with differing fidelity
+    The goal here is to not sample from the dataframe randomly, but instead either keep a hyperparameter group
+    or drop it. 
+    (By group I mean one config trained e.g. at epochs 1, ..., 50 )..
+    """
     # All hyperpars excluding fidelity params
     hpars = config.cont_names+config.cat_names
     [hpars.remove(fp) for fp in config.fidelity_params]

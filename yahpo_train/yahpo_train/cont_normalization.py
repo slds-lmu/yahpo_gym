@@ -8,7 +8,7 @@ class ContNormalization(nn.Module):
     Learns the transformation during initialization and
     outputs the transformation afterwards.
     """
-    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .03, clip_outliers=True):
+    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .005, clip_outliers=True):
         super(ContNormalization, self).__init__()
         self.eps = eps
         self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
@@ -74,6 +74,10 @@ class ContNormalization(nn.Module):
         return to_tensor(res.x)
 
     def inverse_trafo_yj(self, x, lmbda):
+        """
+        The inverse trafo is not defined e.g., case one: x = 0.9, lmbda=-1.5, then the 'inv_pos' part is not defined.
+        We should perhaps figure out what this translates to.
+        """
         return torch.where(x >= 0, self.inv_pos(x, lmbda), self.inv_neg(x, lmbda))
 
     def inv_pos(self, x, lmbda):
@@ -94,7 +98,7 @@ class ContNormalization(nn.Module):
         """
         Clip values that are greater than some quantile by at least IQR (and vice versa for smaller.)
         """
-        q = .999
+        q = .995
         q1, q0 = torch.quantile(x_sample, q), torch.quantile(x_sample, 1.-q)
         iqr = torch.abs(q1 - q0)
         x_sample = torch.where(x_sample > q1 + iqr, q1, x_sample)
