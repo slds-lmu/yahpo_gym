@@ -8,13 +8,12 @@ class ContNormalization(nn.Module):
     Learns the transformation during initialization and
     outputs the transformation afterwards.
     """
-    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .005, clip_outliers=True):
+    def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .005, clip_outliers=True, impute_nan=True):
         super(ContNormalization, self).__init__()
         self.eps = eps
         self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
-        # Clip strong outliers
-        if clip_outliers:
-            x_sample = self.clip_outliers(x_sample)
+        self.impute_nan = impute_nan
+        self.clip_outliers = clip_outliers
         # Trafo
         if not lmbda:
             self.lmbda  = self.est_params(to_tensor(x_sample))
@@ -27,8 +26,14 @@ class ContNormalization(nn.Module):
         elif self.normalize == 'range':
             self.min, self.max = torch.min(xt), torch.max(xt)
             
-    def forward(self, x):
+    def forward(self, x): 
+        if self.impute_nan:
+            x = self._impute_nan(x)
+        if self.clip_outliers:
+            x = self._clip_outliers(x)
+
         x = self.trafo_yj(x.double(), self.lmbda)
+
         if self.normalize == 'scale':
             x = (x - self.mu) / torch.sqrt(self.sigma)
         elif self.normalize == 'range':
@@ -94,7 +99,7 @@ class ContNormalization(nn.Module):
             x = 1. - _float_power(-(2.-lmbda) * x + 1., 1. / (2. - lmbda))
         return x
     
-    def clip_outliers(self, x_sample):
+    def _clip_outliers(self, x_sample):
         """
         Clip values that are greater than some quantile by at least IQR (and vice versa for smaller.)
         """
@@ -104,6 +109,11 @@ class ContNormalization(nn.Module):
         x_sample = torch.where(x_sample > q1 + iqr, q1, x_sample)
         x_sample = torch.where(x_sample < q0 - iqr, q0, x_sample)
         return x_sample
+
+    def _impute_nan(self, x_sample):
+        x_sample = torch.nan_to_num(x_sample)
+        return x_sample
+
 
 def to_tensor(x):
     if torch.is_tensor(x):

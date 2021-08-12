@@ -1,3 +1,4 @@
+import pandas as pd
 from yahpo_gym.local_config import local_config
 
 _yahpo_default_dict = {
@@ -35,6 +36,10 @@ class Configuration():
     @property
     def config_path(self):
         return f"{self.config['basedir']}/{self.config['config_id']}"
+
+    @property
+    def data(self):
+        return pd.read_csv(self.get_path("dataset"))
      
     def __repr__(self): 
         return f"Configuration: ({self.config['config_id']})"

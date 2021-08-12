@@ -64,6 +64,7 @@ class SurrogateTabularLearner(Learner):
             self.tfyb = self.yb
         self.pred = self.model(*self.xb, invert_ytrafo = False)
         self.yb = [self.model.trafo_ys(*self.yb)]
+        import pdb; pdb.set_trace()
         self('after_pred')
         if len(self.yb):
             self.loss_grad = self.loss_func(self.pred, *self.yb)
