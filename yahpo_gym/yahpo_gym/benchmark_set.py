@@ -63,10 +63,17 @@ class BenchmarkSet():
 
     @property
     def instances(self):
-        pass
+        if self.config.instance_names is None:
+            return []
+        return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]
 
 
 if __name__ == '__main__':
     import yahpo_gym.benchmarks.lcbench
-    print(BenchmarkSet("lcbench").config_space)
+    import yahpo_gym.benchmarks.nasbench_301
+    x = BenchmarkSet("lcbench")
+    print(x.instances)
+
+    x = BenchmarkSet("nasbench301")
+    print(x.instances)
 

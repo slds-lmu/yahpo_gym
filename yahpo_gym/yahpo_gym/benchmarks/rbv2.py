@@ -5,6 +5,7 @@ _rbv2_dict = {
     'y_names' : ['mmce', 'f1', 'auc', 'logloss', 'timetrain', 'timepredict'],
     'y_minimize' : [True, False, False, True, True, True],
     'fidelity_params': ['trainsize', 'repl'],
+    'instance_names': 'task_id',
     'runtime_name': 'traintime'
 }
 

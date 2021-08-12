@@ -12,6 +12,7 @@ _nasbench_301_dict = {
                   'NetworkSelectorDatasetInfo_COLON_darts_COLON_edge_reduce_10', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_edge_reduce_11', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_edge_reduce_12', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_edge_reduce_13', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_normal_3', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_normal_4',
                   'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_normal_5', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_reduce_3', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_reduce_4', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_reduce_5'],
     'fidelity_params': ['epoch'],
-    'runtime_name': 'runtime'
+    'runtime_name': 'runtime',
+    'instance_names': None
 }
 config_dict.update({'nasbench301' : _nasbench_301_dict})

@@ -14,6 +14,12 @@ class ContNormalization(nn.Module):
         self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
         self.impute_nan = impute_nan
         self.clip_outliers = clip_outliers
+
+        # Deal with outliers and NaN
+        if self.impute_nan:
+            x_sample = self._impute_nan(x_sample)
+        if self.clip_outliers:
+            x_sample = self._clip_outliers(x_sample)
         # Trafo
         if not lmbda:
             self.lmbda  = self.est_params(to_tensor(x_sample))

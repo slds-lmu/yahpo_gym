@@ -12,7 +12,6 @@ _yahpo_default_dict = {
     'cat_names': [],
     'fidelity_params': [],
     'runtime_name': '',
-    'task_name': '',
     'model_old': 'model.onnx'
 }
 
@@ -28,7 +27,7 @@ class Configuration():
         self.cat_names = self.config['cat_names']
         self.cont_names = self.config['cont_names']
         self.fidelity_params = self.config['fidelity_params']
-        self.task_name = self.config['task_name']
+        self.instance_names = self.config['instance_names']
         
     def get_path(self, key):
         return f'{self.config_path}/{self.config[key]}'

@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from torch.functional import Tensor
 from yahpo_train.cont_normalization import ContNormalization
 import pandas as pd
 import pytest
@@ -30,6 +31,24 @@ def test_cont_norm():
             assert torch.mean(torch.abs(xsn2 - xs2)) / torch.max(xs2) < lim
             assert xsn2.shape == xs2.shape
 
+def test_cont_with_nan():
+    xss = [
+        torch.cat((torch.rand(50, 1), torch.Tensor(np.array([np.nan]).reshape(1,1)))),
+        torch.Tensor([1., 2., -1., 100000, np.nan]),
+        torch.Tensor([1., np.nan, -1., 100000, np.nan])
+    ]
+    for xs in xss:
+        for normalize in ["scale", "range", None]:
+            lim = 1e-4
+            tfm = ContNormalization(xs, normalize = normalize)
+            xt = tfm(xs)
+            xsn = tfm.invert(xt)
+            mask = ~torch.isnan(xs)
+            diff = xsn - xs
+            assert torch.mean(torch.abs(diff[mask])) / torch.max(xs[mask]) < lim
+            assert xsn.shape == xs.shape
+
+
 def test_cont_norm_pd():
     nrows = 1000000
     file = cfg("lcbench").get_path("dataset")
@@ -54,5 +73,6 @@ def test_cont_norm_pd():
 if __name__ == '__main__':
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
-    test_cont_norm()
+    # test_cont_norm()
+    test_cont_with_nan()
     # test_cont_norm_pd()

@@ -6,6 +6,7 @@ _lcbench_dict = {
     'y_minimize' : [True, False, True, False, True, False],
     'cont_names': ['epoch', 'batch_size', 'learning_rate', 'momentum', 'weight_decay', 'num_layers', 'max_units', 'max_dropout'],
     'cat_names': ['OpenML_task_id'],
+    'instance_names' : 'OpenML_task_id',
     'fidelity_params': ['epoch'],
     'runtime_name': 'time'
 }
