@@ -1,7 +1,7 @@
 from yahpo_gym.configuration import config_dict, cfg
 
 _nasbench_301_dict = {
-    'config_id' : 'nasbench301',
+    'config_id' : 'nb301',
     'y_names' : ['val_accuracy', 'runtime'],
     'y_minimize' : [False, True],
     'cont_names': ['epoch'],
@@ -15,4 +15,4 @@ _nasbench_301_dict = {
     'runtime_name': 'runtime',
     'instance_names': None
 }
-config_dict.update({'nasbench301' : _nasbench_301_dict})
+config_dict.update({'nb301': _nasbench_301_dict})
