@@ -9,14 +9,14 @@ class ContNormalization(nn.Module):
     outputs the transformation afterwards.
     """
     def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .005, clip_outliers=True, impute_nan=True):
-        super(ContNormalization, self).__init__()
+        super().__init__()
         self.eps = eps
         self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
         self.impute_nan = impute_nan
         self.clip_outliers = clip_outliers
-
         # Deal with outliers and NaN
         if self.impute_nan:
+            self.impute_val = None
             x_sample = self._impute_nan(x_sample)
         if self.clip_outliers:
             x_sample = self._clip_outliers(x_sample)
@@ -29,8 +29,12 @@ class ContNormalization(nn.Module):
         # Rescaling
         if self.normalize == 'scale':
             self.sigma, self.mu = torch.var_mean(xt)
+            if self.sigma == 0.:
+                raise Exception("Constant feature detected!")
         elif self.normalize == 'range':
             self.min, self.max = torch.min(xt), torch.max(xt)
+            if self.max == self.min:
+                raise Exception("Constant feature detected!")
             
     def forward(self, x): 
         if self.impute_nan:
@@ -81,7 +85,7 @@ class ContNormalization(nn.Module):
         return - loglik
 
     def est_params(self, x_sample):
-        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-5, 5), method='bounded')
+        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-10, 10), method='bounded')
         return to_tensor(res.x)
 
     def inverse_trafo_yj(self, x, lmbda):
@@ -117,7 +121,9 @@ class ContNormalization(nn.Module):
         return x_sample
 
     def _impute_nan(self, x_sample):
-        x_sample = torch.nan_to_num(x_sample)
+        if self.impute_val is None:
+            self.impute_val = torch.mode(x_sample[~torch.isnan(x_sample)]).values
+        x_sample = torch.nan_to_num(x_sample, self.impute_val)
         return x_sample
 
 

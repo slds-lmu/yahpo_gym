@@ -82,7 +82,7 @@ class SurrogateTabularLearner(Learner):
 
 class FFSurrogateModel(nn.Module):
     def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False):
-        super(FFSurrogateModel, self).__init__()
+        super().__init__()
 
         if not (len(layers) | len(deeper) | wide):
             raise Exception("One of layers, deeper or wide has to be set!")

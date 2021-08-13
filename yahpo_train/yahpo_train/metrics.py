@@ -18,13 +18,22 @@ class AvgTfedMetric(Metric):
     @property
     def name(self):  return self.func.func.__name__ if hasattr(self.func, 'func') else  self.func.__name__
 
-def mae(x,y):
+def mae(x,y,impute_nan=True):
+    if impute_nan:
+        x = torch.nan_to_num(x)
+        y = torch.nan_to_num(y)
     return mean_absolute_error(x,y, multioutput="raw_values")
 
-def r2(x,y):
+def r2(x,y,impute_nan=True):
+    if impute_nan:
+        x = torch.nan_to_num(x)
+        y = torch.nan_to_num(y)
     return r2_score(x,y, multioutput="raw_values") 
 
-def spearman(x,y):
+def spearman(x,y,impute_nan=True):
+    if impute_nan:
+        x = torch.nan_to_num(x)
+        y = torch.nan_to_num(y)
     x = np.array(x)
     y = np.array(y)
     rho = [spearmanr(xs, ys)[0]  for xs,ys in zip(np.rollaxis(x, 1), np.rollaxis(y, 1))]
