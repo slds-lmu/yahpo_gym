@@ -1,6 +1,8 @@
+from numpy import float_power
 import torch
 import torch.nn as nn
 from scipy import optimize
+import scipy
 
 class ContNormalization(nn.Module):
     """
@@ -14,18 +16,27 @@ class ContNormalization(nn.Module):
         self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
         self.impute_nan = impute_nan
         self.clip_outliers = clip_outliers
+        self.scaler = None
+        
         # Deal with outliers and NaN
         if self.impute_nan:
             self.impute_val = None
             x_sample = self._impute_nan(x_sample)
         if self.clip_outliers:
             x_sample = self._clip_outliers(x_sample)
-        # Trafo
+
+        # YJ Trafo train
         if not lmbda:
-            self.lmbda  = self.est_params(to_tensor(x_sample))
+            self.lmbda  = self.est_params(x_sample)
         else:
             self.lmbda = to_tensor(lmbda)
-        xt = self.trafo_yj(x_sample, self.lmbda)
+
+        # Apply trafo
+        if self.scaler is not None:
+            xt = self.scaler.forward(x_sample)
+        else:
+            xt = self.trafo_yj(x_sample, self.lmbda)
+
         # Rescaling
         if self.normalize == 'scale':
             self.sigma, self.mu = torch.var_mean(xt)
@@ -42,7 +53,10 @@ class ContNormalization(nn.Module):
         if self.clip_outliers:
             x = self._clip_outliers(x)
 
-        x = self.trafo_yj(x.double(), self.lmbda)
+        if self.scaler is not None:
+            x = self.scaler.forward(x)
+        else:
+            x = self.trafo_yj(x, self.lmbda)
 
         if self.normalize == 'scale':
             x = (x - self.mu) / torch.sqrt(self.sigma)
@@ -55,11 +69,15 @@ class ContNormalization(nn.Module):
             x = x  * torch.sqrt(self.sigma) + self.mu
         elif self.normalize == 'range':
             x = (x - self.sigmoid_p) * ((self.max - self.min) / (1. - 2*self.sigmoid_p)) + self.min
-        x = self.inverse_trafo_yj(x.double(), self.lmbda) 
+          
+        if self.scaler is not None:
+            x = self.scaler.invert(x)
+        else:
+            x = self.inverse_trafo_yj(x.double(), self.lmbda) 
         return x
 
     def trafo_yj(self, x, lmbda):   
-        return torch.where(x >= 0, self.scale_pos(x, lmbda), self.scale_neg(x, lmbda))
+        return torch.where(x >= torch.as_tensor(0, dtype=torch.float64), self.scale_pos(x, lmbda), self.scale_neg(x, lmbda))
 
     def scale_pos(self, x, lmbda):
         if torch.abs(lmbda) < self.eps:
@@ -78,22 +96,36 @@ class ContNormalization(nn.Module):
         """
         Negative Log-Likelihood optimized inside Yeo-Johnson transform 
         """
-        xt = self.trafo_yj(x_sample, to_tensor([lmbda]))
+        xt = self.trafo_yj(x_sample, to_tensor(lmbda).double())
         xt_var, _ = torch.var_mean(xt, dim=0, unbiased=False)
         loglik = - 0.5 * x_sample.shape[0] * torch.log(xt_var)
         loglik += (lmbda - 1.) * torch.sum(torch.sign(x_sample) * torch.log1p(torch.abs(x_sample)))
         return - loglik
 
     def est_params(self, x_sample):
-        res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bounds=(-10, 10), method='bounded')
-        return to_tensor(res.x)
+        # res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bracket=(-2.001, 2.001), method='brent', tol = 1e-8, options={'maxiter': 1000}).x
+        _, lmbda = scipy.stats.yeojohnson(x_sample, lmbda=None)
+
+        nll = self._neg_loglik(to_tensor(lmbda), x_sample)
+        print(f'NLL YJ: {nll}')
+        for sc in [Scaler("log1p",torch.log1p, torch.expm1), Scaler("log10",torch.log10, lambda x: torch.pow(10., x)),Scaler("log2",torch.log2, torch.exp2), Scaler("negexp",lambda x: torch.exp(-x), lambda x: - torch.log(x))]:
+            try:
+                nll_new = self._neg_loglik(0.0, sc.forward(x_sample))
+                print(f'NLL Scaler {sc.name}: {nll_new}')
+            except:
+                nll_new = 1e3
+            if nll_new < nll:
+                self.scaler = sc
+                lmbda = 1.
+       
+        return torch.tensor(lmbda)
 
     def inverse_trafo_yj(self, x, lmbda):
         """
         The inverse trafo is not defined e.g., case one: x = 0.9, lmbda=-1.5, then the 'inv_pos' part is not defined.
         We should perhaps figure out what this translates to.
         """
-        return torch.where(x >= 0, self.inv_pos(x, lmbda), self.inv_neg(x, lmbda))
+        return torch.where(x >= torch.as_tensor(0, dtype=torch.float64), self.inv_pos(x, lmbda), self.inv_neg(x, lmbda))
 
     def inv_pos(self, x, lmbda):
         if torch.abs(lmbda) <= self.eps:
@@ -126,7 +158,6 @@ class ContNormalization(nn.Module):
         x_sample = torch.nan_to_num(x_sample, self.impute_val)
         return x_sample
 
-
 def to_tensor(x):
     if torch.is_tensor(x):
         return x
@@ -141,4 +172,22 @@ def _float_power(base, exp):
     """
     out = torch.pow(base.to(torch.double), exp.to(torch.double))
     return out.to(torch.float64)
+
+class Scaler():
+    def  __init__(self, name, forward, invert):
+        self.name = name
+        self.fwd = forward
+        self.inv = invert
+
+    def forward(self, x):
+            return self.fwd(x)
+
+    def invert(self,x):
+        return self.inv(x)
+    
+    def __repr__(self): 
+        return f"Scaler: {self.name}"
+
+    def __str__(self):
+        return f"Scaler: {self.name}"
 
