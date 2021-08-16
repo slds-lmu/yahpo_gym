@@ -5,10 +5,11 @@ from pathlib import Path
 import numpy as np
 import torch
 import onnxruntime as rt
+import time
 
 class BenchmarkSet():
 
-    def __init__(self, config_id = None, active_session = False):
+    def __init__(self, config_id = None, active_session = False, quant = 0.01):
         """
         Combination of an objective function and a configuration space
         with additional helpers that allow querying properties and further customization.
@@ -16,6 +17,8 @@ class BenchmarkSet():
         self.config = cfg(config_id)
         self.config_space = self._get_config_space()
         self.active_session = active_session
+        self.quant = quant
+        
         self.constants = {}
         if self.active_session:
             self.set_session()
@@ -30,8 +33,22 @@ class BenchmarkSet():
         # input & output names and dims
         input_names = [x.name for x in self.sess.get_inputs()]
         output_name = self.sess.get_outputs()[0].name
-        results = self.sess.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0]
+        results = self.sess.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
+        return {k:v for k,v in zip(self.config.y_names, results)}
+
+    def objective_function_timed(self, configuration):
+        """
+        Evaluate the surrogate for a given configuration.
+        Waits for 'quant * predicted runtime' before returining results. 
+        """
+        start_time = time.time()
+        results = self.objective_function(configuration)
+        rt = results[self.config.runtime_name]
+        offset = time.time() - start_time
+        sleepit = (rt - offset) * self.quant
+        time.sleep(sleepit)
         return results
+
     
     def set_constant(self, param, value=None):
         hpar = self.config_space.get_hyperparameter(self.config.instance_names)
@@ -52,13 +69,18 @@ class BenchmarkSet():
 
     def _integer_encode(self, value, name):
         """Integer encode categorical variables"""
-        return 1
+        return 2
 
     def _get_config_space(self):
         with open(self.config.get_path("config_space"), 'r') as f:
             json_string = f.read()
             cs = json.read(json_string)
         return cs
+    
+    def _eval_random(self):
+        cfg = self.config_space.sample_configuration().get_dictionary()
+        print(cfg)
+        return self.objective_function_timed(cfg)
     
     def __repr__(self):
         return f"BenchmarkInstance ({self.config.config_id})"
@@ -83,3 +105,4 @@ if __name__ == '__main__':
     x.set_instance("3945")
     value = {'epoch':1, 'batch_size':1, 'learning_rate':.1, 'momentum':.1, 'weight_decay':.1, 'num_layers':1, 'max_units':1, 'max_dropout':.1}
     print(x.objective_function(value))
+    x.set_constant("epoch", 50)

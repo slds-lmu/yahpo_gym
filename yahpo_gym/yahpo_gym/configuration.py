@@ -28,6 +28,7 @@ class Configuration():
         self.cont_names = self.config['cont_names']
         self.fidelity_params = self.config['fidelity_params']
         self.instance_names = self.config['instance_names']
+        self.runtime_name = self.config['runtime_name']
         
     def get_path(self, key):
         return f'{self.config_path}/{self.config[key]}'
