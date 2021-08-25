@@ -13,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as fh:
     long_description = fh.read()
 
 __version__ = None
-exec(open('module_template/about.py').read())
+exec(open(path.join(here, 'yahpo_gym/about.py')).read())
 if __version__ is None:
     raise IOError('about.py in project lacks __version__!')
 
