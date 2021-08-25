@@ -65,17 +65,17 @@ _rbv2_aknn.update({
 config_dict.update({'rbv2_aknn' : _rbv2_aknn})
 
 
-# Superset Model Multiplexer for SVM, RF, DT, XGB  # UNFINISHED
+# Superset Model Multiplexer for SVM, RF, DT, XGB  #FIXME: UNFINISHED
 _rbv2_super = _rbv2_dict.copy()
 _rbv2_super.update({
     'config_id' : 'rbv2_super',
-    'cont_names': ['svm.cost', 'svm.gamma', 'svm.tolerance', 'svm.degree', 
+    'cont_names': ['svm.cost', 'svm.gamma', 'svm.tolerance', 'svm.degree',
                    'glmnet.alpha', 'glmnet.s',
                    'rpart.cp', 'rpart.maxdepth', 'rpart.minbucket', 'rpart.minsplit',
                    'ranger.num.trees', 'ranger.sample.fraction','ranger.mtry.power', 'ranger.min.node.size',   'ranger.num.random.splits',
                    'aknn.k','aknn.M', 'aknn.ef', 'aknn.ef_construction'
                    'xgboost.nrounds', 'xgboost.eta', 'xgboost.gamma', 'xgboost.lambda',  'xgboost.alpha', 'xgboost.subsample', 'xgboost.max_depth', 'xgboost.min_child_weight',
-                   'xgboost.colsample_bytree', 'xgboost.colsample_bylevel', 'xgboost.rate_drop', 'xgboost.skip_drop', 
+                   'xgboost.colsample_bytree', 'xgboost.colsample_bylevel', 'xgboost.rate_drop', 'xgboost.skip_drop',
                    'trainsize', 'repl'],
     'cat_names': ['task_id', 'learner', 'svm.kernel', 'ranger.respect.unordered.factors', 'ranger.splitrule', 'aknn.distance', 'xgboost.booster', 'num.impute.selected.cpo']
 })
