@@ -1,6 +1,7 @@
 from yahpo_gym.configuration import cfg
 from yahpo_gym.benchmarks import *
-from ConfigSpace.read_and_write import json
+import json
+from ConfigSpace.read_and_write import json as CS_json
 from pathlib import Path
 import numpy as np
 import torch
@@ -15,6 +16,7 @@ class BenchmarkSet():
         with additional helpers that allow querying properties and further customization.
         """
         self.config = cfg(config_id)
+        self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
         self.quant = quant
@@ -39,7 +41,7 @@ class BenchmarkSet():
     def objective_function_timed(self, configuration):
         """
         Evaluate the surrogate for a given configuration.
-        Waits for 'quant * predicted runtime' before returining results. 
+        Waits for 'quant * predicted runtime' before returining results.
         """
         start_time = time.time()
         results = self.objective_function(configuration)
@@ -61,20 +63,34 @@ class BenchmarkSet():
     def _config_to_xs(self, configuration):
         # Update with constants (constants overwrite configuration values)
         if len(self.constants):
-            [configuration.update({k : v}) for k,v in self.constants.items()]  
-        # FIXME: Here we should check and update the configuration with the ConfigSpace  
+            [configuration.update({k : v}) for k,v in self.constants.items()]
+
+        # FIXME: check NA handling below
+        all = self.config_space.get_hyperparameter_names()
+        missing = list(set(all).difference(set(configuration.keys())))
+        for hp in missing:
+            value = '#na#' if hp in self.config.cat_names else 0  # '#na#' for cats, see _integer_encode below
+            configuration.update({hp:value})
+
+        # FIXME: Check the configuration with the ConfigSpace
         x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names]).reshape(1, -1).astype(np.int32)
         x_cont = np.array([configuration[x] for x in self.config.cont_names]).reshape(1, -1).astype(np.float32)
         return x_cont, x_cat
 
     def _integer_encode(self, value, name):
         """Integer encode categorical variables"""
-        return 2
+        # see model.py dl_from_config on how the encoding was generated and stored
+        return self.encoding.get(name).get(value)
+
+    def _get_encoding(self):
+        with open(self.config.get_path("encoding"), 'r') as f:
+            encoding = json.load(f)
+        return encoding
 
     def _get_config_space(self):
         with open(self.config.get_path("config_space"), 'r') as f:
             json_string = f.read()
-            cs = json.read(json_string)
+            cs = CS_json.read(json_string)
         return cs
     
     def _eval_random(self):

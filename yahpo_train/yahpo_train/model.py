@@ -5,27 +5,36 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.onnx
 from fastai.tabular.all import *
-
 from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, **kwargs):
     # We shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
     # All relevant info is obtained from the 'config'
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace).sample(frac=1.).reset_index()
+    dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=1.).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
+
     dls = TabularDataLoaders.from_df(
         df = df,
         path = config.config_path,
-        y_names=config.y_names,
+        y_names = config.y_names,
         cont_names = config.cont_names,
         cat_names = config.cat_names,
-        procs = [Categorify, FillMissing],
+        procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=True, fill_vals=0)],  # FIXME: FillMissing correct?
         valid_idx = _get_valid_idx(df, config),
         bs = bs,
         shuffle=True,
         **kwargs
     )
+
+    # Save the encoding of categories
+    encoding = {cat_name:dict(dls.classes[cat_name].o2i) for cat_name in config.cat_names}
+
+    if (save_encoding):       
+        with open(config.get_path("encoding"), 'w') as f:
+            json.dump(encoding, fp=f, sort_keys=True)
+
     return dls
 
 def _get_valid_idx(df, config, frac=.05, rng_seed=10):
@@ -167,7 +176,7 @@ class FFSurrogateModel(nn.Module):
 
 if __name__ == '__main__':
     from yahpo_train.cont_normalization import ContNormalization
-    from yahpo_gym import cfg
+    from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
     cfg = cfg("lcbench")
     dls = dl_from_config(cfg)
