@@ -1,6 +1,27 @@
 # YAHPO-GYM
 
-Surrogate based benchmarks for HPO problems
+Surrogate based benchmarks for HPO problems.
+
+### Overview
+
+|     | instance     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
+|:----|:-------------|:--------|-------:|:-----------------|:---------------|-----------:|:-------|
+| 1   | rbv2_super   | Mix+Dep |     38 | 6:perf(4)+rt+pt  | trainsize+repl |         89 |        |
+| 2   | rbv2_svm     | Mix+Dep |      6 | 6:perf(4)+rt+pt  | trainsize+repl |         96 |        |
+| 3   | rbv2_rpart   | Mix     |      5 | 6:perf(4)+rt+pt  | trainsize+repl |        101 |        |
+| 4   | rbv2_aknn    | Mix     |      6 | 6:perf(4)+rt+pt  | trainsize+repl |         99 |        |
+| 5   | rbv2_glmnet  | Mix     |      3 | 6:perf(4)+rt+pt  | trainsize+repl |         98 |        |
+| 6   | rbv2_ranger  | Mix+Dep |      8 | 6:perf(4)+rt+pt  | trainsize+repl |        114 |        |
+| 7   | rbv2_xgboost | Mix+Dep |     14 | 6:perf(4)+rt+pt  | trainsize+repl |        109 |        |
+| 8   | lcbench      | Mix     |      7 | 6:perf(5)+rt     | epoch          |         35 |        |
+| 9   | nb301        | Cat+Dep |     34 | 2:perf(1)+rt     | epoch          |          1 |        |
+
+where for **n\_targets** (\#number):
+
+-   perf = performance measure
+-   ms = model\_size
+-   rt = runtime
+-   pt = predicttime
 
 
 ### Setup 
@@ -23,10 +44,8 @@ bench = benchmark_set.BenchmarkSet("lcbench")
 bench.instances
 # Set an instance
 bench.set_instance("3945")
-# Sample a point from the configspace
+# Sample a point from the configspace (containing parameters for the instance and budget)
 value = bench.config_space.sample_configuration(1).get_dictionary()
-# Add a budget value for the fidelity parameter(s)
-value.update(epoch = 1)
 # Evaluate
 print(bench.objective_function(value))
 ```
@@ -79,7 +98,10 @@ class lcbench(Worker):
     @staticmethod
     def get_configspace():
         hps = bench.config_space.get_hyperparameters()
-        hps[0] = CSH.Constant("OpenML_task_id", "3945")  # we additionally fix the instance here for BOHB
+        oml_idx = bench.config_space.get_hyperparameter_names().index("OpenML_task_id")
+        hps[oml_idx] = CSH.Constant("OpenML_task_id", "3945")  # we additionally fix the instance here for BOHB
+        epoch_idx = bench.config_space.get_hyperparameter_names().index("epoch")
+        del hps[epoch_idx]  # drop budget parameter
         cnds = bench.config_space.get_conditions()
         fbds = bench.config_space.get_forbiddens()
         cs = CS.ConfigurationSpace()

@@ -1,3 +1,3 @@
 # YAHPO-GYM - Train
 
-Train and evaluate surrogates for HPO problems
+Train and evaluate surrogates for HPO problems.
