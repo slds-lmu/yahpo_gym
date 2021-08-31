@@ -24,6 +24,11 @@ where for **n\_targets** (\#number):
 -   rt = runtime
 -   pt = predicttime
 
+### Installation
+
+```console
+pip install -e .
+```
 
 ### Setup 
 
