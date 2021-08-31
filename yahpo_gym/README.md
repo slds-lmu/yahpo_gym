@@ -1,6 +1,7 @@
 # YAHPO-GYM
 
 Surrogate based benchmarks for HPO problems.
+
 For a pre-alpha version of this project relying on the v1 surrogate models, please go [here](https://github.com/compstat-lmu/paper_2021_multi_fidelity_surrogates).
 
 ### Overview
@@ -30,7 +31,13 @@ where for **n\_targets** (\#number):
 pip install -e .
 ```
 
-### Setup 
+### Setup
+
+To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), ConfigSpace (`config_space.json`) and some encoding info (`encoding.json`).
+
+You can download these [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
+
+You should pertain the folder structure as on the hosting site (i.e., create a `"path-to-data"` directory, for example named `"multifidelity_data"`, containing the individual, e.g., `"lcench"`, directories).
 
 ```py
 # Initialize the local config & set save path for surrogates and metadata
