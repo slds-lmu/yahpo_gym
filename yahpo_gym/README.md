@@ -1,6 +1,7 @@
 # YAHPO-GYM
 
 Surrogate based benchmarks for HPO problems.
+For a pre-alpha version of this project relying on the v1 surrogate models, please go [here](https://github.com/compstat-lmu/paper_2021_multi_fidelity_surrogates).
 
 ### Overview
 
