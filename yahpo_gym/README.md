@@ -15,7 +15,7 @@ For a pre-alpha version of this project relying on the v1 surrogate models, plea
 | 5   | rbv2_glmnet  | Mix     |      3 | 6:perf(4)+rt+pt  | trainsize+repl |         98 |        |
 | 6   | rbv2_ranger  | Mix+Dep |      8 | 6:perf(4)+rt+pt  | trainsize+repl |        114 |        |
 | 7   | rbv2_xgboost | Mix+Dep |     14 | 6:perf(4)+rt+pt  | trainsize+repl |        109 |        |
-| 8   | lcbench      | Mix     |      7 | 6:perf(5)+rt     | epoch          |         35 |        |
+| 8   | lcbench      | Numeric |      7 | 6:perf(5)+rt     | epoch          |         35 |        |
 | 9   | nb301        | Cat+Dep |     34 | 2:perf(1)+rt     | epoch          |          1 |        |
 
 where for **n\_targets** (\#number):
