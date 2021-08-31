@@ -40,7 +40,7 @@ You can download these [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1Lf
 You should pertain the folder structure as on the hosting site (i.e., create a `"path-to-data"` directory, for example named `"multifidelity_data"`, containing the individual, e.g., `"lcench"`, directories).
 
 ```py
-# Initialize the local config & set save path for surrogates and metadata
+# Initialize the local config & set path for surrogates and metadata
 from yahpo_gym import local_config
 local_config.init_config()
 local_config.set_data_path("path-to-data")
