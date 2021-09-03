@@ -8,11 +8,11 @@ from fastai.tabular.all import *
 from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, frac=1., **kwargs):
     # We shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
     # All relevant info is obtained from the 'config'
     dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=1.).reset_index()
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=frac).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     
     dls = TabularDataLoaders.from_df(
@@ -98,7 +98,7 @@ class SurrogateTabularLearner(Learner):
         return self.model.export_onnx(config)
 
 class FFSurrogateModel(nn.Module):
-    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False):
+    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None):
         super().__init__()
 
         if not (len(layers) | len(deeper) | wide):
@@ -106,8 +106,18 @@ class FFSurrogateModel(nn.Module):
 
         emb_szs = get_emb_sz(dls.train_ds, {} if emb_szs is None else emb_szs)
         self.embds_fct = nn.ModuleList([Embedding(ni, nf) for ni, nf in emb_szs])
-        self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), clip_outliers=False) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
-        self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range', clip_outliers=True) for name, cont in dls.ys.iteritems()])
+
+        # Transform continuous variables and targets
+        if embds_dbl is not None:
+            self.embds_dbl = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.all_cols[dls.cont_names].iteritems(), embds_dbl)])
+        else:
+            self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), clip_outliers=False) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
+        
+        if embds_tgt is not None:
+            self.embds_tgt = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.ys.iteritems(), embds_tgt)])
+        else:
+            self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range', clip_outliers=True) for name, cont in dls.ys.iteritems()])
+
         self.n_emb,self.n_cont = sum(e.embedding_dim for e in self.embds_fct), len(dls.cont_names)
         self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
 
