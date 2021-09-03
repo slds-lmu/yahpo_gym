@@ -14,7 +14,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, *
     dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
     df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=1.).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
-
+    
     dls = TabularDataLoaders.from_df(
         df = df,
         path = config.config_path,
@@ -37,7 +37,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, *
 
     return dls
 
-def _get_valid_idx(df, config, frac=.05, rng_seed=10):
+def _get_valid_idx(df, config, frac=.1, rng_seed=10):
     """
     Include or exclude blocks of hyperparameters with differing fidelity
     The goal here is to not sample from the dataframe randomly, but instead either keep a hyperparameter group
@@ -47,7 +47,15 @@ def _get_valid_idx(df, config, frac=.05, rng_seed=10):
     # All hyperpars excluding fidelity params
     hpars = config.cont_names+config.cat_names
     [hpars.remove(fp) for fp in config.fidelity_params]
-    # random.seed(rng_seed)
+
+    # Speed up for larger number of hyperparameters by converting cats to int.
+    # Otherwise groupby breaks
+    cont_hpars = set(hpars).intersection(set(config.cat_names))
+    df = df[hpars].copy()
+    df[cont_hpars].fillna('_NA_')
+    df = df.apply(lambda x: pd.factorize(x.astype('category'))[0], axis=0)
+    
+    random.seed(rng_seed)
     idx = pd.Int64Index([])
     for _, dfg in df.groupby(hpars):
         # Sample index blocks
