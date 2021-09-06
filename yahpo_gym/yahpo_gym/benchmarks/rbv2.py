@@ -73,7 +73,7 @@ _rbv2_super.update({
                    'glmnet.alpha', 'glmnet.s',
                    'rpart.cp', 'rpart.maxdepth', 'rpart.minbucket', 'rpart.minsplit',
                    'ranger.num.trees', 'ranger.sample.fraction','ranger.mtry.power', 'ranger.min.node.size',   'ranger.num.random.splits',
-                   'aknn.k','aknn.M', 'aknn.ef', 'aknn.ef_construction'
+                   'aknn.k','aknn.M', 'aknn.ef', 'aknn.ef_construction',
                    'xgboost.nrounds', 'xgboost.eta', 'xgboost.gamma', 'xgboost.lambda',  'xgboost.alpha', 'xgboost.subsample', 'xgboost.max_depth', 'xgboost.min_child_weight',
                    'xgboost.colsample_bytree', 'xgboost.colsample_bylevel', 'xgboost.rate_drop', 'xgboost.skip_drop',
                    'trainsize', 'repl'],

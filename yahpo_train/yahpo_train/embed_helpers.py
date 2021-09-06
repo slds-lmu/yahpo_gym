@@ -1,3 +1,4 @@
+# The following functions are adapted from https://github.com/fastai/fastai and changed according to new requirements
 from fastai.tabular.all import ifnone
 from fastai.torch_basics import *
 from fastai.tabular.all import *
@@ -10,7 +11,7 @@ def _one_emb_sz(classes, n, sz_dict=None):
     "Pick an embedding size for `n` depending on `classes` if not given in `sz_dict`."
     sz_dict = ifnone(sz_dict, {})
     n_cat = len(classes[n])
-    sz = sz_dict.get(n, int(emb_sz_rule(n_cat)))  # rule of thumb
+    sz = sz_dict.get(n, int(emb_sz_rule(n_cat)))
     return n_cat,sz
 
 def get_emb_sz(to, sz_dict=None):

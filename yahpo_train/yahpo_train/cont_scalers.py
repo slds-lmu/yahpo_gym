@@ -1,6 +1,27 @@
 import torch
 import torch.nn as nn
 
+from yahpo_train.cont_normalization import to_tensor
+
+class ContTransformerNone(nn.Module):
+    """
+    Transformer for Continuous Variables. Performs no transformation (default operation)
+    """
+    def __init__(self, x):
+        super().__init__()
+
+    def forward(self, x):
+        """
+        Batch-wise transform for x
+        """
+        return x.float()
+
+    def invert(self, x):
+        """
+        Batch-wise inverse transform for x
+        """
+        return x.float()
+
 class ContTransformerRange(nn.Module):
     """
     Transformer for Continuous Variables.
@@ -29,6 +50,38 @@ class ContTransformerRange(nn.Module):
         return x.float()
 
 
+class ContTransformerNegExpRange(nn.Module):
+    """
+    Log-Transformer for Continuous Variables.
+    Transforms to [p,1-p] after applying a log-transform
+
+    logfun :: Can be torch.log
+    """
+    def __init__(self, x, p=0.01):
+        self.p = torch.as_tensor(p)
+        super().__init__()
+        x = self.torch.expm1(-x)
+        self.min, self.max = torch.min(x), torch.max(x)
+        if self.max == self.min:
+            raise Exception("Constant feature detected!")
+        
+    def forward(self, x):
+        """
+        Batch-wise transform for x
+        """
+        x = torch.expm1(-x)
+        x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
+        return x.float()
+
+    def invert(self, x):
+        """
+        Batch-wise inverse transform for x
+        """
+        x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
+        x = - torch.log1p(x)
+        return x.float()
+
+
 class ContTransformerLogRange(nn.Module):
     """
     Log-Transformer for Continuous Variables.
@@ -37,10 +90,10 @@ class ContTransformerLogRange(nn.Module):
     logfun :: Can be torch.log
     """
     def __init__(self, x, logfun = torch.log, expfun = torch.exp, p=0.01):
-        super().__init__()
         self.p = torch.as_tensor(p)
         self.logfun = logfun
-        self.expfun = self.expfun
+        self.expfun = expfun
+        super().__init__()
 
         x = self.logfun(x)
         self.min, self.max = torch.min(x), torch.max(x)
@@ -145,3 +198,41 @@ class ContTransformerClipOutliers(nn.Module):
     def invert(self, x):
         "Clipping has no inverse"
         return x
+
+class ContTransformerChain(nn.Module):
+    """
+    Chained transformer Continuous Variables. Chains several transforms.
+    During forward pass, transforms are applied according to the list order,
+    during invert, the order is reversed.
+    """
+    def __init__(self, x, tfms):
+        self.tfms = [tf(x) for tf in tfms]
+        super().__init__()
+
+    def forward(self, x):
+        """
+        Chained batch-wise transform for x 
+        """
+        for tf in self.tfms():
+            x = tf.forward(x)
+        return x
+
+    def invert(self, x):
+        """
+        Chained batch-wise inverse transform for x
+        """
+        for tf in reversed(self.tfms()):
+            x = tf.invert(x)
+        return x.float()
+
+
+def _float_power(base, exp):
+    """
+    This is currently problematic due to numerical imprecision. torch.float_power would solve the problem 
+    but currently can not be converted to ONNX.
+    """
+    out = torch.pow(base.to(torch.double), exp.to(torch.double))
+    return out.to(torch.float64)
+
+def float_pow10(base):
+    return _float_power(base, torch.as_tensor(10.))

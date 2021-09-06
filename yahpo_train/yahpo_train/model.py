@@ -153,7 +153,7 @@ class FFSurrogateModel(nn.Module):
             xd = torch.cat(xd, 1)
             x = torch.cat([x, xd], 1) if self.n_emb > 0 else xd
         
-        xs = torch.zeros(x.shape[0], self.sizes[-1])
+        xs = torch.zeros(x.shape[0], self.sizes[-1], device = x.device)
         if len(self.wide):
             xs = xs.add(self.wide(x))
         if len(self.deep):
@@ -177,14 +177,14 @@ class FFSurrogateModel(nn.Module):
         ys = torch.cat(ys, 1)
         return ys
     
-    def export_onnx(self, config):
+    def export_onnx(self, config_dict, device='cuda:0'):
         """
         Export model to an ONNX file. We can safely ignore tracing errors with respect to lambda since lambda will be constant during inference.
         """
         self.eval()
         torch.onnx.export(self,
-            (torch.ones(1, len(config.cat_names), dtype=torch.int), {'x_cont': torch.randn(1, len(config.cont_names))}),
-            config.get_path("model"),
+            (torch.ones(1, len(config_dict.cat_names), dtype=torch.int, device=device), {'x_cont': torch.randn(1, len(config_dict.cont_names), device=device)}),
+            config_dict.get_path("model"),
             do_constant_folding=True,
             export_params=True,
             input_names=['x_cat', 'x_cont'],

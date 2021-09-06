@@ -173,6 +173,9 @@ def _float_power(base, exp):
     out = torch.pow(base.to(torch.double), exp.to(torch.double))
     return out.to(torch.float64)
 
+def float_pow10(base):
+    return _float_power(base, 10.)
+
 class Scaler():
     def  __init__(self, name, forward, invert):
         self.name = name
