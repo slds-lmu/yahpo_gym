@@ -12,16 +12,21 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, f
     # We shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
     # All relevant info is obtained from the 'config'
     dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
+    dtypes.update(dict(zip(config.cont_names+config.y_names, ["float32"] * len(config.cont_names+config.y_names))))
     df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=frac).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
-    
+    # Get rid of irrelevant columns
+    df = df[config.cat_names+config.cont_names+config.y_names]
+    # Fill missing target with 0
+    df[config.y_names] = df[config.y_names].fillna(0.) 
+
     dls = TabularDataLoaders.from_df(
         df = df,
         path = config.config_path,
         y_names = config.y_names,
         cont_names = config.cont_names,
         cat_names = config.cat_names,
-        procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=True, fill_vals=0)],  # FIXME: FillMissing correct?
+        procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=False, fill_vals=dict((k, 0.) for k in config.cat_names+config.cont_names))],
         valid_idx = _get_valid_idx(df, config),
         bs = bs,
         shuffle=True,
@@ -53,7 +58,10 @@ def _get_valid_idx(df, config, frac=.1, rng_seed=10):
     cont_hpars = set(hpars).intersection(set(config.cat_names))
     df = df[hpars].copy()
     df[cont_hpars].fillna('_NA_')
+    df = df_shrink(df)
     df = df.apply(lambda x: pd.factorize(x.astype('category'))[0], axis=0)
+    if len(hpars) > 10:
+        hpars = random.sample(hpars, k=10)
     
     random.seed(rng_seed)
     idx = pd.Int64Index([])
@@ -79,14 +87,18 @@ class SurrogateTabularLearner(Learner):
         if not self.training: 
             self.tfpred = self.model(*self.xb, invert_ytrafo = True)
             self.tfyb = self.yb
+        # For the training loss we train on untransformed scale.
         self.pred = self.model(*self.xb, invert_ytrafo = False)
         self.yb = [self.model.trafo_ys(*self.yb)]
+
         self('after_pred')
         if len(self.yb):
             self.loss_grad = self.loss_func(self.pred, *self.yb)
             self.loss = self.loss_grad.clone()
+
         self('after_loss')
         if not self.training or not len(self.yb): return
+
         self('before_backward')
         self.loss_grad.backward()
         self._with_events(self.opt.step, 'step', CancelStepException)

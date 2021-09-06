@@ -30,7 +30,7 @@ class ContTransformerRange(nn.Module):
     def __init__(self, x, p=0.01):
         super().__init__()
         self.p = torch.as_tensor(p)
-        self.min, self.max = torch.min(x), torch.max(x)
+        self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
         if self.max == self.min:
             raise Exception("Constant feature detected!")
         
@@ -60,8 +60,8 @@ class ContTransformerNegExpRange(nn.Module):
     def __init__(self, x, p=0.01):
         self.p = torch.as_tensor(p)
         super().__init__()
-        x = self.torch.expm1(-x)
-        self.min, self.max = torch.min(x), torch.max(x)
+        x = torch.expm1(-x)
+        self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
         if self.max == self.min:
             raise Exception("Constant feature detected!")
         
@@ -69,7 +69,7 @@ class ContTransformerNegExpRange(nn.Module):
         """
         Batch-wise transform for x
         """
-        x = torch.expm1(-x)
+        x = torch.exp(-x)
         x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
         return x.float()
 
@@ -78,7 +78,7 @@ class ContTransformerNegExpRange(nn.Module):
         Batch-wise inverse transform for x
         """
         x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
-        x = - torch.log1p(x)
+        x = - torch.log(x)
         return x.float()
 
 
@@ -89,14 +89,15 @@ class ContTransformerLogRange(nn.Module):
 
     logfun :: Can be torch.log
     """
-    def __init__(self, x, logfun = torch.log, expfun = torch.exp, p=0.01):
+    def __init__(self, x, logfun = torch.log, expfun = torch.exp, p=0.01, eps = 1e-8):
         self.p = torch.as_tensor(p)
+        self.eps = torch.as_tensor(eps)
         self.logfun = logfun
         self.expfun = expfun
         super().__init__()
 
-        x = self.logfun(x)
-        self.min, self.max = torch.min(x), torch.max(x)
+        x = self.logfun(x + self.eps)
+        self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
         if self.max == self.min:
             raise Exception("Constant feature detected!")
         
@@ -105,7 +106,7 @@ class ContTransformerLogRange(nn.Module):
         """
         Batch-wise transform for x
         """
-        x = self.logfun(x)
+        x = self.logfun(x + self.eps)
         x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
         return x.float()
 
@@ -114,7 +115,7 @@ class ContTransformerLogRange(nn.Module):
         Batch-wise inverse transform for x
         """
         x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
-        x = self.expfun(x)
+        x = torch.clamp(self.expfun(x) - self.eps, min = 0.)
         return x.float()
 
 
@@ -182,7 +183,7 @@ class ContTransformerClipOutliers(nn.Module):
     def __init__(self, x, q = .995):
         super().__init__()
         self.q = q
-        self.q1, self.q0 = torch.quantile(x, q), torch.quantile(x, 1.-q)
+        self.q1, self.q0 = torch.quantile(x[~torch.isnan(x)], q), torch.quantile(x[~torch.isnan(x)], 1.-q)
 
 
     def forward(self, x):
