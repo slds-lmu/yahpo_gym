@@ -35,7 +35,7 @@ _rbv2_rpart.update({
     'cont_names': ['cp', 'maxdepth', 'minbucket', 'minsplit', 'trainsize', 'repl'],
     'cat_names': ['task_id', 'num.impute.selected.cpo']
 })
-config_dict.update({'rbv2_svm' : _rbv2_svm})
+config_dict.update({'rbv2_rpart' : _rbv2_rpart})
 
 # ElasticNet
 _rbv2_glmnet = _rbv2_dict.copy()

@@ -34,7 +34,8 @@ def fit_nb301(key = 'nb301', frac=1.0):
 
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
-
+    wandb.finish()
+    
 
 def fit_rbv2_super(key = 'rbv2_super', frac=1.0):
     cc = cfg(key)
@@ -53,6 +54,7 @@ def fit_rbv2_super(key = 'rbv2_super', frac=1.0):
     init_wandb_learner(key, l, frac)
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
 
 
 def fit_rbv2_svm(key = 'rbv2_svm', frac=1.0):
@@ -69,6 +71,7 @@ def fit_rbv2_svm(key = 'rbv2_svm', frac=1.0):
     init_wandb_learner(key, l, frac)
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
 
 
 def fit_rbv2_xgboost(key = 'rbv2_xgboost', frac=1.0):
@@ -89,6 +92,7 @@ def fit_rbv2_xgboost(key = 'rbv2_xgboost', frac=1.0):
 
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
 
 
 def fit_rbv2_ranger(key = 'rbv2_ranger', frac=1.0):
@@ -108,6 +112,7 @@ def fit_rbv2_ranger(key = 'rbv2_ranger', frac=1.0):
     init_wandb_learner(key, l, frac)
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
 
 
 def fit_rbv2_rpart(key = 'rbv2_rpart', frac=1.0):
@@ -127,6 +132,8 @@ def fit_rbv2_rpart(key = 'rbv2_rpart', frac=1.0):
     init_wandb_learner(key, l, frac)
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
+
 
 def fit_rbv2_glmnet(key = 'rbv2_glmnet', frac=1.0):
     cc = cfg(key)
@@ -145,6 +152,8 @@ def fit_rbv2_glmnet(key = 'rbv2_glmnet', frac=1.0):
     init_wandb_learner(key, l, frac)
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
+
 
 def fit_rbv2_aknn(key = 'rbv2_aknn', frac=1.0):
     cc = cfg(key)
@@ -163,6 +172,8 @@ def fit_rbv2_aknn(key = 'rbv2_aknn', frac=1.0):
     init_wandb_learner(key, l, frac)
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
+
 
 def fit_fcnet(key = 'fcnet', frac=1.0):
     cc = cfg(key)
@@ -182,6 +193,7 @@ def fit_fcnet(key = 'fcnet', frac=1.0):
 
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
 
 
 def fit_lcbench(key='lcbench', frac=1.0):
@@ -200,6 +212,7 @@ def fit_lcbench(key='lcbench', frac=1.0):
     # Fit
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
+    wandb.finish()
 
 
 def fit_taskset(key='taskset', frac=1.0):
@@ -221,14 +234,14 @@ def fit_taskset(key='taskset', frac=1.0):
     # Fit
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
-
+    wandb.finish()
 
 if __name__ == '__main__':
     wandb.login()
     # fit_rbv2_svm()
     # fit_rbv2_xgboost()
-    fit_rbv2_super()
-    fit_lcbench()
+    # fit_rbv2_super()
+    # fit_lcbench()
     fit_nb301()
     fit_rbv2_ranger()    
     fit_rbv2_rpart()
