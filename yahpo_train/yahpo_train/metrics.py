@@ -1,6 +1,8 @@
+from fastai.callback.wandb import WandbCallback
 from scipy.stats import spearmanr
 from sklearn.metrics import mean_absolute_error, r2_score
 from fastai.tabular.all import *
+import wandb
 
 class AvgTfedMetric(Metric):
     """
@@ -34,7 +36,41 @@ def spearman(x,y,impute_nan=True):
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
+    
+    if torch.all(y == y[1]) or torch.all(x == x[1]):
+        return np.array([0.5 for _,_ in zip(np.rollaxis(x, 1), np.rollaxis(y, 1))])
+
     x = np.array(x.cpu())
     y = np.array(y.cpu())
-    rho = [spearmanr(xs, ys)[0]  for xs,ys in zip(np.rollaxis(x, 1), np.rollaxis(y, 1))]
+    
+    rho = [spearmanr(xs, ys)[0] if not ((xs[0] == xs).all() or (ys[0] == ys).all()) else 0. for xs,ys in zip(np.rollaxis(x, 1), np.rollaxis(y, 1)) ]
     return np.array(rho)
+
+class WandbMetricsTableCallback(WandbCallback):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def after_epoch(self):
+        "Log validation loss and custom metrics & log prediction samples"
+        # Correct any epoch rounding error and overwrite value
+        self._wandb_epoch = round(self._wandb_epoch)
+        wandb.log({'epoch': self._wandb_epoch}, step=self._wandb_step)
+        # Log sample predictions
+        if self.log_preds:
+            try:
+                self.log_predictions(self.learn.fetch_preds.preds)
+            except Exception as e:
+                self.log_preds = False
+                self.remove_cb(FetchPredsCallback)
+                print(f'WandbCallback was not able to get prediction samples -> {e}')
+        
+        log_dict = {}
+        for n,s in zip(self.recorder.metric_names, self.recorder.log):
+            if n not in ['train_loss', 'epoch', 'time']:
+                if hasattr(s, "__len__"):
+                    for m, nm in zip(s, self.recorder.dls.y_names):
+                        log_dict.update({n+nm:m})
+                else:
+                    log_dict.update({n:s})
+
+        wandb.log(log_dict, step=self._wandb_step)

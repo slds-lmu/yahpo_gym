@@ -71,12 +71,14 @@ class ContTransformerNegExpRange(nn.Module):
         """
         x = torch.exp(-x)
         x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
+        x = 1 - x
         return x.float()
 
     def invert(self, x):
         """
         Batch-wise inverse transform for x
         """
+        x = 1 - x
         x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
         x = - torch.log(x)
         return x.float()
@@ -178,9 +180,9 @@ class ContTransformerClipOutliers(nn.Module):
     """
     Clips large and small values according to quantiles.
 
-    q :: quantile to clip
+    q :: quantile to clip to. Clipping values that deviate by more than one IQR range
     """
-    def __init__(self, x, q = .995):
+    def __init__(self, x, q = .99):
         super().__init__()
         self.q = q
         self.q1, self.q0 = torch.quantile(x[~torch.isnan(x)], q), torch.quantile(x[~torch.isnan(x)], 1.-q)
