@@ -194,7 +194,7 @@ def fit_lcbench(key='lcbench', frac=1.0):
     [tfms.update({k:ContTransformerNegExpRange}) for k in ["val_cross_entropy", "test_cross_entropy", "time"]]
     embds_dbl = [tfms.get(name) if tfms.get(name) is not None else ContTransformerNone for name, cont in dls.all_cols[dls.cont_names].iteritems()]
     embds_tgt = [tfms.get(name) if tfms.get(name) is not None else ContTransformerNone for name, cont in dls.ys.iteritems()]
-    
+
     l = init_learner(dls, embds_dbl, embds_tgt)
     init_wandb_learner(key, l, frac)
     # Fit
@@ -225,10 +225,14 @@ def fit_taskset(key='taskset', frac=1.0):
 
 if __name__ == '__main__':
     wandb.login()
-    # fit_rbv2_svm(frac=1.)
-    # fit_rbv2_xgboost(frac=1.)
+    # fit_rbv2_svm()
+    # fit_rbv2_xgboost()
     fit_rbv2_super()
     fit_lcbench()
     fit_nb301()
-    fit_rbv2_ranger()
+    fit_rbv2_ranger()    
+    fit_rbv2_rpart()
+    fit_rbv2_glmnet()
+    fit_rbv2_aknn()
+
 
