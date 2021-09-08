@@ -108,6 +108,11 @@ class SurrogateTabularLearner(Learner):
 
     def export_onnx(self, config):
         return self.model.export_onnx(config)
+    
+    def __repr__(self): 
+        return f"{self.wide} \n {self.deep}  \n {self.deeper}"
+
+
 
 class FFSurrogateModel(nn.Module):
     def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None):

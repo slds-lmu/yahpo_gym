@@ -13,8 +13,9 @@ def init_wandb_learner(key, l, frac=1.0):
     l.add_cb(WandbMetricsTableCallback())
     wandb.config.update({'cont_tf': l.embds_dbl, 'tgt_tf': l.embds_tgt, 'fraction': frac}, allow_val_change=True)
 
+
 def init_learner(dls, embds_dbl, embds_tgt):
-    f = FFSurrogateModel(dls, layers=[512,512], embds_dbl=embds_dbl, embds_tgt=embds_tgt)
+    f = FFSurrogateModel(dls, layers=[512,512], deeper = [256,256,128,128], embds_dbl=embds_dbl, embds_tgt=embds_tgt)
     l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
     l.metrics = [AvgTfedMetric(mae),  AvgTfedMetric(r2), AvgTfedMetric(spearman)]
     l.add_cb(MixHandler)
@@ -238,14 +239,14 @@ def fit_taskset(key='taskset', frac=1.0):
 
 if __name__ == '__main__':
     wandb.login()
-    # fit_rbv2_svm()
-    # fit_rbv2_xgboost()
-    # fit_rbv2_super()
-    # fit_lcbench()
-    # fit_nb301()
-    # 5mfit_rbv2_ranger()    
-    # fit_rbv2_rpart()
-    # fit_rbv2_glmnet()
+    fit_rbv2_svm()
+    fit_rbv2_xgboost()
+    fit_rbv2_super()
+    fit_lcbench()
+    fit_nb301()
+    fit_rbv2_ranger()    
+    fit_rbv2_rpart()
+    fit_rbv2_glmnet()
     fit_rbv2_aknn()
 
 
