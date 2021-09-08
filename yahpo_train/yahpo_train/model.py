@@ -8,7 +8,10 @@ from fastai.tabular.all import *
 from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.embed_helpers import *
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, frac=1., **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, nrows=None, frac=1., **kwargs):
+    """
+    Instantiate a pytorch dataloader from a YAHPO config
+    """
     # We shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
     # All relevant info is obtained from the 'config'
     dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
