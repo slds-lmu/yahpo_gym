@@ -70,8 +70,6 @@ from yahpo_gym import benchmark_set
 import yahpo_gym.benchmarks.lcbench
 import time
 import numpy as np
-import ConfigSpace as CS
-import ConfigSpace.hyperparameters as CSH
 from hpbandster.core.worker import Worker
 import hpbandster.core.nameserver as hpns
 from hpbandster.optimizers import BOHB as BOHB
@@ -110,17 +108,8 @@ class lcbench(Worker):
     
     @staticmethod
     def get_configspace():
-        hps = bench.config_space.get_hyperparameters()
-        oml_idx = bench.config_space.get_hyperparameter_names().index("OpenML_task_id")
-        hps[oml_idx] = CSH.Constant("OpenML_task_id", "3945")  # we additionally fix the instance here for BOHB
-        epoch_idx = bench.config_space.get_hyperparameter_names().index("epoch")
-        del hps[epoch_idx]  # drop budget parameter
-        cnds = bench.config_space.get_conditions()
-        fbds = bench.config_space.get_forbiddens()
-        cs = CS.ConfigurationSpace()
-        cs.add_hyperparameters(hps)
-        cs.add_conditions(cnds)
-        cs.add_forbidden_clauses(fbds)
+        # sets OpenML_task_id constant to "3945" and removes the epoch fidelity parameter
+        cs = bench.get_opt_space(instance = "3945", drop_fidelity_params = True)
         return(cs)
 
 NS = hpns.NameServer(run_id="lcbench", host="127.0.0.1", port=None)

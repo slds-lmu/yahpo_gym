@@ -2,6 +2,8 @@ from yahpo_gym.configuration import cfg
 from yahpo_gym.benchmarks import *
 import json
 from ConfigSpace.read_and_write import json as CS_json
+import ConfigSpace as CS
+import ConfigSpace.hyperparameters as CSH
 from pathlib import Path
 import numpy as np
 import torch
@@ -51,7 +53,6 @@ class BenchmarkSet():
         time.sleep(sleepit)
         return results
 
-    
     def set_constant(self, param, value=None):
         hpar = self.config_space.get_hyperparameter(self.config.instance_names)
         # value in hpar.choices
@@ -59,6 +60,27 @@ class BenchmarkSet():
     
     def set_instance(self, value):
         self.set_constant(self.config.instance_names, value)
+
+    def get_opt_space(self, instance, drop_fidelity_params = True):
+        """
+        Get the search space to be optimized.
+        Sets 'instance# as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
+        """
+        # FIXME: assert instance is a valid choice
+        hps = self.config_space.get_hyperparameters()
+        instance_names_idx = self.config_space.get_hyperparameter_names().index(self.config.instance_names)
+        hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
+        if drop_fidelity_params:
+            fidelity_params_idx = [self.config_space.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
+            for idx in fidelity_params_idx:
+                del hps[idx]
+        cnds = self.config_space.get_conditions()
+        fbds = self.config_space.get_forbiddens()
+        cs = CS.ConfigurationSpace()
+        cs.add_hyperparameters(hps)
+        cs.add_conditions(cnds)
+        cs.add_forbidden_clauses(fbds)
+        return cs
 
     def _config_to_xs(self, configuration):
         # Update with constants (constants overwrite configuration values)
@@ -78,7 +100,9 @@ class BenchmarkSet():
         return x_cont, x_cat
 
     def _integer_encode(self, value, name):
-        """Integer encode categorical variables"""
+        """
+        Integer encode categorical variables.
+        """
         # see model.py dl_from_config on how the encoding was generated and stored
         return self.encoding.get(name).get(value)
 
@@ -92,7 +116,7 @@ class BenchmarkSet():
             json_string = f.read()
             cs = CS_json.read(json_string)
         return cs
-    
+
     def _eval_random(self):
         cfg = self.config_space.sample_configuration().get_dictionary()
         print(cfg)
