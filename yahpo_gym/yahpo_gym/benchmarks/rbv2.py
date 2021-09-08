@@ -59,7 +59,7 @@ config_dict.update({'rbv2_xgboost' : _rbv2_xgboost})
 _rbv2_aknn = _rbv2_dict.copy()
 _rbv2_aknn.update({
     'config_id' : 'rbv2_aknn',
-    'cont_names': ['k','M', 'aknn.ef', 'ef_construction', 'trainsize', 'repl'],
+    'cont_names': ['k','M', 'ef', 'ef_construction', 'trainsize', 'repl'],
     'cat_names': ['task_id', 'distance', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_aknn' : _rbv2_aknn})

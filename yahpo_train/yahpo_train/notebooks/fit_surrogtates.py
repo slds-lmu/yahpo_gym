@@ -35,7 +35,7 @@ def fit_nb301(key = 'nb301', frac=1.0):
     l.fit_flat_cos(10, 1e-4)
     l.export_onnx(cc)
     wandb.finish()
-    
+
 
 def fit_rbv2_super(key = 'rbv2_super', frac=1.0):
     cc = cfg(key)
@@ -242,10 +242,10 @@ if __name__ == '__main__':
     # fit_rbv2_xgboost()
     # fit_rbv2_super()
     # fit_lcbench()
-    fit_nb301()
-    fit_rbv2_ranger()    
-    fit_rbv2_rpart()
-    fit_rbv2_glmnet()
+    # fit_nb301()
+    # 5mfit_rbv2_ranger()    
+    # fit_rbv2_rpart()
+    # fit_rbv2_glmnet()
     fit_rbv2_aknn()
 
 
