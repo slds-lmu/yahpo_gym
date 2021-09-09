@@ -227,6 +227,3 @@ if __name__ == '__main__':
     l.fit_flat_cos(5, 1e-4)
     l.export_onnx(cfg)
 
-
-
-  
