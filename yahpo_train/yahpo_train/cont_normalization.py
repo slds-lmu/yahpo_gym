@@ -17,6 +17,8 @@ class ContNormalization(nn.Module):
         self.impute_nan = impute_nan
         self.clip_outliers = clip_outliers
         self.scaler = None
+
+        x_sample = x_sample.double()
         
         # Deal with outliers and NaN
         if self.impute_nan:
@@ -27,7 +29,7 @@ class ContNormalization(nn.Module):
 
         # YJ Trafo train
         if not lmbda:
-            self.lmbda  = self.est_params(x_sample)
+            self.lmbda = self.est_params(x_sample)
         else:
             self.lmbda = to_tensor(lmbda)
 
@@ -48,6 +50,7 @@ class ContNormalization(nn.Module):
                 raise Exception("Constant feature detected!")
             
     def forward(self, x): 
+        x = x.double()
         if self.impute_nan:
             x = self._impute_nan(x)
         if self.clip_outliers:
@@ -65,28 +68,29 @@ class ContNormalization(nn.Module):
         return x.float()
 
     def invert(self, x):
+        x = x.double()
         if self.normalize == 'scale':
-            x = x  * torch.sqrt(self.sigma) + self.mu
+            x = x * torch.sqrt(self.sigma) + self.mu
         elif self.normalize == 'range':
             x = (x - self.sigmoid_p) * ((self.max - self.min) / (1. - 2*self.sigmoid_p)) + self.min
           
         if self.scaler is not None:
             x = self.scaler.invert(x)
         else:
-            x = self.inverse_trafo_yj(x.double(), self.lmbda) 
+            x = self.inverse_trafo_yj(x, self.lmbda)
         return x
 
-    def trafo_yj(self, x, lmbda):   
+    def trafo_yj(self, x, lmbda):
         return torch.where(x >= torch.as_tensor(0, dtype=torch.float64), self.scale_pos(x, lmbda), self.scale_neg(x, lmbda))
 
     def scale_pos(self, x, lmbda):
-        if torch.abs(lmbda) < self.eps:
+        if torch.abs(lmbda).numpy() < self.eps:
             x = torch.log1p(x)
         else:
             x = (_float_power(x + 1., lmbda) - 1) / lmbda 
         return x
     def scale_neg(self, x, lmbda):
-        if torch.abs(lmbda - 2.) <= self.eps:
+        if torch.abs(lmbda - 2.).numpy() <= self.eps:
             x = torch.log1p(-x)
         else:
             x = (_float_power(-x + 1, 2. - lmbda) - 1.) / (2. - lmbda)
@@ -106,17 +110,17 @@ class ContNormalization(nn.Module):
         # res = optimize.minimize_scalar(lambda lmbd: self._neg_loglik(lmbd, x_sample), bracket=(-2.001, 2.001), method='brent', tol = 1e-8, options={'maxiter': 1000}).x
         _, lmbda = scipy.stats.yeojohnson(x_sample, lmbda=None)
 
-        nll = self._neg_loglik(to_tensor(lmbda), x_sample)
-        print(f'NLL YJ: {nll}')
-        for sc in [Scaler("log1p",torch.log1p, torch.expm1), Scaler("log10",torch.log10, lambda x: torch.pow(10., x)),Scaler("log2",torch.log2, torch.exp2), Scaler("negexp",lambda x: torch.exp(-x), lambda x: - torch.log(x))]:
-            try:
-                nll_new = self._neg_loglik(0.0, sc.forward(x_sample))
-                print(f'NLL Scaler {sc.name}: {nll_new}')
-            except:
-                nll_new = 1e3
-            if nll_new < nll:
-                self.scaler = sc
-                lmbda = 1.
+        #nll = self._neg_loglik(to_tensor(lmbda), x_sample)
+        #print(f'NLL YJ: {nll}')
+        #for sc in [Scaler("log1p",torch.log1p, torch.expm1), Scaler("log10",torch.log10, lambda x: torch.pow(10., x)),Scaler("log2",torch.log2, torch.exp2), Scaler("negexp", lambda x: torch.exp(-x), lambda x: - torch.log(x))]:
+        #    try:
+        #        nll_new = self._neg_loglik(0.0, sc.forward(x_sample))
+        #        print(f'NLL Scaler {sc.name}: {nll_new}')
+        #    except:
+        #        nll_new = 1e3
+        #    if nll_new < nll:
+        #        self.scaler = sc
+        #        lmbda = 1.
        
         return torch.tensor(lmbda)
 
@@ -134,9 +138,10 @@ class ContNormalization(nn.Module):
             x = _float_power(x * lmbda + 1., 1. / lmbda) - 1.
         return x
     
-    def inv_neg(self, x,  lmbda):
+    def inv_neg(self, x, lmbda):
         if torch.abs(lmbda - 2.) < self.eps:
-            x = -torch.exp(x)+1.
+            #x = -torch.exp(x)+1.
+            x = -torch.expm1(-x)
         else:
             x = 1. - _float_power(-(2.-lmbda) * x + 1., 1. / (2. - lmbda))
         return x
@@ -167,7 +172,7 @@ def to_tensor(x):
 # FIXME: replace with torch.float_power once ONNX opset allows for this
 def _float_power(base, exp):
     """
-    This is currently problematic due to numerical imprecision. torch.float_power would solve the problem 
+    This is currently problematic due to numerical imprecision. torch.float_power would solve the problem
     but currently can not be converted to ONNX.
     """
     out = torch.pow(base.to(torch.double), exp.to(torch.double))
@@ -183,9 +188,9 @@ class Scaler():
         self.inv = invert
 
     def forward(self, x):
-            return self.fwd(x)
+        return self.fwd(x)
 
-    def invert(self,x):
+    def invert(self, x):
         return self.inv(x)
     
     def __repr__(self): 

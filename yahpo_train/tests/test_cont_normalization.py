@@ -2,6 +2,8 @@ import torch
 import numpy as np
 from torch.functional import Tensor
 from yahpo_train.cont_normalization import ContNormalization
+from yahpo_gym.configuration import cfg
+from yahpo_gym.benchmarks import lcbench
 import pandas as pd
 import scipy.stats
 import pytest
@@ -71,9 +73,9 @@ def test_cont_norm_pd():
     nrows = 1000000
     file = cfg("lcbench").get_path("dataset")
     df2 = pd.read_csv(file, nrows=nrows).sample(frac=.01)
-    df = pd.read_csv(file, nrows=nrows).sample(frac = .3)
+    df = pd.read_csv(file, nrows=nrows).sample(frac=.3)
     for nm in df.columns[1:]:
-        lim = 1e-4
+        lim = 1e-3
         for normalize in ["scale", "range", None]:
             xs = torch.Tensor(df[nm].values)
             tfm = ContNormalization(xs, normalize = normalize)
@@ -89,8 +91,7 @@ def test_cont_norm_pd():
             assert xsn.shape == xs.shape
 
 if __name__ == '__main__':
-    from yahpo_gym.configuration import cfg
-    from yahpo_gym.benchmarks import lcbench
     test_cont_norm()
     test_cont_with_nan()
     test_cont_with_log()
+    test_cont_norm_pd()

@@ -54,9 +54,7 @@ class ContTransformerRange(nn.Module):
 class ContTransformerNegExpRange(nn.Module):
     """
     Log-Transformer for Continuous Variables.
-    Transforms to [p,1-p] after applying a log-transform
-
-    logfun :: Can be torch.log
+    Transforms to [p,1-p] after applying a neg-exp transform
     """
     def __init__(self, x, p=0.01):
         self.p = torch.as_tensor(p)
@@ -90,6 +88,7 @@ class ContTransformerLogRange(nn.Module):
     Transforms to [p,1-p] after applying a log-transform
 
     logfun :: Can be torch.log
+    expfun :: Can be torch.exp
     """
     def __init__(self, x, logfun = torch.log, expfun = torch.exp, p=0.01, eps = 1e-8):
         self.p = torch.as_tensor(p)
@@ -123,11 +122,8 @@ class ContTransformerLogRange(nn.Module):
 
 class ContTransformerMultScalar(nn.Module):
     """
-    Log-Transformer for Continuous Variables.
-    Transforms to [p,1-p] after applying a log-transform
-
-    trafo :: A univariate function
-    inverse :: A univariate function
+    Transformer for Continuous Variables.
+    Transforms by multiplying with a scalar
     """
     def __init__(self, x, m = 1.):
         super().__init__()
@@ -150,11 +146,7 @@ class ContTransformerMultScalar(nn.Module):
 
 class ContTransformerFun(nn.Module):
     """
-    Log-Transformer for Continuous Variables.
-    Transforms to [p,1-p] after applying a log-transform
-
-    trafo :: A univariate function
-    inverse :: A univariate function
+    Custom Transformer for Continuous Variables.
     """
     def __init__(self, x, trafo = lambda x: x, inverse = lambda x: x):
         super().__init__()
