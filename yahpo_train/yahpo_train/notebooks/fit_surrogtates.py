@@ -8,7 +8,7 @@ from fastai.callback.wandb import *
 from functools import partial
 import wandb
 
-def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 1e-4, epochs=25, deep=[512,512], deeper=[], dropout=0., wide=True, use_bn=False, frac=1.0, bs=2048, export=False, log_wandb=True, wandb_entity='mfsurrogates'):
+def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 1e-4, epochs=25, deep=[512,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1.0, bs=2048, export=False, log_wandb=True, wandb_entity='mfsurrogates'):
     """
     Fit function with hyperparameters
     """

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from yahpo_train.cont_normalization import to_tensor
+from functools import partial
 
 class ContTransformerNone(nn.Module):
     """
@@ -60,7 +61,8 @@ class ContTransformerNegExpRange(nn.Module):
     def __init__(self, x, p=0.01):
         self.p = torch.as_tensor(p)
         super().__init__()
-        x = torch.expm1(-x)
+
+        x = torch.exp(-x.to(torch.double))
         self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
         if self.max == self.min:
             raise Exception("Constant feature detected!")
@@ -69,18 +71,16 @@ class ContTransformerNegExpRange(nn.Module):
         """
         Batch-wise transform for x
         """
-        x = torch.exp(-x)
+        x = torch.exp(-x.to(torch.double))
         x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
-        x = 1 - x
         return x.float()
 
     def invert(self, x):
         """
         Batch-wise inverse transform for x
         """
-        x = 1 - x
         x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
-        x = - torch.log(x)
+        x = - torch.log(x.to(torch.double))
         return x.float()
 
 
@@ -228,6 +228,8 @@ class ContTransformerChain(nn.Module):
             x = tf.invert(x)
         return x.float()
 
+
+ContTransformerScaleNegExp = partial(ContTransformerChain([ContTransformerRange, ContTransformerNegExpRange]))
 
 def _float_power(base, exp):
     """
