@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 import scipy
 
-from yahpo_train.cont_normalization import to_tensor
 from functools import partial
-
 
 class ContTransformerNone(nn.Module):
     """
@@ -18,7 +16,6 @@ class ContTransformerNone(nn.Module):
         Batch-wise transform for x
         """
         return x.float()
-
     def invert(self, x):
         """
         Batch-wise inverse transform for x
@@ -59,20 +56,27 @@ class ContTransformerNegExpRange(nn.Module):
     Log-Transformer for Continuous Variables.
     Transforms to [p,1-p] after applying a neg-exp transform
     """
-    def __init__(self, x, p=0.01):
+    def __init__(self, x, p=0.01, scale=True):
         self.p = torch.as_tensor(p)
+        self.scale = scale
         super().__init__()
+        
+        self.max = torch.as_tensor(1.).to(torch.double)
+        if scale:
+            self.max = max(torch.max(x[~torch.isnan(x)]).to(torch.double), self.max)
 
-        x = torch.exp(-x.to(torch.double))
+        x = x.to(torch.double) / self.max
+        x = torch.exp(-x)
         self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
         if self.max == self.min:
             raise Exception("Constant feature detected!")
         
     def forward(self, x):
         """
-        Batch-wise transform for x
+        Batch-wise transform for x: x -> exp(-x / scale) -> [p, 1-p]
         """
-        x = torch.exp(-x.to(torch.double))
+        x = x.to(torch.double) / self.max
+        x = torch.exp(-x)
         x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
         return x.float()
 
@@ -82,6 +86,7 @@ class ContTransformerNegExpRange(nn.Module):
         """
         x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
         x = - torch.log(x.to(torch.double))
+        x = x * self.max
         return x.float()
 
 
@@ -211,7 +216,7 @@ class ContTransformerChain(nn.Module):
         """
         Chained batch-wise transform for x 
         """
-        for tf in self.tfms():
+        for tf in self.tfms:
             x = tf.forward(x)
         return x
 
@@ -219,12 +224,12 @@ class ContTransformerChain(nn.Module):
         """
         Chained batch-wise inverse transform for x
         """
-        for tf in reversed(self.tfms()):
+        for tf in reversed(self.tfms):
             x = tf.invert(x)
         return x.float()
 
 
-ContTransformerScaleNegExp = partial(ContTransformerChain([ContTransformerRange, ContTransformerNegExpRange]))
+ContTransformerScaleNegExp = partial(ContTransformerChain,tfms = [partial(ContTransformerRange, p=.1), ContTransformerNegExpRange])
 
 class ContNormalization(nn.Module):
     """
@@ -235,10 +240,9 @@ class ContNormalization(nn.Module):
     def __init__(self, x_sample, lmbda = None, eps=1e-6, normalize='scale', sigmoid_p = .005, clip_outliers=True, impute_nan=True):
         super().__init__()
         self.eps = eps
-        self.normalize, self.sigmoid_p = normalize, to_tensor(sigmoid_p)
+        self.normalize, self.sigmoid_p = normalize, torch.as_tensor(sigmoid_p)
         self.impute_nan = impute_nan
         self.clip_outliers = clip_outliers
-        self.scaler = None
 
         x_sample = x_sample.double()
         
@@ -253,13 +257,9 @@ class ContNormalization(nn.Module):
         if not lmbda:
             self.lmbda = self.est_params(x_sample)
         else:
-            self.lmbda = to_tensor(lmbda)
+            self.lmbda = torch.as_tensor(lmbda)
 
-        # Apply trafo
-        if self.scaler is not None:
-            xt = self.scaler.forward(x_sample)
-        else:
-            xt = self.trafo_yj(x_sample, self.lmbda)
+        xt = self.trafo_yj(x_sample, self.lmbda)
 
         # Rescaling
         if self.normalize == 'scale':
@@ -278,10 +278,7 @@ class ContNormalization(nn.Module):
         if self.clip_outliers:
             x = self._clip_outliers(x)
 
-        if self.scaler is not None:
-            x = self.scaler.forward(x)
-        else:
-            x = self.trafo_yj(x, self.lmbda)
+         x = self.trafo_yj(x, self.lmbda)
 
         if self.normalize == 'scale':
             x = (x - self.mu) / torch.sqrt(self.sigma)
@@ -296,10 +293,7 @@ class ContNormalization(nn.Module):
         elif self.normalize == 'range':
             x = (x - self.sigmoid_p) * ((self.max - self.min) / (1. - 2*self.sigmoid_p)) + self.min
           
-        if self.scaler is not None:
-            x = self.scaler.invert(x)
-        else:
-            x = self.inverse_trafo_yj(x, self.lmbda)
+        x = self.inverse_trafo_yj(x, self.lmbda)
         return x
 
     def trafo_yj(self, x, lmbda):
@@ -322,7 +316,7 @@ class ContNormalization(nn.Module):
         """
         Negative Log-Likelihood optimized inside Yeo-Johnson transform 
         """
-        xt = self.trafo_yj(x_sample, to_tensor(lmbda).double())
+        xt = self.trafo_yj(x_sample, torch.as_tensor(lmbda).double())
         xt_var, _ = torch.var_mean(xt, dim=0, unbiased=False)
         loglik = - 0.5 * x_sample.shape[0] * torch.log(xt_var)
         loglik += (lmbda - 1.) * torch.sum(torch.sign(x_sample) * torch.log1p(torch.abs(x_sample)))
@@ -384,21 +378,3 @@ def _float_power(base, exp):
 
 def float_pow10(base):
     return _float_power(base, torch.as_tensor(10.))
-
-class Scaler():
-    def  __init__(self, name, forward, invert):
-        self.name = name
-        self.fwd = forward
-        self.inv = invert
-
-    def forward(self, x):
-        return self.fwd(x)
-
-    def invert(self, x):
-        return self.inv(x)
-    
-    def __repr__(self): 
-        return f"Scaler: {self.name}"
-
-    def __str__(self):
-        return f"Scaler: {self.name}"

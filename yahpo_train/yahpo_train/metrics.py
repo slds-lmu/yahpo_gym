@@ -15,8 +15,10 @@ class AvgTfedMetric(Metric):
         bs = find_bs(learn.tfyb)
         self.total += learn.to_detach(self.func(*learn.tfyb, torch.nan_to_num(learn.tfpred, nan = 0.0)))*bs
         self.count += bs
+        
     @property
     def value(self): return self.total/self.count if self.count != 0 else None
+
     @property
     def name(self):  return self.func.func.__name__ if hasattr(self.func, 'func') else  self.func.__name__
 
@@ -37,6 +39,7 @@ def spearman(x,y,impute_nan=True):
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
     
+    # Return 0.5 for constant batches
     if torch.all(y == y[1]) or torch.all(x == x[1]):
         return np.array([0.5 for _,_ in zip(np.rollaxis(x, 1), np.rollaxis(y, 1))])
 

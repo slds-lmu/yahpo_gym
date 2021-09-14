@@ -1,4 +1,3 @@
-from yahpo_train.cont_normalization import ContNormalization
 from yahpo_train.model  import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
@@ -138,6 +137,7 @@ def fit_lcbench(key='lcbench', **kwargs):
     [tfms.update({k:ContTransformerNegExpRange}) for k in ["val_cross_entropy", "test_cross_entropy", "time"]]
     fit_config(key, tfms=tfms, **kwargs)
 
+
 def fit_taskset(key='taskset', **kwargs):
     # Transforms
     tfms = {}
@@ -151,11 +151,13 @@ def fit_taskset(key='taskset', **kwargs):
 if __name__ == '__main__':
     wandb.login()
     # fit_nb301(dropout=.0) # Done
-    fit_rbv2_rpart()
-    fit_rbv2_super()
-    fit_rbv2_svm()
-    fit_rbv2_xgboost()
-    fit_lcbench()
-    fit_rbv2_ranger()    
-    fit_rbv2_glmnet()
-    fit_rbv2_aknn()
+    # fit_rbv2_rpart()
+    # fit_rbv2_super()
+    # fit_rbv2_svm()
+    # fit_rbv2_xgboost()
+    # fit_lcbench(export=True)
+    # fit_rbv2_ranger()    
+    # fit_rbv2_glmnet()
+    # fit_rbv2_aknn(export=True)
+    fit_fcnet(export=True)
+    fit_taskset(export=True)
