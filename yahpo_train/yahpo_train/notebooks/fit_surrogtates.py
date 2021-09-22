@@ -1,7 +1,7 @@
 from yahpo_train.model  import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
-from yahpo_gym.benchmarks import lcbench, rbv2, nasbench_301, fcnet
+from yahpo_gym.benchmarks import lcbench, rbv2, nasbench_301, fcnet, taskset
 from yahpo_gym.configuration import cfg
 from fastai.callback.wandb import *
 from functools import partial
@@ -126,7 +126,7 @@ def fit_fcnet(key = 'fcnet', **kwargs):
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ["batch_size", "n_units_1", "n_units_2"]]
     [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log, expfun=torch.exp)}) for k in ["init_lr", "runtime", "n_params"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["valid_loss"]]
+    [tfms.update({k:partial(ContTransformerNegExpRange, q=.975)}) for k in ["valid_loss"]]
     fit_config(key, tfms=tfms, **kwargs)
 
 
@@ -134,7 +134,7 @@ def fit_lcbench(key='lcbench', **kwargs):
     # Transforms
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ["val_accuracy", "val_balanced_accuracy", "test_balanced_accuracy", "batch_size", "max_units"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["val_cross_entropy", "test_cross_entropy", "time"]]
+    [tfms.update({k:partial(ContTransformerNegExpRange, q=1.)}) for k in ["val_cross_entropy", "test_cross_entropy", "time"]]
     fit_config(key, tfms=tfms, **kwargs)
 
 
@@ -144,7 +144,7 @@ def fit_taskset(key='taskset', **kwargs):
     [tfms.update({k:ContTransformerRange}) for k in ['replication']]
     [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2,  expfun=torch.exp2 )}) for k in ["epoch"]]
     [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log,  expfun=torch.exp)}) for k in ["learning_rate", 'beta1', 'beta2', 'epsilon', 'l1', 'l2', 'linear_decay', 'exponential_decay']]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["train", "valid1", "valid2", "test"]]
+    [tfms.update({k:partial(ContTransformerNegExpRange, q=.99)}) for k in ["train", "valid1", "valid2", "test"]]
     fit_config(key, tfms=tfms, **kwargs)
 
 
@@ -159,5 +159,5 @@ if __name__ == '__main__':
     # fit_rbv2_ranger()    
     # fit_rbv2_glmnet()
     # fit_rbv2_aknn(export=True)
-    fit_fcnet(export=True)
+    # fit_fcnet()
     fit_taskset(export=True)

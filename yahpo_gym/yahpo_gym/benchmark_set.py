@@ -6,7 +6,6 @@ import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
 from pathlib import Path
 import numpy as np
-import torch
 import onnxruntime as rt
 import time
 

@@ -213,7 +213,6 @@ class FFSurrogateModel(nn.Module):
 
 
 if __name__ == '__main__':
-    from yahpo_train.cont_normalization import ContNormalization
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
     cfg = cfg("lcbench")

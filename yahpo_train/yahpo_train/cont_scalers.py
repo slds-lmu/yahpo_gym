@@ -56,14 +56,14 @@ class ContTransformerNegExpRange(nn.Module):
     Log-Transformer for Continuous Variables.
     Transforms to [p,1-p] after applying a neg-exp transform
     """
-    def __init__(self, x, p=0.01, scale=True):
+    def __init__(self, x, p=0.01, scale=True, q=1.):
         self.p = torch.as_tensor(p)
         self.scale = scale
         super().__init__()
         
         self.max = torch.as_tensor(1.).to(torch.double)
         if scale:
-            self.max = max(torch.max(x[~torch.isnan(x)]).to(torch.double), self.max)
+            self.max = max(torch.quantile(x[~torch.isnan(x)],q=q).to(torch.double), self.max)
 
         x = x.to(torch.double) / self.max
         x = torch.exp(-x)
@@ -278,7 +278,7 @@ class ContNormalization(nn.Module):
         if self.clip_outliers:
             x = self._clip_outliers(x)
 
-         x = self.trafo_yj(x, self.lmbda)
+        x = self.trafo_yj(x, self.lmbda)
 
         if self.normalize == 'scale':
             x = (x - self.mu) / torch.sqrt(self.sigma)
