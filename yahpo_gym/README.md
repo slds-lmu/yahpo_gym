@@ -58,7 +58,11 @@ local_config.init_config()
 local_config.set_data_path("path-to-data")
 ```
 
-### Run Inference
+### Usage
+
+This example showcases the simplicity of YAHPO GYM's API. 
+A longer introduction is given in the accompanying [jupyter notebook](https://github.com/pfistfl/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
+
 
 ```py
 from yahpo_gym import benchmark_set

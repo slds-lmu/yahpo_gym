@@ -1,9 +1,12 @@
 import pandas as pd
-import abc
+import yahpo_gym
 from yahpo_gym.local_config import local_config
+from fastdownload import FastDownload
+from pathlib import Path
 
 _yahpo_default_dict = {
     'basedir': local_config.data_path,
+    'download_url': local_config.download_url,
     'config_id': '',
     'model': 'new_model.onnx',
     'dataset': 'data.csv',
@@ -45,10 +48,24 @@ class Configuration():
     def get_path(self, key):
         return f'{self.config_path}/{self.config[key]}'
 
+    def download_files(self, data = False, update = False):
+        d = FastDownload(base=self.config['basedir'], data=self.config['config_id'], module = yahpo_gym.benchmarks)
+
+        fullurl = self.config['download_url'] + "/" + self.config['config_id'] + "/"
+        files = [self.config['encoding'], self.config['config_space'], self.config['model']]
+        if data:
+            files = files + [self.config['dataset']]
+
+        for file in files:
+            if update:
+                d.update(fullurl + file)
+            d.download(fullurl + file)
+
     @property
     def config_path(self):
         return f"{self.config['basedir']}/{self.config['config_id']}"
 
+    @property
     def data(self):
         return pd.read_csv(self.get_path("dataset"))
 

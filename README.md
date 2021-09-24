@@ -48,7 +48,9 @@ YAHPO GYM is the module for inference and allows for evaluating a HPC configurat
 
 Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtained [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
-An example for evaluation and running HPO methods is given in the README of [YAHPO GYM itself](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
+An example for evaluation and running HPO methods is given in the README of the [YAHPO GYM Module](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
+
+A quick introduction is given in the accompanying [jupyter notebook](https://github.com/pfistfl/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
 
 #### YAHPO Train
 
