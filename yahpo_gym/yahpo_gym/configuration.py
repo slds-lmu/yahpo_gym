@@ -49,9 +49,12 @@ class Configuration():
     def config_path(self):
         return f"{self.config['basedir']}/{self.config['config_id']}"
 
-    @property
     def data(self):
         return pd.read_csv(self.get_path("dataset"))
+
+    @property
+    def hp_names(self):
+        return self.cat_names + self.cont_names
      
     def __repr__(self): 
         return f"Configuration: ({self.config['config_id']})"
@@ -92,7 +95,7 @@ class ConfigDict():
         return Configuration(self.configs[key])
 
     def __repr__(self):
-        return self.configs.__repr__()
+        return f"Configuration Dictionary ({len(self.configs)} benchmarks)"
     
     def __str__(self):
         out = "{:<15} {:<10} {:<10} {:<10} {:<10}".format("Key", "Instances", "Cat. HP", "Cont. HP", "Targets")

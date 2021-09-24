@@ -135,13 +135,3 @@ class BenchmarkSet():
         if self.config.instance_names is None:
             return []
         return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]
-
-
-if __name__ == '__main__':
-    import yahpo_gym.benchmarks.lcbench
-    import yahpo_gym.benchmarks.nasbench_301
-    x = BenchmarkSet("lcbench")
-    x.set_instance("3945")
-    value = {'epoch':1, 'batch_size':1, 'learning_rate':.1, 'momentum':.1, 'weight_decay':.1, 'num_layers':1, 'max_units':1, 'max_dropout':.1}
-    print(x.objective_function(value))
-    x.set_constant("epoch", 50)

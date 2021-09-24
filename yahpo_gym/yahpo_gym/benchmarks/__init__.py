@@ -1,1 +1,1 @@
-from yahpo_gym.benchmarks import *
+from yahpo_gym.benchmarks import lcbench, fcnet, nasbench_301, rbv2
