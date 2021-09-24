@@ -80,9 +80,3 @@ _rbv2_super.update({
     'cat_names': ['task_id', 'learner', 'svm.kernel', 'ranger.respect.unordered.factors', 'ranger.splitrule', 'aknn.distance', 'xgboost.booster', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_super' : _rbv2_super})
-
-if __name__ == '__main__':
-    from yahpo_gym.benchmark_set import BenchmarkSet
-    # b = BenchmarkSet('rbv2_glmnet')
-    # hposet = {'OpenML_task_id': 3, 'epoch':100, 'batch_size':10, 'learning_rate':.1, 'momentum':.9, 'weight_decay':.01, 'num_layers':3, 'max_units':100, 'max_dropout':.6}
-    # res = b.objective_function(hposet)
