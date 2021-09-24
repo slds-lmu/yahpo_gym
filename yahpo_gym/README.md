@@ -79,6 +79,25 @@ value = bench.config_space.sample_configuration(1).get_dictionary()
 print(bench.objective_function(value))
 ```
 
+The `BenchmarkSet` has the following important functions and fields (with relevant args):
+
+```
+- `__init__`: config_id: str, "Name of the scenario"
+  "Instantiate the benchmark."
+
+- `objective_function`, configuration: Dict, "A dictionary of HP values to evaluate"
+  "Evaluate the objective function."
+
+- `set_instance`: value: str, "A valid instance"
+  "Set an instance. A list of available instances can be obtained via the `instances` field."
+
+- `get_opt_space`: instance: str, "A valid instance"
+  "Get the Opt. Space (A `ConfigSpace.ConfigSpace`)."
+
+- `set_session`: session: str, "A onnx session"
+  "Set an onnx session."
+```
+
 ### BOHB example
 
 ```py
