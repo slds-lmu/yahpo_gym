@@ -10,6 +10,8 @@
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
 across a large variety of problems.
 
+![image]()
+
 **Overview over problems**
 
 |     | scenario     | space   | n_dims | n_targets        | fidelity       | n_problems | status |

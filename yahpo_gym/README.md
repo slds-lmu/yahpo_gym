@@ -7,6 +7,7 @@
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
 across a large variety of problems.
+Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g.  [HpBandSter](https://github.com/automl/HpBandSter).
 
 **Overview over problems**
 
@@ -38,7 +39,7 @@ pip install "git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory
 
 ### Setup
 
-To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), ConfigSpace (`config_space.json`) and some encoding info (`encoding.json`).
+To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`).
 
 You can download these [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
