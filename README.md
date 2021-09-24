@@ -1,12 +1,18 @@
 # YAHPO GYM
 
-Modules for training and inference of surrogate based HPO benchmarks.
+### What is YAHPO GYM? 
 
-For a pre-alpha version of this project relying on the v1 surrogate models, please go [here](https://github.com/compstat-lmu/paper_2021_multi_fidelity_surrogates).
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [our paper](https://arxiv.org/abs/2109.03670).
 
-### Overview
+### Why should I use it?
 
-|     | instance     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
+across a large variety of problems.
+
+**Overview over problems**
+
+|     | scenario     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
 |:----|:-------------|:--------|-------:|:-----------------|:---------------|-----------:|:-------|
 | 1   | rbv2_super   | Mix+Dep |     38 | 6:perf(4)+rt+pt  | trainsize+repl |         89 |        |
 | 2   | rbv2_svm     | Mix+Dep |      6 | 6:perf(4)+rt+pt  | trainsize+repl |         96 |        |
@@ -25,7 +31,13 @@ where for **n\_targets** (\#number):
 -   rt = runtime
 -   pt = predicttime
 
-### YAHPO GYM
+### What does this repository contain?
+
+This repository contains two modules: `yahpo_gym` and `yahpo_train`. 
+Whhile we mainly focus on `yahpo_gym`, as it is provides an interface to the benchmark described in our [paper](https://arxiv.org/abs/2109.03670),
+we also provide the full reproducible codebase used to generate the underlying surrogate neural networks in `yahpo_train`.
+
+#### YAHPO GYM
 
 YAHPO GYM is the module for inference and allows for evaluating a HPC configuration on a given benchmark instance.
 
@@ -33,9 +45,8 @@ Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtai
 
 An example for evaluation and running HPO methods is given in the README of [YAHPO GYM itself](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
 
-### YAHPO Train
+#### YAHPO Train
 
 YAHPO Train is the module for training new surrogate models.
 
-YAHPO Train is still in a very preliminary state.
-
+YAHPO Train is still in a preliminary state but can already be used to reproduce and refit models introduced in our [paper](https://arxiv.org/abs/2109.03670).

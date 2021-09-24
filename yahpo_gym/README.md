@@ -1,12 +1,16 @@
-# YAHPO GYM
+### What is YAHPO GYM? 
 
-Surrogate based benchmarks for HPO problems.
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [our paper](https://arxiv.org/abs/2109.03670).
 
-For a pre-alpha version of this project relying on the v1 surrogate models, please go [here](https://github.com/compstat-lmu/paper_2021_multi_fidelity_surrogates).
+### Why should I use it?
 
-### Overview
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
+across a large variety of problems.
 
-|     | instance     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
+**Overview over problems**
+
+|     | scenario     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
 |:----|:-------------|:--------|-------:|:-----------------|:---------------|-----------:|:-------|
 | 1   | rbv2_super   | Mix+Dep |     38 | 6:perf(4)+rt+pt  | trainsize+repl |         89 |        |
 | 2   | rbv2_svm     | Mix+Dep |      6 | 6:perf(4)+rt+pt  | trainsize+repl |         96 |        |
@@ -25,10 +29,11 @@ where for **n\_targets** (\#number):
 -   rt = runtime
 -   pt = predicttime
 
+
 ### Installation
 
 ```console
-pip install -e .
+pip install "git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym"
 ```
 
 ### Setup
