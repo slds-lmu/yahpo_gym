@@ -49,7 +49,7 @@ class Configuration():
         return f'{self.config_path}/{self.config[key]}'
 
     def download_files(self, data = False, update = False):
-        d = FastDownload(base=self.config['basedir'], data=self.config['config_id'], module = yahpo_gym.benchmarks)
+        d = FastDownload(base=self.config['basedir'], data=self.config['config_id'], archive=self.config['config_id'], module = yahpo_gym.benchmarks)
 
         fullurl = self.config['download_url'] + "/" + self.config['config_id'] + "/"
         files = [self.config['encoding'], self.config['config_space'], self.config['model']]
