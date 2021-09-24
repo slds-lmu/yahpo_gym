@@ -9,6 +9,8 @@ Since all our benchmarks are based on surrogate models that approximate the unde
 across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g.  [HpBandSter](https://github.com/automl/HpBandSter).
 
+![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/traces.PNG?raw=true)
+
 **Overview over problems**
 
 |     | scenario     | space   | n_dims | n_targets        | fidelity       | n_problems | status |

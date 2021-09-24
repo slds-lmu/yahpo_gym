@@ -10,7 +10,7 @@
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
 across a large variety of problems.
 
-![image]()
+![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/traces.PNG?raw=true)
 
 **Overview over problems**
 
