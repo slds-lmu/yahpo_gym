@@ -4,7 +4,7 @@ import yaml
 
 class LocalConfiguration():
 
-    def __init__(self, settings_path="~/.config/yahpo_gym"):
+    def __init__(self, settings_path: str ="~/.config/yahpo_gym"):
         """
         Interface for setting up a local configuration.
         This reads from and writes to a configuration file in the YAML format,
@@ -20,7 +20,7 @@ class LocalConfiguration():
         """
         self.settings_path = Path(settings_path).expanduser().absolute()
     
-    def init_config(self, settings_path="", download_url="https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd"):
+    def init_config(self, settings_path: str = "", download_url: str ="https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd"):
         """
         Initialize a new local configuration.
 
@@ -39,7 +39,7 @@ class LocalConfiguration():
         with self.settings_path.open('w', encoding='utf-8') as fh:
             yaml.dump(config, fh)
 
-    def set_data_path(self, data_path):
+    def set_data_path(self, data_path: str):
         """
         Set path to directory where required models and metadata are stored.
 

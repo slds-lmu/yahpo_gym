@@ -1,34 +1,50 @@
 from yahpo_gym.configuration import cfg
-from yahpo_gym.benchmarks import *
-import json
+import onnxruntime as rt
+import time
+from pathlib import Path
+from typing import Union, Dict, List
+import numpy as np
+
 from ConfigSpace.read_and_write import json as CS_json
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
-from pathlib import Path
-import numpy as np
-import onnxruntime as rt
-import time
 
 class BenchmarkSet():
 
-    def __init__(self, config_id = None, active_session = False, quant = 0.01):
+    def __init__(self, config_id: str = None, active_session: bool = False, session: Union[rt.InferenceSession, None] = None):
         """
-        Combination of an objective function and a configuration space
-        with additional helpers that allow querying properties and further customization.
+        Interface for  a benchmark scenario. 
+        Initialized with a valid key for a valid Scenario and optinally an `onnxruntime.InferenceSession`.
+
+        Parameters
+        ----------
+        config_id: str
+            (Required) A key for `ConfigDict` pertaining to a valid benchmark scenario (e.g. `lcbench`).
+        active_session: bool
+            Should the benchmark run in an active  `onnxruntime.InferenceSession`? Initialized to `False`.
+        session: onnx.Session
+            A ONNX session to use for inference. Overwrite `active_session` and sets the provided  `onnxruntime.InferenceSession` as the active session.
+            Initialized to `None`.
         """
         self.config = cfg(config_id)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
-        self.quant = quant
+        self.quant = 0.1
         
         self.constants = {}
-        if self.active_session:
-            self.set_session()
+        if self.active_session or self.session is not None:
+            self.set_session(session)
 
-    def objective_function(self, configuration):
+    def objective_function(self, configuration: Union[Dict, List[Dict]]):
         """
         Evaluate the surrogate for a given configuration.
+
+        Parameters
+        ----------
+        configuration: Dict
+            A valid dict containing hyperparameters to be evaluated. 
+            Attention: `configuration` is not checked for internal validity for speed purposes.
         """
         if not self.active_session:
             self.set_session()
@@ -39,10 +55,16 @@ class BenchmarkSet():
         results = self.sess.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
         return {k:v for k,v in zip(self.config.y_names, results)}
 
-    def objective_function_timed(self, configuration):
+    def _objective_function_timed(self, configuration: Union[Dict, List[Dict]]):
         """
-        Evaluate the surrogate for a given configuration.
-        Waits for 'quant * predicted runtime' before returining results.
+        Evaluate the surrogate for a given configuration and sleep for quant * predicted runtime.
+        Not exported yet since this is not well tested right now.
+
+        Parameters
+        ----------
+        configuration: Dict
+            A valid dict containing hyperparameters to be evaluated. 
+            Attention: `configuration` is not checked for internal validity for speed purposes.
         """
         start_time = time.time()
         results = self.objective_function(configuration)
@@ -52,18 +74,43 @@ class BenchmarkSet():
         time.sleep(sleepit)
         return results
 
-    def set_constant(self, param, value=None):
+    def set_constant(self, param: str, value = None):
+        """
+        Set a given hyperparameter to a constant.
+
+        Parameters
+        ----------
+        param: str
+            A valid parameter name.
+        value: int | str | any
+            A valid value for the parameter `param`.
+        """
         hpar = self.config_space.get_hyperparameter(self.config.instance_names)
-        # value in hpar.choices
+        # FIXMER: value in hpar.choices
         self.constants[param] = value
     
     def set_instance(self, value):
+        """
+        Set an instance.
+
+        Parameters
+        ----------
+        value: int | str | any
+            A valid value for the parameter pertaining to the configuration. See `instances`.
+        """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, instance, drop_fidelity_params = True):
+    def get_opt_space(self, instance:str, drop_fidelity_params:bool = True):
         """
         Get the search space to be optimized.
-        Sets 'instance# as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
+        Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
+        
+        Parameters
+        ----------
+        instance: str
+            A valid instance. See `instances`.
+        drop_fidelity_params: bool
+            Should fidelity params be dropped from the `opt_space`? Defaults to  `True`.
         """
         # FIXME: assert instance is a valid choice
         hps = self.config_space.get_hyperparameters()
@@ -81,7 +128,41 @@ class BenchmarkSet():
         cs.add_forbidden_clauses(fbds)
         return cs
 
+
+    def set_session(self, session: Union[rt.InferenceSession, None] = None):
+        """
+        Set the session for inference on the surrogate model.
+
+        Parameters
+        ----------
+        session: onnxruntime.InferenceSession
+            A ONNX session to use for inference. Overwrite `active_session` and sets the provided  `onnxruntime.InferenceSession` as the active session.
+            Initialized to `None`.
+        """
+        if session is not None:
+            self.session = session
+        else: 
+            model_path = self.config.get_path("model")
+            if not Path(model_path).is_file():
+                raise Exception(f("ONNX file {model_path} not found!"))
+            self.sess = rt.InferenceSession(model_path)
+    
+
+    @property
+    def instances(self):
+        """
+        A list of valid instances for the scenario.
+        """
+        if self.config.instance_names is None:
+            return []
+        return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]
+
+
+    def __repr__(self):
+        return f"BenchmarkInstance ({self.config.config_id})"
+
     def _config_to_xs(self, configuration):
+        # FIXME: This should work with configuration as a `List` of Dicts
         # Update with constants (constants overwrite configuration values)
         if len(self.constants):
             [configuration.update({k : v}) for k,v in self.constants.items()]
@@ -93,7 +174,6 @@ class BenchmarkSet():
             value = '#na#' if hp in self.config.cat_names else 0  # '#na#' for cats, see _integer_encode below
             configuration.update({hp:value})
 
-        # FIXME: Check the configuration with the ConfigSpace
         x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names]).reshape(1, -1).astype(np.int32)
         x_cont = np.array([configuration[x] for x in self.config.cont_names]).reshape(1, -1).astype(np.float32)
         return x_cont, x_cat
@@ -120,18 +200,3 @@ class BenchmarkSet():
         cfg = self.config_space.sample_configuration().get_dictionary()
         print(cfg)
         return self.objective_function_timed(cfg)
-    
-    def __repr__(self):
-        return f"BenchmarkInstance ({self.config.config_id})"
-    
-    def set_session(self):
-        model_path = self.config.get_path("model")
-        if not Path(model_path).is_file():
-            raise Exception(f("ONNX file {model_path} not found!"))
-        self.sess = rt.InferenceSession(model_path)
-
-    @property
-    def instances(self):
-        if self.config.instance_names is None:
-            return []
-        return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]

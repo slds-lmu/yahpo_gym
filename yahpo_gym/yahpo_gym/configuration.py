@@ -3,6 +3,7 @@ import yahpo_gym
 from yahpo_gym.local_config import local_config
 from fastdownload import FastDownload
 from pathlib import Path
+from typing import Dict
 
 _yahpo_default_dict = {
     'basedir': local_config.data_path,
@@ -21,7 +22,7 @@ _yahpo_default_dict = {
 }
 
 class Configuration():
-    def __init__(self, config_dict):
+    def __init__(self, config_dict: Dict):
         """
         Interface for benchmark scenario meta information. 
         Abstract base class used to instantiate configurations that contain all
@@ -45,10 +46,10 @@ class Configuration():
         self.instance_names = self.config['instance_names']
         self.runtime_name = self.config['runtime_name']
         
-    def get_path(self, key):
+    def get_path(self, key: str):
         return f'{self.config_path}/{self.config[key]}'
 
-    def download_files(self, data = False, update = False):
+    def download_files(self, data: bool = False, update: bool = False):
         d = FastDownload(base=self.config['basedir'], data=self.config['config_id'], archive=self.config['config_id'], module = yahpo_gym.benchmarks)
 
         fullurl = self.config['download_url'] + "/" + self.config['config_id'] + "/"
@@ -89,7 +90,7 @@ class ConfigDict():
         """
         self.configs = {}
 
-    def update(self, config_dict):
+    def update(self, config_dict: Dict):
         """
         Add new or update existing benchmark scenario configuration.
 
@@ -100,7 +101,7 @@ class ConfigDict():
         """
         self.configs.update(config_dict)
     
-    def get_item(self, key):
+    def get_item(self, key: str):
         """
         Instantiate a given Configuration.
 
@@ -124,7 +125,7 @@ class ConfigDict():
         return out
 
 
-def cfg(key = None):
+def cfg(key: str = None):
     """
         Shorthand acces to 'ConfigDict'.
         
