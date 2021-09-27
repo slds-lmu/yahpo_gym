@@ -1,4 +1,5 @@
 # YAHPO GYM
+---
 
 ### What is YAHPO GYM? 
 
@@ -14,6 +15,9 @@ Since all our benchmarks are based on surrogate models that approximate the unde
 across a large variety of problems.
 
 ![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/traces.PNG?raw=true)
+
+<br><br>
+---
 
 **Overview over problems**
 
@@ -36,6 +40,7 @@ where for **n\_targets** (\#number):
 -   rt = runtime
 -   pt = predicttime
 
+<br><br>
 ### What does this repository contain?
 
 This repository contains two modules: `yahpo_gym` and `yahpo_train`. 
