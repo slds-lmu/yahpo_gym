@@ -4,23 +4,57 @@ import yaml
 
 class LocalConfiguration():
 
-    def __init__(self, settings_path="~/.config/yahpo_gym"):
-        self.settings_path = Path(settings_path).expanduser().absolute()
+    def __init__(self, settings_path: str ="~/.config/yahpo_gym"):
+        """
+        Interface for setting up a local configuration.
+        This reads from and writes to a configuration file in the YAML format,
+        allowing to store paths to the underlying data and models required for
+        inference on the fitted surrogates.
+        
 
-    def set_data_path(self, config_path):
+        Parameters
+        ----------
+        settings_path: str
+            Path to the directory where surrogate models and metadata are saved.
+            The default is "~/.config/yahpo_gym".
+        """
+        self.settings_path = Path(settings_path).expanduser().absolute()
+    
+    def init_config(self, settings_path: str = "", download_url: str ="https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd"):
+        """
+        Initialize a new local configuration.
+
+        This writes a local configuration file to the specified 'settings_path'.
+        The 
+        It is currently used to globally store the following information
+            - 'data_path': A path to the metadata required for inference.
+
+        Parameters
+        ----------
+        settings_path: str
+            Path to the directory where surrogate models and metadata are saved.
+        """
+        os.makedirs(os.path.dirname(self.settings_path), exist_ok=True)
+        config = {'data_path': str(settings_path), 'download_url':download_url}
+        with self.settings_path.open('w', encoding='utf-8') as fh:
+            yaml.dump(config, fh)
+
+    def set_data_path(self, data_path: str):
+        """
+        Set path to directory where required models and metadata are stored.
+
+        Parameters
+        ----------
+        data_path: str
+            Path to the directory where surrogate models and metadata are saved.
+        """
         config = self.config
-        config.update({'data_path': str(config_path)})
+        config.update({'data_path': str(data_path)})
         
         with self.settings_path.open('w', encoding='utf-8') as fh:
             yaml.dump(config, fh)
-    
-    def init_config(self, config_path=""):
-        os.makedirs(os.path.dirname(self.settings_path), exist_ok=True)
-        config = {'data_path': str(config_path)}
-        with self.settings_path.open('w', encoding='utf-8') as fh:
-            yaml.dump(config, fh)
 
-    def load_config(self):
+    def _load_config(self):
         config = {}
         try:
             with self.settings_path.open('r') as fh:
@@ -31,14 +65,24 @@ class LocalConfiguration():
 
     @property
     def config(self):
-        return self.load_config()
+        """
+        The stored settings dictionary.
+        """
+        return self._load_config()
+
     @property
     def data_path(self):
+        """
+        Path where metadata and surrogate models for inference are stored.
+        """
         return Path(self.config.get('data_path')).expanduser().absolute()
+
+    @property
+    def download_url(self):
+        """
+        Path where metadata and surrogate models for inference are stored.
+        """
+        return self.config.get('download_url')
 
 local_config = LocalConfiguration()
 __all__ = [local_config, LocalConfiguration]
-
-if __name__ == '__main__':
-    from yahpo_gym import local_config
-    local_config.init_config()

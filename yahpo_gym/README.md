@@ -1,12 +1,26 @@
-# YAHPO-GYM
+### What is YAHPO GYM? 
 
-Surrogate based benchmarks for HPO problems.
+---
 
-For a pre-alpha version of this project relying on the v1 surrogate models, please go [here](https://github.com/compstat-lmu/paper_2021_multi_fidelity_surrogates).
 
-### Overview
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [our paper](https://arxiv.org/abs/2109.03670).
+The underlying software with additional documentation and background can be found [here](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 
-|     | instance     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
+YAHPO GYM consists of several `scenarios`, e.g. the collection of all benchmark instances in `lcbench` is a `scenario`.
+An `instance` is the concrete task of optimizing hyperparameters of the neural network on a given dataset from OpenML.
+
+### Why should I use it?
+
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
+across a large variety of problems.
+Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g.  [HpBandSter](https://github.com/automl/HpBandSter).
+
+![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/traces.PNG?raw=true)
+
+**Overview over problems**
+
+|     | scenario     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
 |:----|:-------------|:--------|-------:|:-----------------|:---------------|-----------:|:-------|
 | 1   | rbv2_super   | Mix+Dep |     38 | 6:perf(4)+rt+pt  | trainsize+repl |         89 |        |
 | 2   | rbv2_svm     | Mix+Dep |      6 | 6:perf(4)+rt+pt  | trainsize+repl |         96 |        |
@@ -25,15 +39,17 @@ where for **n\_targets** (\#number):
 -   rt = runtime
 -   pt = predicttime
 
+---
+
 ### Installation
 
 ```console
-pip install -e .
+pip install "git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym"
 ```
 
 ### Setup
 
-To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), ConfigSpace (`config_space.json`) and some encoding info (`encoding.json`).
+To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`).
 
 You can download these [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
@@ -46,7 +62,11 @@ local_config.init_config()
 local_config.set_data_path("path-to-data")
 ```
 
-### Run Inference
+### Usage
+
+This example showcases the simplicity of YAHPO GYM's API. 
+A longer introduction is given in the accompanying [jupyter notebook](https://github.com/pfistfl/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
+
 
 ```py
 from yahpo_gym import benchmark_set
@@ -63,6 +83,25 @@ value = bench.config_space.sample_configuration(1).get_dictionary()
 print(bench.objective_function(value))
 ```
 
+The `BenchmarkSet` has the following important functions and fields (with relevant args):
+
+```
+- `__init__`: config_id: str, "Name of the scenario"
+  "Instantiate the benchmark."
+
+- `objective_function`, configuration: Dict, "A dictionary of HP values to evaluate"
+  "Evaluate the objective function."
+
+- `set_instance`: value: str, "A valid instance"
+  "Set an instance. A list of available instances can be obtained via the `instances` field."
+
+- `get_opt_space`: instance: str, "A valid instance"
+  "Get the Opt. Space (A `ConfigSpace.ConfigSpace`)."
+
+- `set_session`: session: str, "A onnx session"
+  "Set an onnx session."
+```
+
 ### BOHB example
 
 ```py
@@ -70,8 +109,6 @@ from yahpo_gym import benchmark_set
 import yahpo_gym.benchmarks.lcbench
 import time
 import numpy as np
-import ConfigSpace as CS
-import ConfigSpace.hyperparameters as CSH
 from hpbandster.core.worker import Worker
 import hpbandster.core.nameserver as hpns
 from hpbandster.optimizers import BOHB as BOHB
@@ -110,17 +147,8 @@ class lcbench(Worker):
     
     @staticmethod
     def get_configspace():
-        hps = bench.config_space.get_hyperparameters()
-        oml_idx = bench.config_space.get_hyperparameter_names().index("OpenML_task_id")
-        hps[oml_idx] = CSH.Constant("OpenML_task_id", "3945")  # we additionally fix the instance here for BOHB
-        epoch_idx = bench.config_space.get_hyperparameter_names().index("epoch")
-        del hps[epoch_idx]  # drop budget parameter
-        cnds = bench.config_space.get_conditions()
-        fbds = bench.config_space.get_forbiddens()
-        cs = CS.ConfigurationSpace()
-        cs.add_hyperparameters(hps)
-        cs.add_conditions(cnds)
-        cs.add_forbidden_clauses(fbds)
+        # sets OpenML_task_id constant to "3945" and removes the epoch fidelity parameter
+        cs = bench.get_opt_space(instance = "3945", drop_fidelity_params = True)
         return(cs)
 
 NS = hpns.NameServer(run_id="lcbench", host="127.0.0.1", port=None)

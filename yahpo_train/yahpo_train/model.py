@@ -5,15 +5,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.onnx
 from fastai.tabular.all import *
-from yahpo_train.cont_normalization import ContNormalization
+from yahpo_train.cont_scalers import ContNormalization
 from yahpo_train.embed_helpers import *
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, nrows=None, frac=1., **kwargs):
+    """
+    Instantiate a pytorch dataloader from a YAHPO config
+    """
     # We shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
     # All relevant info is obtained from the 'config'
     dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=1.).reset_index()
+    dtypes.update(dict(zip(config.cont_names+config.y_names, ["float32"] * len(config.cont_names+config.y_names))))
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=frac).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
+    # Get rid of irrelevant columns
+    df = df[config.cat_names+config.cont_names+config.y_names]
+    # Fill missing target with 0
+    df[config.y_names] = df[config.y_names].fillna(0.) 
 
     dls = TabularDataLoaders.from_df(
         df = df,
@@ -21,7 +29,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, *
         y_names = config.y_names,
         cont_names = config.cont_names,
         cat_names = config.cat_names,
-        procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=True, fill_vals=0)],  # FIXME: FillMissing correct?
+        procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=False, fill_vals=dict((k, 0.) for k in config.cat_names+config.cont_names))],
         valid_idx = _get_valid_idx(df, config),
         bs = bs,
         shuffle=True,
@@ -37,7 +45,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, *
 
     return dls
 
-def _get_valid_idx(df, config, frac=.05, rng_seed=10):
+def _get_valid_idx(df, config, frac=.1, rng_seed=10):
     """
     Include or exclude blocks of hyperparameters with differing fidelity
     The goal here is to not sample from the dataframe randomly, but instead either keep a hyperparameter group
@@ -47,7 +55,18 @@ def _get_valid_idx(df, config, frac=.05, rng_seed=10):
     # All hyperpars excluding fidelity params
     hpars = config.cont_names+config.cat_names
     [hpars.remove(fp) for fp in config.fidelity_params]
-    # random.seed(rng_seed)
+
+    # Speed up for larger number of hyperparameters by converting cats to int.
+    # Otherwise groupby breaks
+    cont_hpars = set(hpars).intersection(set(config.cat_names))
+    df = df[hpars].copy()
+    df[cont_hpars].fillna('_NA_')
+    df = df_shrink(df)
+    df = df.apply(lambda x: pd.factorize(x.astype('category'))[0], axis=0)
+    if len(hpars) > 10:
+        hpars = random.sample(hpars, k=10)
+    
+    random.seed(rng_seed)
     idx = pd.Int64Index([])
     for _, dfg in df.groupby(hpars):
         # Sample index blocks
@@ -71,14 +90,18 @@ class SurrogateTabularLearner(Learner):
         if not self.training: 
             self.tfpred = self.model(*self.xb, invert_ytrafo = True)
             self.tfyb = self.yb
+        # For the training loss we train on untransformed scale.
         self.pred = self.model(*self.xb, invert_ytrafo = False)
         self.yb = [self.model.trafo_ys(*self.yb)]
+
         self('after_pred')
         if len(self.yb):
             self.loss_grad = self.loss_func(self.pred, *self.yb)
             self.loss = self.loss_grad.clone()
+
         self('after_loss')
         if not self.training or not len(self.yb): return
+
         self('before_backward')
         self.loss_grad.backward()
         self._with_events(self.opt.step, 'step', CancelStepException)
@@ -88,9 +111,14 @@ class SurrogateTabularLearner(Learner):
 
     def export_onnx(self, config):
         return self.model.export_onnx(config)
+    
+    def __repr__(self): 
+        return f"{self.wide} \n {self.deep}  \n {self.deeper}"
+
+
 
 class FFSurrogateModel(nn.Module):
-    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False):
+    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None):
         super().__init__()
 
         if not (len(layers) | len(deeper) | wide):
@@ -98,8 +126,18 @@ class FFSurrogateModel(nn.Module):
 
         emb_szs = get_emb_sz(dls.train_ds, {} if emb_szs is None else emb_szs)
         self.embds_fct = nn.ModuleList([Embedding(ni, nf) for ni, nf in emb_szs])
-        self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), clip_outliers=False) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
-        self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range', clip_outliers=True) for name, cont in dls.ys.iteritems()])
+
+        # Transform continuous variables and targets
+        if embds_dbl is not None:
+            self.embds_dbl = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.all_cols[dls.cont_names].iteritems(), embds_dbl)])
+        else:
+            self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), clip_outliers=False) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
+        
+        if embds_tgt is not None:
+            self.embds_tgt = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.ys.iteritems(), embds_tgt)])
+        else:
+            self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range', clip_outliers=True) for name, cont in dls.ys.iteritems()])
+
         self.n_emb,self.n_cont = sum(e.embedding_dim for e in self.embds_fct), len(dls.cont_names)
         self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
 
@@ -135,7 +173,7 @@ class FFSurrogateModel(nn.Module):
             xd = torch.cat(xd, 1)
             x = torch.cat([x, xd], 1) if self.n_emb > 0 else xd
         
-        xs = torch.zeros(x.shape[0], self.sizes[-1])
+        xs = torch.zeros(x.shape[0], self.sizes[-1], device = x.device)
         if len(self.wide):
             xs = xs.add(self.wide(x))
         if len(self.deep):
@@ -159,14 +197,14 @@ class FFSurrogateModel(nn.Module):
         ys = torch.cat(ys, 1)
         return ys
     
-    def export_onnx(self, config):
+    def export_onnx(self, config_dict, device='cuda:0'):
         """
         Export model to an ONNX file. We can safely ignore tracing errors with respect to lambda since lambda will be constant during inference.
         """
         self.eval()
         torch.onnx.export(self,
-            (torch.ones(1, len(config.cat_names), dtype=torch.int), {'x_cont': torch.randn(1, len(config.cont_names))}),
-            config.get_path("model"),
+            (torch.ones(1, len(config_dict.cat_names), dtype=torch.int, device=device), {'x_cont': torch.randn(1, len(config_dict.cont_names), device=device)}),
+            config_dict.get_path("model"),
             do_constant_folding=True,
             export_params=True,
             input_names=['x_cat', 'x_cont'],
@@ -175,7 +213,6 @@ class FFSurrogateModel(nn.Module):
 
 
 if __name__ == '__main__':
-    from yahpo_train.cont_normalization import ContNormalization
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
     cfg = cfg("lcbench")
@@ -189,6 +226,3 @@ if __name__ == '__main__':
     l.fit_flat_cos(5, 1e-4)
     l.export_onnx(cfg)
 
-
-
-  

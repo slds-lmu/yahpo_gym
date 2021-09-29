@@ -35,7 +35,7 @@ _rbv2_rpart.update({
     'cont_names': ['cp', 'maxdepth', 'minbucket', 'minsplit', 'trainsize', 'repl'],
     'cat_names': ['task_id', 'num.impute.selected.cpo']
 })
-config_dict.update({'rbv2_svm' : _rbv2_svm})
+config_dict.update({'rbv2_rpart' : _rbv2_rpart})
 
 # ElasticNet
 _rbv2_glmnet = _rbv2_dict.copy()
@@ -59,7 +59,7 @@ config_dict.update({'rbv2_xgboost' : _rbv2_xgboost})
 _rbv2_aknn = _rbv2_dict.copy()
 _rbv2_aknn.update({
     'config_id' : 'rbv2_aknn',
-    'cont_names': ['k','M', 'aknn.ef', 'ef_construction', 'trainsize', 'repl'],
+    'cont_names': ['k','M', 'ef', 'ef_construction', 'trainsize', 'repl'],
     'cat_names': ['task_id', 'distance', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_aknn' : _rbv2_aknn})
@@ -73,16 +73,10 @@ _rbv2_super.update({
                    'glmnet.alpha', 'glmnet.s',
                    'rpart.cp', 'rpart.maxdepth', 'rpart.minbucket', 'rpart.minsplit',
                    'ranger.num.trees', 'ranger.sample.fraction','ranger.mtry.power', 'ranger.min.node.size',   'ranger.num.random.splits',
-                   'aknn.k','aknn.M', 'aknn.ef', 'aknn.ef_construction'
+                   'aknn.k','aknn.M', 'aknn.ef', 'aknn.ef_construction',
                    'xgboost.nrounds', 'xgboost.eta', 'xgboost.gamma', 'xgboost.lambda',  'xgboost.alpha', 'xgboost.subsample', 'xgboost.max_depth', 'xgboost.min_child_weight',
                    'xgboost.colsample_bytree', 'xgboost.colsample_bylevel', 'xgboost.rate_drop', 'xgboost.skip_drop',
                    'trainsize', 'repl'],
     'cat_names': ['task_id', 'learner', 'svm.kernel', 'ranger.respect.unordered.factors', 'ranger.splitrule', 'aknn.distance', 'xgboost.booster', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_super' : _rbv2_super})
-
-if __name__ == '__main__':
-    from yahpo_gym.benchmark_set import BenchmarkSet
-    # b = BenchmarkSet('rbv2_glmnet')
-    # hposet = {'OpenML_task_id': 3, 'epoch':100, 'batch_size':10, 'learning_rate':.1, 'momentum':.9, 'weight_decay':.01, 'num_layers':3, 'max_units':100, 'max_dropout':.6}
-    # res = b.objective_function(hposet)
