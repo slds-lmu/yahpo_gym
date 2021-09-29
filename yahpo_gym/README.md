@@ -141,7 +141,7 @@ class lcbench(Worker):
         time.sleep(self.sleep_interval)
 
         return({
-                    "loss": - result.get("val_accuracy"),  # we want to maximize validation accuracy
+                    "loss": - float(result.get("val_accuracy")),  # we want to maximize validation accuracy
                     "info": "empty"
                 })
     
