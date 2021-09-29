@@ -20,7 +20,7 @@ class LocalConfiguration():
         """
         self.settings_path = Path(settings_path).expanduser().absolute()
     
-    def init_config(self, settings_path: str = "", download_url: str ="https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd"):
+    def init_config(self, settings_path: str = "", download_url: str ="https://syncandshare.lrz.de/dl/fiCMkzqj1bv1LfCUyvZKmLvd"):
         """
         Initialize a new local configuration.
 
