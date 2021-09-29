@@ -26,11 +26,42 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       self$py_instance = gym$benchmark_set$BenchmarkSet('lcbench', download = TRUE)
 
     },
-    get_objective_function = function() {
-
+    #' @description
+    #' Get the objective function
+    #'
+    #' @return
+    #'  A [`bbotk::Objective`].
+    get_objective_function = function(instance, drop_fidelity_params = TRUE) {
+      ObjectiveYAHPO$new(
+        private$.py_instance,
+        self$get_opt_param_set(instance, drop_fidelity_params)
+      )
     },
-    get_param_set = function() {
 
+    #' @description
+    #' Evaluate the objective function
+    #'
+    #' @param xs [`instance`] \cr
+    #'   A valid configuration. See `get_opt_param_set`.
+    #' @return
+    #'  A numeric vector, prediction results.
+    eval_objective_function = function(xs) {
+      private$.py_instance$objective_function(xs)
+    },
+
+    #' @description
+    #' Get Optimization Param Set
+    #'
+    #' @param instance [`instance`] \cr
+    #'   A valid instance. See `instances`.
+    #' @param drop_fidelity_params [`logical`] \cr
+    #'   Should fidelity params be dropped?
+    #' @return
+    #'  A [`paradox::ParamSet`] containing the search space to optimize over.
+    get_opt_space = function(instance, drop_fidelity_params = TRUE) {
+      assert_character(instance)
+      assert_flag(drop_fidelity_params)
+      self$py_instance$get_opt_space(instance, drop_fidelity_params)
     }
   ),
   active = list(
