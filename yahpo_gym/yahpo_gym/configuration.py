@@ -22,7 +22,7 @@ _yahpo_default_dict = {
 }
 
 class Configuration():
-    def __init__(self, config_dict: Dict):
+    def __init__(self, config_dict: Dict, download: bool = False):
         """
         Interface for benchmark scenario meta information. 
         Abstract base class used to instantiate configurations that contain all
@@ -36,6 +36,10 @@ class Configuration():
         config = _yahpo_default_dict.copy()
         config.update(config_dict)
         self.config = config
+
+
+        if download:
+            self.download_files()
         
         # Set attributes
         self.config_id = self.config['config_id']

@@ -22,8 +22,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     py_instance = NULL,
     initialize = function(key, onnx_session = NULL) {
       # Initialize python instance
-      gym = import("yahpo_gym")
-      self$py_instance = gym$benchmark_set$BenchmarkSet('lcbench')
+      gym = reticulate::import("yahpo_gym")
+      self$py_instance = gym$benchmark_set$BenchmarkSet('lcbench', download = True)
 
     },
     get_objective_function = function() {

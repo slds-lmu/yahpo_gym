@@ -11,7 +11,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, config_id: str = None, active_session: bool = False, session: Union[rt.InferenceSession, None] = None):
+    def __init__(self, config_id: str = None, download: bool = True, active_session: bool = False, session: Union[rt.InferenceSession, None] = None):
         """
         Interface for  a benchmark scenario. 
         Initialized with a valid key for a valid Scenario and optinally an `onnxruntime.InferenceSession`.

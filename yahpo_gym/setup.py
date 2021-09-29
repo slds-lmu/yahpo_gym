@@ -25,7 +25,7 @@ setup(name='yahpo_gym',
       license='LGPLv3',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
       include_package_data=True,
-      install_requires=['ConfigSpace', 'onnxruntime', 'fastdownload'],
+      install_requires=['ConfigSpace', 'onnxruntime', 'fastdownload', 'pyyaml', 'configspace'],
       keywords=['module', 'train', 'yahpo'],
       url="https://github.com/pfistfl/yahpo_gym",
       classifiers=["Development Status :: 3 - Alpha"])

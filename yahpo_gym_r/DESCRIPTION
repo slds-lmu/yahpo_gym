@@ -1,4 +1,4 @@
-Package: yahpo gym
+Package: yahpo_gym
 Type: Package
 Title: Interface to the yahpo gym python module
 Version: 0.0.1
@@ -11,10 +11,17 @@ Authors@R:
             email = "florian.pfisterer@stat.uni-muenchen.de"
         ))
 Description:
-    Exposes
+    Exposes YAHPO GYM's objective function and parameter space for R.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+StagedInstall: no
+Config/reticulate:
+  list(
+    packages = list(
+      list(package = "yahpo_gym")
+    )
+  )
 Depends:
     R (>= 3.5)
 Imports:
@@ -33,6 +40,4 @@ RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/testthat/parallel: true
-Encoding: UTF-8
-LazyData: true
 NeedsCompilation: no
