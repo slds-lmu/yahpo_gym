@@ -2,7 +2,6 @@
 
 ---
 
-
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [our paper](https://arxiv.org/abs/2109.03670).
 The underlying software with additional documentation and background can be found [here](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 
@@ -16,7 +15,7 @@ Since all our benchmarks are based on surrogate models that approximate the unde
 across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g.  [HpBandSter](https://github.com/automl/HpBandSter).
 
-![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/traces.PNG?raw=true)
+![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/results.png?raw=true)
 
 **Overview over problems**
 
