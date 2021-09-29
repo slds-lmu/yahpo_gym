@@ -33,7 +33,7 @@ class BenchmarkSet():
         self.quant = 0.1
         
         self.constants = {}
-        if self.active_session or self.session is not None:
+        if self.active_session or session is not None:
             self.set_session(session)
 
     def objective_function(self, configuration: Union[Dict, List[Dict]]):
