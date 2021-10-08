@@ -19,16 +19,6 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         }
       )
     }
-
-    # @description
-    # Evaluates input value(s) on the objective function. Calls the R function
-    # supplied by the user.
-    # @param xs Input values.
-    # eval = function(xs) {
-    #   if (self$check_values) self$domain$assert(xs)
-    #   res = invoke(private$.py_instance, xs, .args = self$constants$values)
-
-    # }
   ),
   private = list(
     .py_instance = NULL
@@ -40,7 +30,8 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
   )
 )
 
+#' @title Preprocess r object for use with python's YAHPO GYM
 #' @export
 preproc_xs = function(xs) {
-  as.list(xs)
+  keep(as.list(xs), Negate(is.na))
 }

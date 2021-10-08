@@ -32,9 +32,9 @@ and additional helper functionality.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{BenchmarkSet$new()}}
-\item \href{#method-get_objective_function}{\code{BenchmarkSet$get_objective_function()}}
+\item \href{#method-get_objective}{\code{BenchmarkSet$get_objective()}}
 \item \href{#method-eval_objective_function}{\code{BenchmarkSet$eval_objective_function()}}
-\item \href{#method-get_opt_space}{\code{BenchmarkSet$get_opt_space()}}
+\item \href{#method-get_opt_space_py}{\code{BenchmarkSet$get_opt_space_py()}}
 \item \href{#method-clone}{\code{BenchmarkSet$clone()}}
 }
 }
@@ -48,12 +48,12 @@ and additional helper functionality.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_objective_function"></a>}}
-\if{latex}{\out{\hypertarget{method-get_objective_function}{}}}
-\subsection{Method \code{get_objective_function()}}{
+\if{html}{\out{<a id="method-get_objective"></a>}}
+\if{latex}{\out{\hypertarget{method-get_objective}{}}}
+\subsection{Method \code{get_objective()}}{
 Get the objective function
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective_function(instance, drop_fidelity_params)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(instance, drop_fidelity_params = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
@@ -82,12 +82,12 @@ A numeric vector, prediction results.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_opt_space"></a>}}
-\if{latex}{\out{\hypertarget{method-get_opt_space}{}}}
-\subsection{Method \code{get_opt_space()}}{
-Get Optimization Param Set
+\if{html}{\out{<a id="method-get_opt_space_py"></a>}}
+\if{latex}{\out{\hypertarget{method-get_opt_space_py}{}}}
+\subsection{Method \code{get_opt_space_py()}}{
+Get Optimization ConfigSpace
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space(instance, drop_fidelity_params)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance, drop_fidelity_params = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
