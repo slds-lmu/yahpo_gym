@@ -8,6 +8,9 @@ R Interface for the YAHPO GYM python module
 The package can be installed from Github via
 
 
+```r
+remotes::install_github("pfistfl/yahpo_gym/yahpo_gym_r")
+```
 
 ### Setup
 
@@ -58,6 +61,14 @@ p$optimize(ois)
 
 ### Available Problems
 
+We can list all available benchmark problems
+
 ```r
 list_benchmarks()
+```
+
+and available instances in a `Benchmark`:
+
+```r
+b$instances
 ```
