@@ -23,7 +23,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     initialize = function(key, onnx_session = NULL) {
       # Initialize python instance
       gym = reticulate::import("yahpo_gym")
-      self$py_instance = gym$benchmark_set$BenchmarkSet('lcbench', download = TRUE)
+      self$py_instance = gym$benchmark_set$BenchmarkSet(key, download = TRUE)
 
     },
     #' @description
@@ -31,10 +31,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'
     #' @return
     #'  A [`bbotk::Objective`].
-    get_objective_function = function(instance, drop_fidelity_params = TRUE) {
+    get_objective = function(instance, drop_fidelity_params = TRUE) {
+      doms = private$.load_r_domains()
       ObjectiveYAHPO$new(
-        private$.py_instance,
-        self$get_opt_param_set(instance, drop_fidelity_params)
+        self$py_instance,
+        doms$domain,
+        doms$codomain
       )
     },
 
@@ -50,7 +52,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     },
 
     #' @description
-    #' Get Optimization Param Set
+    #' Get Optimization ConfigSpace
     #'
     #' @param instance [`instance`] \cr
     #'   A valid instance. See `instances`.
@@ -58,7 +60,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should fidelity params be dropped?
     #' @return
     #'  A [`paradox::ParamSet`] containing the search space to optimize over.
-    get_opt_space = function(instance, drop_fidelity_params = TRUE) {
+    get_opt_space_py = function(instance, drop_fidelity_params = TRUE) {
       assert_character(instance)
       assert_flag(drop_fidelity_params)
       self$py_instance$get_opt_space(instance, drop_fidelity_params)
@@ -74,6 +76,13 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     },
     instances = function() {
       self$py_instance$instances
+    }
+  ),
+  private = list(
+    .load_r_domains = function() {
+      ps_path = self$py_instance$config$get_path("param_set")
+      source(ps_path, local = environment())
+      list(domain = domain, codomain = codomain)
     }
   )
 )
