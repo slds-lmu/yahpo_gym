@@ -52,6 +52,7 @@ class Configuration():
         self.runtime_name = self.config['runtime_name']
         
     def get_path(self, key: str):
+
         return f'{self.config_path}/{self.config[key]}'
 
     def download_files(self, data: bool = False, update: bool = False, files: list = []):

@@ -28,12 +28,42 @@ and additional helper functionality.
   * instances: [`character`] \cr
 }
 
+\examples{
+\dontrun{
+b = BenchmarkSet$new("lcbench")
+b$instances
+}
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{py_instance}}{[`BenchmarkSet`] \cr
+A python `yahpo_gym.BenchmarkSet`.}
+}
+\if{html}{\out{</div>}}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{session}}{`onnxruntime.InferenceSession` \cr
+Set/Get the ONNX session.
+
+The param `sess` is a `onnxruntime.InferenceSession`\cr
+  A matching `onnxruntime.InferenceSession`. Please make sure
+  that the session matches the selected benchmark scenario, as no
+  additional checks are performed and inference will fail during
+  evaluation of the objective function.}
+
+\item{\code{instances}}{`character` \cr
+A character vector of available instances for the scenario.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{BenchmarkSet$new()}}
 \item \href{#method-get_objective}{\code{BenchmarkSet$get_objective()}}
-\item \href{#method-eval_objective_function}{\code{BenchmarkSet$eval_objective_function()}}
 \item \href{#method-get_opt_space_py}{\code{BenchmarkSet$get_opt_space_py()}}
 \item \href{#method-clone}{\code{BenchmarkSet$clone()}}
 }
@@ -42,10 +72,34 @@ and additional helper functionality.
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize a new object
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$new(key, onnx_session = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$new(
+  key,
+  onnx_session = NULL,
+  download = TRUE,
+  active_session = FALSE
+)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{key}}{`character` \cr
+Key for a benchmark scenario. See [`list_benchmarks`] for more information.}
+
+\item{\code{onnx_session}}{`onnxruntime.InferenceSession` \cr
+A matching `onnxruntime.InferenceSession`. See `session` for more information.
+If no session is provided, new session is created.}
+
+\item{\code{download}}{`logical` \cr
+Download the required data on instantiation? Default `TRUE`.}
+
+\item{\code{active_session}}{`logical` \cr
+Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_objective"></a>}}
@@ -53,32 +107,20 @@ and additional helper functionality.
 \subsection{Method \code{get_objective()}}{
 Get the objective function
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(instance, drop_fidelity_params = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-A [`bbotk::Objective`].
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-eval_objective_function"></a>}}
-\if{latex}{\out{\hypertarget{method-eval_objective_function}{}}}
-\subsection{Method \code{eval_objective_function()}}{
-Evaluate the objective function
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$eval_objective_function(xs)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(instance)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{xs}}{[`instance`] \cr
-A valid configuration. See `get_opt_param_set`.}
+\item{\code{instance}}{[`instance`] \cr
+A valid instance. See `instances`.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A numeric vector, prediction results.
+A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
+ functionality to evaluate the surrogates.
 }
 }
 \if{html}{\out{<hr>}}
@@ -87,7 +129,7 @@ A numeric vector, prediction results.
 \subsection{Method \code{get_opt_space_py()}}{
 Get Optimization ConfigSpace
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance, drop_fidelity_params = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
