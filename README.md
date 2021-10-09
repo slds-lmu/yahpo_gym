@@ -4,9 +4,10 @@
 ### What is YAHPO GYM? 
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [our paper](https://arxiv.org/abs/2109.03670).
+The underlying software with additional documentation and background can be found [here](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
 
 YAHPO GYM consists of several `scenarios`, e.g. the collection of all benchmark instances in `lcbench` is a `scenario`.
-An `instance` is the concrete task of optimizing hyperparameters of the neural network on a given dataset from OpenML.
+Here, an `instance` is the concrete task of optimizing hyperparameters of the neural network on a given dataset from OpenML.
 
 ### Why should I use it?
 
@@ -14,7 +15,7 @@ An `instance` is the concrete task of optimizing hyperparameters of the neural n
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
 across a large variety of problems.
 
-![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/traces.PNG?raw=true)
+![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/results.png?raw=true)
 
 <br><br>
 ---
@@ -44,7 +45,7 @@ where for **n\_targets** (\#number):
 ### What does this repository contain?
 
 This repository contains two modules: `yahpo_gym` and `yahpo_train`. 
-Whhile we mainly focus on `yahpo_gym`, as it is provides an interface to the benchmark described in our [paper](https://arxiv.org/abs/2109.03670),
+While we mainly focus on `yahpo_gym`, as it is provides an interface to the benchmark described in our [paper](https://arxiv.org/abs/2109.03670),
 we also provide the full reproducible codebase used to generate the underlying surrogate neural networks in `yahpo_train`.
 
 #### YAHPO GYM

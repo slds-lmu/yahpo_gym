@@ -15,7 +15,7 @@ class BenchmarkSet():
 
     def __init__(self, config_id: str = None, download: bool = True, active_session: bool = False, session: Union[rt.InferenceSession, None] = None):
         """
-        Interface for  a benchmark scenario. 
+        Interface for a benchmark scenario. 
         Initialized with a valid key for a valid Scenario and optinally an `onnxruntime.InferenceSession`.
 
         Parameters
@@ -23,9 +23,9 @@ class BenchmarkSet():
         config_id: str
             (Required) A key for `ConfigDict` pertaining to a valid benchmark scenario (e.g. `lcbench`).
         active_session: bool
-            Should the benchmark run in an active  `onnxruntime.InferenceSession`? Initialized to `False`.
+            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
         session: onnx.Session
-            A ONNX session to use for inference. Overwrite `active_session` and sets the provided  `onnxruntime.InferenceSession` as the active session.
+            A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
         """
         self.config = cfg(config_id, download=download)
@@ -112,7 +112,7 @@ class BenchmarkSet():
         instance: str
             A valid instance. See `instances`.
         drop_fidelity_params: bool
-            Should fidelity params be dropped from the `opt_space`? Defaults to  `True`.
+            Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
         """
         # FIXME: assert instance is a valid choice
         hps = self.config_space.get_hyperparameters()
@@ -138,7 +138,7 @@ class BenchmarkSet():
         Parameters
         ----------
         session: onnxruntime.InferenceSession
-            A ONNX session to use for inference. Overwrite `active_session` and sets the provided  `onnxruntime.InferenceSession` as the active session.
+            A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
         """
         if session is not None:
