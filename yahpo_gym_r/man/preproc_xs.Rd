@@ -4,7 +4,7 @@
 \alias{preproc_xs}
 \title{Preprocess r object for use with python's YAHPO GYM}
 \usage{
-preproc_xs(xs)
+preproc_xs(xs, ...)
 }
 \description{
 Preprocess r object for use with python's YAHPO GYM

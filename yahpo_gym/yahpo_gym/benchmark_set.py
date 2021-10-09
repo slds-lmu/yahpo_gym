@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 from typing import Union, Dict, List
 import numpy as np
-import json
 from ConfigSpace.read_and_write import json as CS_json
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH

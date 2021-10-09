@@ -17,9 +17,9 @@ and additional helper functionality.
 }
 \section{Methods}{
 
-  * new(key, onnx_session): Initialize the class.
-  * get_objective_function(): Obtain the [`bbotk::ObjectiveFunction`].
-  * get_param_set(): Obtain the [`paradox::ParamSet`].
+  * new(key, onnx_session, active_session, download): Initialize the class.
+  * get_objective(): Obtain the [`bbotk::Objective`].
+  * get_opt_space_py(): Obtain the [`ConfigSpace`].
 }
 
 \section{Fields}{
@@ -39,6 +39,9 @@ b$instances
 \describe{
 \item{\code{py_instance}}{[`BenchmarkSet`] \cr
 A python `yahpo_gym.BenchmarkSet`.}
+
+\item{\code{id}}{`character` \cr
+The scenario identifier.}
 }
 \if{html}{\out{</div>}}
 }
@@ -77,8 +80,8 @@ Initialize a new object
 \if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$new(
   key,
   onnx_session = NULL,
-  download = TRUE,
-  active_session = FALSE
+  active_session = FALSE,
+  download = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -92,11 +95,11 @@ Key for a benchmark scenario. See [`list_benchmarks`] for more information.}
 A matching `onnxruntime.InferenceSession`. See `session` for more information.
 If no session is provided, new session is created.}
 
-\item{\code{download}}{`logical` \cr
-Download the required data on instantiation? Default `TRUE`.}
-
 \item{\code{active_session}}{`logical` \cr
 Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.}
+
+\item{\code{download}}{`logical` \cr
+Download the required data on instantiation? Default `TRUE`.}
 }
 \if{html}{\out{</div>}}
 }

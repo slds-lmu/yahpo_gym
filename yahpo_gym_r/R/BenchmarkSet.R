@@ -7,9 +7,9 @@
 #' and additional helper functionality.
 #'
 #' @section Methods:
-#'   * new(key, onnx_session): Initialize the class.
-#'   * get_objective_function(): Obtain the [`bbotk::ObjectiveFunction`].
-#'   * get_param_set(): Obtain the [`paradox::ParamSet`].
+#'   * new(key, onnx_session, active_session, download): Initialize the class.
+#'   * get_objective(): Obtain the [`bbotk::Objective`].
+#'   * get_opt_space_py(): Obtain the [`ConfigSpace`].
 #'
 #' @section Fields:
 #'   * session: [`onnx.InferenceSession`] \cr
@@ -28,6 +28,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   A python `yahpo_gym.BenchmarkSet`.
     py_instance = NULL,
 
+    #' @field id `character` \cr
+    #'   The scenario identifier.
+    id = NULL,
+
     #' @description
     #' Initialize a new object
     #'
@@ -40,7 +44,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     #' @param download `logical` \cr
     #'   Download the required data on instantiation? Default `TRUE`.
-    initialize = function(key, onnx_session = NULL,  download = TRUE, active_session = FALSE) {
+    initialize = function(key, onnx_session = NULL, active_session = FALSE,  download = TRUE) {
       # Initialize python instance
       gym = reticulate::import("yahpo_gym")
       self$id = assert_string(key)
@@ -63,6 +67,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       assert_choice(instance, self$instances)
       doms = private$.load_r_domains(instance)
       ObjectiveYAHPO$new(
+        instance,
         self$py_instance,
         doms$domain,
         doms$codomain
@@ -84,6 +89,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     }
   ),
   active = list(
+
     #' @field session `onnxruntime.InferenceSession` \cr
     #' Set/Get the ONNX session.
     #'
@@ -99,6 +105,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         self$py_instance$set_session(sess)
       }
     },
+
     #' @field instances `character` \cr
     #' A character vector of available instances for the scenario.
     instances = function() {
@@ -106,7 +113,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     }
   ),
   private = list(
-    .load_r_domains = function() {
+    .load_r_domains = function(instance) {
       ps_path = self$py_instance$config$get_path("param_set")
       source(ps_path, local = environment())
       list(domain = domain, codomain = codomain)

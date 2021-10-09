@@ -20,11 +20,12 @@ Here we install all packages into the `yahpo_gym` conda environment.
 ```{r, eval = FALSE}
 reticulate::conda_create(
   envname = "yahpo_gym",
-  packages = c("onnxruntime"),
+  packages = c("onnxruntime", "pip", "pyyaml"),
   channel = "conda-forge",
   python_version = "3.8"
 )
-reticulate::conda_install(envname = "yahpo_gym", packages="fastdownload", pip=TRUE)
+reticulate::conda_install(envname = "yahpo_gym", packages="configspace", channel="conda-forge")
+reticulate::conda_install(envname = "yahpo_gym", packages="fastdownload", channel="fastai")
 ```
 
 Now we can instantiate a local config that sets up the path files are downloaded to:
@@ -42,14 +43,15 @@ We first load the package and the required conda environment:
 
 ```r
 reticulate::use_condaenv("yahpo_gym", required=TRUE)
-library("yahpo_gym")
+devtools::load_all()
+# library("yahpo_gym")
 ```
 
 and subsequently instantiate the benchmark to obtain our objective.
 
 ```r
-b = BenchmarkSet$new("lcbench")
-obj = b$get_objective()
+b = BenchmarkSet$new("rbv2_super")
+obj = b$get_objective("1040")
 ```
 
 and run our search procedure.
@@ -72,4 +74,19 @@ and available instances in a `Benchmark`:
 
 ```r
 b$instances
+```
+
+```r
+reticulate::conda_create(
+  envname = "yahpo_gym",
+  packages = c("onnxruntime", "pip", "pyyaml", "pandas"),
+  channel = "conda-forge",
+  python_version = "3.8"
+)
+reticulate::conda_install(envname = "yahpo_gym",
+  packages="configspace", channel="conda-forge")
+reticulate::conda_install(envname = "yahpo_gym",
+  packages="pandas", channel="conda-forge")
+reticulate::conda_install(envname = "yahpo_gym",
+  packages="fastdownload", channel="fastai")
 ```
