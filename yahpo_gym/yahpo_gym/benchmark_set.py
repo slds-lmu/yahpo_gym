@@ -32,9 +32,10 @@ class BenchmarkSet():
         self.config_space = self._get_config_space()
         self.active_session = active_session
         self.quant = 0.1
-        
         self.constants = {}
-        if self.active_session or session is not None:
+        self.session = None
+
+        if self.active_session or (session is not None):
             self.set_session(session)
 
     def objective_function(self, configuration: Union[Dict, List[Dict]]):
@@ -51,9 +52,9 @@ class BenchmarkSet():
             self.set_session()
         x_cont, x_cat = self._config_to_xs(configuration)
         # input & output names and dims
-        input_names = [x.name for x in self.sess.get_inputs()]
-        output_name = self.sess.get_outputs()[0].name
-        results = self.sess.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
+        input_names = [x.name for x in self.session.get_inputs()]
+        output_name = self.session.get_outputs()[0].name
+        results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
         return {k:v for k,v in zip(self.config.y_names, results)}
 
     def _objective_function_timed(self, configuration: Union[Dict, List[Dict]]):
@@ -140,13 +141,14 @@ class BenchmarkSet():
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
         """
-        if session is not None:
+        # Either overwrite session or instantiate a new one if no active session exists
+        if (session is not None):
             self.session = session
-        else: 
+        elif (self.session is None):
             model_path = self.config.get_path("model")
             if not Path(model_path).is_file():
                 raise Exception(f("ONNX file {model_path} not found!"))
-            self.sess = rt.InferenceSession(model_path)
+            self.session = rt.InferenceSession(model_path)
     
 
     @property

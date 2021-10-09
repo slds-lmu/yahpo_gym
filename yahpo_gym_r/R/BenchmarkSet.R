@@ -44,11 +44,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     #' @param download `logical` \cr
     #'   Download the required data on instantiation? Default `TRUE`.
-    initialize = function(key, onnx_session = NULL, active_session = FALSE,  download = TRUE) {
+    initialize = function(key, onnx_session = NULL, active_session = FALSE,  download = FALSE) {
       # Initialize python instance
       gym = reticulate::import("yahpo_gym")
       self$id = assert_string(key)
-      self$py_instance = gym$benchmark_set$BenchmarkSet(key, session=onnx_session, active_session = active_session)
+      self$py_instance = gym$benchmark_set$BenchmarkSet(key, session=onnx_session,
+        active_session = assert_flag(active_session), download = FALSE)
       # Download files
       if (assert_flag(download)) {
         self$py_instance$config$download_files(files = list("param_set.R"))
@@ -80,10 +81,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @param instance [`instance`] \cr
     #'   A valid instance. See `instances`.
     #' @param drop_fidelity_params [`logical`] \cr
-    #'   Should fidelity params be dropped?
+    #'   Should fidelity params be dropped? Defaults to `FALSE`.
     #' @return
     #'  A [`paradox::ParamSet`] containing the search space to optimize over.
-    get_opt_space_py = function(instance) {
+    get_opt_space_py = function(instance, drop_fidelity_params = FALSE) {
       assert_choice(instance, self$instances)
       self$py_instance$get_opt_space(instance, drop_fidelity_params)
     }

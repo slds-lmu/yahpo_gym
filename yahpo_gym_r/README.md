@@ -20,7 +20,7 @@ Here we install all packages into the `yahpo_gym` conda environment.
 ```{r, eval = FALSE}
 reticulate::conda_create(
   envname = "yahpo_gym",
-  packages = c("onnxruntime", "pip", "pyyaml"),
+  packages = c("onnxruntime", "pip", "pyyaml", "pandas"),
   channel = "conda-forge",
   python_version = "3.8"
 )
@@ -50,17 +50,30 @@ devtools::load_all()
 and subsequently instantiate the benchmark to obtain our objective.
 
 ```r
-b = BenchmarkSet$new("rbv2_super")
-obj = b$get_objective("1040")
+b = BenchmarkSet$new("lcbench", download = FALSE)
+obj = b$get_objective("3945")
 ```
 
 and run our search procedure.
 
 ```r
 p = opt("random_search")
-ois = OptimInstanceMultiCrit$new(obj, terminator = trm("evals"), check_values = FALSE)
+ois = OptimInstanceMultiCrit$new(obj, terminator = trm("evals", n_evals = 10), check_values = FALSE)
 p$optimize(ois)
 ```
+
+
+
+### or with Hyperband using (`mlr3hyperband`)
+
+```r
+library(mlr3hyperband)
+library(bbotk)
+p = opt("hyperband")
+ois = OptimInstanceMultiCrit$new(obj, terminator = trm("evals", n_evals = 10), check_values = FALSE)
+p$optimize(ois)
+```
+
 
 ### Available Problems
 
