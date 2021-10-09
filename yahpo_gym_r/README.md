@@ -17,11 +17,12 @@ remotes::install_github("pfistfl/yahpo_gym/yahpo_gym_r")
 YAHPO GYM requires a one-time setup to install the required python dependencies.
 Here we install all packages into the `yahpo_gym` conda environment.
 
-```r
+```{r, eval = FALSE}
 reticulate::conda_create(
   envname = "yahpo_gym",
   packages = c("onnxruntime"),
-  channel = "conda-forge"
+  channel = "conda-forge",
+  python_version = "3.8"
 )
 reticulate::conda_install(envname = "yahpo_gym", packages="fastdownload", pip=TRUE)
 ```

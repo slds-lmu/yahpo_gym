@@ -23,6 +23,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     initialize = function(key, onnx_session = NULL) {
       # Initialize python instance
       gym = reticulate::import("yahpo_gym")
+      self$id = assert_string(key)
       self$py_instance = gym$benchmark_set$BenchmarkSet(key, download = TRUE)
 
     },
@@ -30,25 +31,15 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' Get the objective function
     #'
     #' @return
-    #'  A [`bbotk::Objective`].
+    #'  A [`bbotk::Objective`] containing a "domain" and "codomain".
     get_objective = function(instance, drop_fidelity_params = TRUE) {
-      doms = private$.load_r_domains()
+      assert_choice(instance, self$instances)
+      doms = private$.load_r_domains(drop_fidelity_params)
       ObjectiveYAHPO$new(
         self$py_instance,
         doms$domain,
         doms$codomain
       )
-    },
-
-    #' @description
-    #' Evaluate the objective function
-    #'
-    #' @param xs [`instance`] \cr
-    #'   A valid configuration. See `get_opt_param_set`.
-    #' @return
-    #'  A numeric vector, prediction results.
-    eval_objective_function = function(xs) {
-      private$.py_instance$objective_function(xs)
     },
 
     #' @description
@@ -60,13 +51,21 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should fidelity params be dropped?
     #' @return
     #'  A [`paradox::ParamSet`] containing the search space to optimize over.
-    get_opt_space_py = function(instance, drop_fidelity_params = TRUE) {
-      assert_character(instance)
-      assert_flag(drop_fidelity_params)
+    get_opt_space_py = function(instance) {
+      assert_choice(instance, self$instances)
       self$py_instance$get_opt_space(instance, drop_fidelity_params)
     }
   ),
   active = list(
+    #' @description
+    #' Set/Get the ONNX session.
+    #'
+    #' @param sess `onnxruntime.InferenceSession`\cr
+    #'   A matching `onnxruntime.InferenceSession`. Please make sure
+    #'   that the session matches the selected benchmark scenario, as no
+    #'   additional checks are performed and inference will fail during
+    #'   evaluation of the objective function.
+    #' @return `onnxruntime.InferenceSession`
     session = function(sess) {
       if (missing(sess)) {
         return(self$py_instance$session)
@@ -75,6 +74,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       }
     },
     instances = function() {
+      #' @description
+      #' A character vector of available instances for the scenario.
       self$py_instance$instances
     }
   ),

@@ -54,11 +54,16 @@ class Configuration():
     def get_path(self, key: str):
         return f'{self.config_path}/{self.config[key]}'
 
-    def download_files(self, data: bool = False, update: bool = False):
-        d = FastDownload(base=self.config['basedir'], data=self.config['config_id'], archive=self.config['config_id'], module = yahpo_gym.benchmarks)
+    def download_files(self, data: bool = False, update: bool = False, files: list = []):
+        d = FastDownload(
+            base=self.config['basedir'],
+            data=self.config['config_id'],
+            archive=self.config['config_id'],
+            module = yahpo_gym.benchmarks
+         )
 
         fullurl = self.config['download_url'] + "/" + self.config['config_id'] + "/"
-        files = [self.config['encoding'], self.config['config_space'], self.config['model']]
+        files = files + [self.config['encoding'], self.config['config_space'], self.config['model']]
         if data:
             files = files + [self.config['dataset']]
 
@@ -106,7 +111,7 @@ class ConfigDict():
         """
         self.configs.update(config_dict)
     
-    def get_item(self, key: str):
+    def get_item(self, key: str, **kwargs):
         """
         Instantiate a given Configuration.
 
@@ -115,7 +120,7 @@ class ConfigDict():
         key: str
             The key of the configuration to retrieve
         """
-        return Configuration(self.configs[key])
+        return Configuration(self.configs[key], **kwargs)
 
     def __repr__(self):
         return f"Configuration Dictionary ({len(self.configs)} benchmarks)"
@@ -130,7 +135,7 @@ class ConfigDict():
         return out
 
 
-def cfg(key: str = None):
+def cfg(key: str = None, **kwargs):
     """
         Shorthand acces to 'ConfigDict'.
         
@@ -141,7 +146,7 @@ def cfg(key: str = None):
             If none, prints available keys.
     """
     if key is not None:
-        return config_dict.get_item(key)
+        return config_dict.get_item(key, **kwargs)
     else:
         return config_dict
 

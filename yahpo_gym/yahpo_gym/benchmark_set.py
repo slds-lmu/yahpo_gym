@@ -28,7 +28,7 @@ class BenchmarkSet():
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided  `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
         """
-        self.config = cfg(config_id)
+        self.config = cfg(config_id, download=download)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
