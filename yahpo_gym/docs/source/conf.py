@@ -5,9 +5,17 @@
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
+import pathlib
+import os
+import sys
+from yahpo_gym.local_config import LocalConfiguration
 
-import sphinx_bootstrap_theme
+if not os.path.exists(pathlib.Path("~/.config/yahpo_gym").expanduser().absolute()):
+    LocalConfiguration().init_config("~/.config/yahpo_gym")
+
 import yahpo_gym
+
+
 
 # -- Path setup --------------------------------------------------------------
 
@@ -15,9 +23,8 @@ import yahpo_gym
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
 sys.path.insert(0, os.path.abspath('../yahpo_gym'))
+
 
 
 # -- Project information -----------------------------------------------------
@@ -190,3 +197,6 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 autoclass_content = 'both'
+
+
+
