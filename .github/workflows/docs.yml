@@ -31,7 +31,7 @@ jobs:
         branch_name=${GITHUB_REF##*/}
         cd ../gh-pages
         rm -rf $branch_name
-        cp -r ../yahpo_gym/docs/build/html $branch_name
+        cp -r ../yahpo_gym/yahpo_gym/docs/build/html $branch_name
     - name: Push to gh-pages
       if: (contains(github.ref, 'main')) && github.event_name == 'push'
       run: |
