@@ -33,7 +33,7 @@ jobs:
         rm -rf $branch_name
         cp -r ../yahpo_gym/docs/build/html $branch_name
     - name: Push to gh-pages
-      if: (contains(github.ref, 'master')) && github.event_name == 'push'
+      if: (contains(github.ref, 'main')) && github.event_name == 'push'
       run: |
         last_commit=$(git log --pretty=format:"%an: %s")
         cd ../gh-pages
