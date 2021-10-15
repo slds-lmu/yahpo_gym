@@ -6,8 +6,17 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
-import sphinx_bootstrap_theme
+import os
+import sys
+
+# import pathlib
+# from yahpo_gym.local_config import LocalConfiguration
+# if not os.path.exists(pathlib.Path("~/.config/yahpo_gym").expanduser().absolute()):
+#     LocalConfiguration().init_config("~/.config/yahpo_gym")
+
 import yahpo_gym
+
+
 
 # -- Path setup --------------------------------------------------------------
 
@@ -15,9 +24,8 @@ import yahpo_gym
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../../yahpo_gym'))
+sys.path.insert(0, os.path.abspath('../yahpo_gym'))
+
 
 
 # -- Project information -----------------------------------------------------
@@ -83,7 +91,7 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'bootstrap'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -188,3 +196,8 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+autoclass_content = 'both'
+
+
+

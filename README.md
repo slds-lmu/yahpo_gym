@@ -3,11 +3,20 @@
 
 ### What is YAHPO GYM? 
 
-**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [our paper](https://arxiv.org/abs/2109.03670).
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
 The underlying software with additional documentation and background can be found [here](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
 
-YAHPO GYM consists of several `scenarios`, e.g. the collection of all benchmark instances in `lcbench` is a `scenario`.
-Here, an `instance` is the concrete task of optimizing hyperparameters of the neural network on a given dataset from OpenML.
+
+YAHPO Gym distinguishes between `scenarios` and `instances`.
+A `scenario` is a collection of `instances` that share the same hyperparameter space. In practice, a `scenario` usually consists of a single algorithm fitted on a variety of datasets (= `instances`).
+
+YAHPO Gym offers $3$ packages:
+
+- `yahpo_gym` (python): The core package allowing inference on the surrogates
+- `yahpo_train` (python): Code to train surrogate models used in `yahpo_gym`.
+
+- `yahpo_gym_r`(R): An R wrapper to yahpo gym.
+
 
 ### Why should I use it?
 
