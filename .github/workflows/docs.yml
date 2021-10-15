@@ -16,7 +16,7 @@ jobs:
         pip install -e .[docs]
     - name: Make docs
       run: |
-        cd docs
+        cd yahpo_gym/docs
         make html
     - name: Pull latest gh-pages
       if: (contains(github.ref, 'master')) && github.event_name == 'push'
