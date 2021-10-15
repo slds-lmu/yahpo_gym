@@ -5,13 +5,14 @@
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
-import pathlib
+
 import os
 import sys
-from yahpo_gym.local_config import LocalConfiguration
 
-if not os.path.exists(pathlib.Path("~/.config/yahpo_gym").expanduser().absolute()):
-    LocalConfiguration().init_config("~/.config/yahpo_gym")
+# import pathlib
+# from yahpo_gym.local_config import LocalConfiguration
+# if not os.path.exists(pathlib.Path("~/.config/yahpo_gym").expanduser().absolute()):
+#     LocalConfiguration().init_config("~/.config/yahpo_gym")
 
 import yahpo_gym
 
