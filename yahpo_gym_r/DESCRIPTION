@@ -1,0 +1,36 @@
+Package: yahpo_gym
+Type: Package
+Title: Interface to the yahpo gym python module
+Version: 0.0.1
+Authors@R:
+    c(
+        person(
+            given = "Florian",
+            family = "Pfisterer",
+            role = c("cre", "aut"),
+            email = "florian.pfisterer@stat.uni-muenchen.de"
+        ))
+Description:
+    Exposes YAHPO GYM's objective function and parameter space for R.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+StagedInstall: no
+Depends:
+    R (>= 3.5)
+Imports:
+    bbotk,
+    checkmate (>= 2.0.0),
+    mlr3misc (>= 0.1.1),
+    paradox (>= 0.3.0),
+    reticulate (>= 1.10),
+    R6
+Suggests:
+    testthat,
+    covr,
+    knitr,
+    rmarkdown
+RoxygenNote: 7.1.2
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/testthat/parallel: true

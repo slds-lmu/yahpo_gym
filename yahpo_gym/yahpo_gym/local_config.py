@@ -3,7 +3,6 @@ import os
 import yaml
 
 class LocalConfiguration():
-
     def __init__(self, settings_path: str ="~/.config/yahpo_gym"):
         """
         Interface for setting up a local configuration.
@@ -27,7 +26,9 @@ class LocalConfiguration():
         This writes a local configuration file to the specified 'settings_path'.
         The 
         It is currently used to globally store the following information
-            - 'data_path': A path to the metadata required for inference.
+        'data_path': A path to the metadata required for inference.
+        'download_url': URL used for downloading the required surrogate models.
+
 
         Parameters
         ----------
@@ -38,6 +39,7 @@ class LocalConfiguration():
         config = {'data_path': str(settings_path), 'download_url':download_url}
         with self.settings_path.open('w', encoding='utf-8') as fh:
             yaml.dump(config, fh)
+        return None
 
     def set_data_path(self, data_path: str):
         """
@@ -85,4 +87,4 @@ class LocalConfiguration():
         return self.config.get('download_url')
 
 local_config = LocalConfiguration()
-__all__ = [local_config, LocalConfiguration]
+__all__ = ['local_config', 'LocalConfiguration']

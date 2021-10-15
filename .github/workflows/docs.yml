@@ -16,7 +16,9 @@ jobs:
         pip install -e .[docs]
     - name: Make docs
       run: |
-        cd docs
+        cd yahpo_gym/docs
+        printf "data_path: ~/LRZ Sync+Share/multifidelity_data\ndownload_url: https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd" >> ~/.config/yahpo_gym
+        pip install sphinx_rtd_theme
         make html
     - name: Pull latest gh-pages
       if: (contains(github.ref, 'master')) && github.event_name == 'push'

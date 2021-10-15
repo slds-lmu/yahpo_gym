@@ -1,8 +1,28 @@
-import torch
-import numpy as np
-from torch.functional import Tensor
-from yahpo_gym.configuration import cfg
-from yahpo_gym.benchmarks import lcbench
-import pandas as pd
-import scipy.stats
 import pytest
+
+
+def test_config():
+  from yahpo_gym.configuration import *
+  _test_dict = {
+      'config_id' : 'TEST_BENCHMARK',
+      'y_names' : ['valid_loss', 'runtime','n_params'],
+      'y_minimize' : [True, False, True, False, True, False],
+      'cont_names': ['epoch', 'batch_size', 'dropout_1'],
+      'cat_names': ['task', 'lr_schedule'],
+      'instance_names': 'task',
+      'fidelity_params': ['epoch', 'replication'],
+      'runtime_name': 'runtime'
+  }
+
+  cc = Configuration(_test_dict)
+
+  assert cc.config_id == 'TEST_BENCHMARK'
+  assert cc.y_names == ['valid_loss', 'runtime','n_params']
+  assert cc.cont_names == ['epoch', 'batch_size', 'dropout_1']
+  assert cc.cat_names == ['task', 'lr_schedule']
+  assert cc.instance_names == 'task'
+  assert cc.fidelity_params == ['epoch', 'replication']
+  assert cc.runtime_name == 'runtime'
+
+  # properties
+  assert cc.hp_names == (['epoch', 'batch_size', 'dropout_1'] + ['task', 'lr_schedule'])
