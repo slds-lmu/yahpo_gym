@@ -21,7 +21,7 @@ jobs:
         pip install sphinx_rtd_theme
         make html
     - name: Pull latest gh-pages
-      if: (contains(github.ref, 'master')) && github.event_name == 'push'
+      if: (contains(github.ref, 'main')) && github.event_name == 'push'
       run: |
         cd ..
         git clone https://github.com/yahpo_gym/yahpo_gym.git --branch gh-pages --single-branch gh-pages
