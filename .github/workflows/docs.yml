@@ -17,14 +17,14 @@ jobs:
     - name: Make docs
       run: |
         cd yahpo_gym/docs
-        printf "data_path: ~/LRZ Sync+Share/multifidelity_data\ndownload_url: https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd" >> ~/.config/yahpo_gym
+        printf "data_path: ~/file/to/data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
         pip install sphinx_rtd_theme
         make html
     - name: Pull latest gh-pages
       if: (contains(github.ref, 'main')) && github.event_name == 'push'
       run: |
         cd ..
-        git clone https://github.com/yahpo_gym/yahpo_gym.git --branch gh-pages --single-branch gh-pages
+        git clone https://github.com/pfistfl/yahpo_gym.git --branch gh-pages --single-branch gh-pages
     - name: Copy new docs into gh-pages
       if: (contains(github.ref, 'develop') || contains(github.ref, 'main')) && github.event_name == 'push'
       run: |
