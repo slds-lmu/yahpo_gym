@@ -28,7 +28,7 @@ setup(name='yahpo_gym',
       install_requires=['ConfigSpace', 'onnxruntime', 'fastdownload', 'pyyaml', 'configspace'],
       extras_require={
           "test": ["pytest>=4.6","mypy", "pre-commit", "pytest-cov"],
-          "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc"]
+          "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc", 'pandas']
       },
       keywords=['module', 'train', 'yahpo'],
       url="https://github.com/pfistfl/yahpo_gym",
