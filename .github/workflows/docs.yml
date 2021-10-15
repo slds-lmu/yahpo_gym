@@ -38,7 +38,7 @@ jobs:
         last_commit=$(git log --pretty=format:"%an: %s")
         cd ../gh-pages
         branch_name=${GITHUB_REF##*/}
-        mv -r $branch_name/ docs
+        mv $branch_name/ docs
         git add docs
         git config --global user.name 'Github Actions'
         git config --global user.email 'not@mail.com'
