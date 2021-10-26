@@ -17,7 +17,7 @@ remotes::install_github("pfistfl/yahpo_gym/yahpo_gym_r")
 YAHPO GYM requires a one-time setup to install the required python dependencies.
 Here we install all packages into the `yahpo_gym` conda environment.
 
-```{r, eval = FALSE}
+```r
 reticulate::conda_create(
   envname = "yahpo_gym",
   packages = c("onnxruntime", "pip", "pyyaml", "pandas"),
@@ -26,6 +26,8 @@ reticulate::conda_create(
 )
 reticulate::conda_install(envname = "yahpo_gym", packages="configspace", channel="conda-forge")
 reticulate::conda_install(envname = "yahpo_gym", packages="fastdownload", channel="fastai")
+reticulate::conda_install(envname = "yahpo_gym", pip=TRUE,
+  packages="'git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym'")
 ```
 
 Now we can instantiate a local config that sets up the path files are downloaded to:
@@ -33,7 +35,7 @@ Now we can instantiate a local config that sets up the path files are downloaded
 ```r
 reticulate::use_condaenv("yahpo_gym", required=TRUE)
 library("yahpo_gym")
-init_local_config(path = "~/LRZ Sync+Share/multifidelity_data")
+init_local_config(path = "~/multifidelity_data")
 ```
 
 
@@ -43,8 +45,7 @@ We first load the package and the required conda environment:
 
 ```r
 reticulate::use_condaenv("yahpo_gym", required=TRUE)
-devtools::load_all()
-# library("yahpo_gym")
+library("yahpogym")
 ```
 
 and subsequently instantiate the benchmark to obtain our objective.
