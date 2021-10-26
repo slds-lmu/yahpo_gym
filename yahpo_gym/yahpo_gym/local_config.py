@@ -57,12 +57,14 @@ class LocalConfiguration():
             yaml.dump(config, fh)
 
     def _load_config(self):
-        config = {}
+        config = {"data_path":"", "download_url":""}
         try:
             with self.settings_path.open('r') as fh:
                 config = yaml.load(fh, Loader=yaml.FullLoader)
         except yaml.parser.ParserError:
-            raise yaml.parser.ParserError("Could not load config!")
+            raise yaml.parser.ParserError("Could not load config! (Invalid YAML?)")
+        except:
+            print("Could not load config! (Did you run LocalConfiguration.init_config()?)")
         return config
 
     @property

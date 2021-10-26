@@ -130,6 +130,19 @@ class BenchmarkSet():
         cs.add_forbidden_clauses(fbds)
         return cs
 
+    def get_fidelity_space(self):
+        """
+        Get the fidelity space to be optimized for.
+        """
+        hps = self.config_space.get_hyperparameters()
+        fidelity_params_idx = [self.config_space.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
+        hps = [hps[idx] for idx in fidelity_params_idx]
+        cs = CS.ConfigurationSpace()
+        cs.add_hyperparameters(hps)
+        cs.add_conditions(self.config_space.get_conditions())
+        cs.add_forbidden_clauses(self.config_space.get_forbiddens())
+        return cs
+
 
     def set_session(self, session: Union[rt.InferenceSession, None] = None):
         """
