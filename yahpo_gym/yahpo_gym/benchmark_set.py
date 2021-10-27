@@ -78,16 +78,12 @@ class BenchmarkSet():
             Should the evaluation be logged in the `archive`? Initialized to `False`.
         """
         start_time = time.time()
-        results = self.objective_function(configuration)
-        results_dict = {k:v for k,v in zip(self.config.y_names, results)}
+        results = self.objective_function(configuration, logging = logging)
         rt = results[self.config.runtime_name]
         offset = time.time() - start_time
         sleepit = (rt - offset) * self.quant
         time.sleep(sleepit)
-        if logging:
-            timedate = time.strftime("%D|%H:%M:%S", time.localtime())
-            self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
-        return results_dict
+        return results
 
     def set_constant(self, param: str, value = None):
         """
