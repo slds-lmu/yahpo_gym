@@ -39,7 +39,7 @@ class BenchmarkSet():
         if self.active_session or (session is not None):
             self.set_session(session)
 
-    def objective_function(self, configuration: Union[Dict, List[Dict]]):
+    def objective_function(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
         """
         Evaluate the surrogate for a given configuration.
 
@@ -48,6 +48,8 @@ class BenchmarkSet():
         configuration: Dict
             A valid dict containing hyperparameters to be evaluated. 
             Attention: `configuration` is not checked for internal validity for speed purposes.
+        logging: bool
+            Should the evaluation be logged in the `archive`? Initialized to `False`.
         """
         if not self.active_session:
             self.set_session()
@@ -57,11 +59,12 @@ class BenchmarkSet():
         output_name = self.session.get_outputs()[0].name
         results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
         results_dict = {k:v for k,v in zip(self.config.y_names, results)}
-        timedate = time.strftime("%D|%H:%M:%S", time.localtime())
-        self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
+        if logging:
+            timedate = time.strftime("%D|%H:%M:%S", time.localtime())
+            self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
         return results_dict
 
-    def _objective_function_timed(self, configuration: Union[Dict, List[Dict]]):
+    def _objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
         """
         Evaluate the surrogate for a given configuration and sleep for quant * predicted runtime.
         Not exported yet since this is not well tested right now.
@@ -71,6 +74,8 @@ class BenchmarkSet():
         configuration: Dict
             A valid dict containing hyperparameters to be evaluated. 
             Attention: `configuration` is not checked for internal validity for speed purposes.
+        logging: bool
+            Should the evaluation be logged in the `archive`? Initialized to `False`.
         """
         start_time = time.time()
         results = self.objective_function(configuration)
@@ -79,8 +84,9 @@ class BenchmarkSet():
         offset = time.time() - start_time
         sleepit = (rt - offset) * self.quant
         time.sleep(sleepit)
-        timedate = time.strftime("%D|%H:%M:%S", time.localtime())
-        self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
+        if logging:
+            timedate = time.strftime("%D|%H:%M:%S", time.localtime())
+            self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
         return results_dict
 
     def set_constant(self, param: str, value = None):
