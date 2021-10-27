@@ -5,6 +5,7 @@
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
 The underlying software with additional documentation and background can be found [here](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
+See the [Documentation](https://pfistfl.github.io/yahpo_gym/) for more info.
 
 
 YAHPO Gym distinguishes between `scenarios` and `instances`.
