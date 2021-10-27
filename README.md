@@ -1,5 +1,4 @@
 # YAHPO GYM
----
 
 ### What is YAHPO GYM? 
 
@@ -11,12 +10,11 @@ See the [Documentation](https://pfistfl.github.io/yahpo_gym/) for more info.
 YAHPO Gym distinguishes between `scenarios` and `instances`.
 A `scenario` is a collection of `instances` that share the same hyperparameter space. In practice, a `scenario` usually consists of a single algorithm fitted on a variety of datasets (= `instances`).
 
-YAHPO Gym offers $3$ packages:
+This repository contains three modules/packages:
 
-- `yahpo_gym` (python): The core package allowing inference on the surrogates
-- `yahpo_train` (python): Code to train surrogate models used in `yahpo_gym`.
-
-- `yahpo_gym_r`(R): An R wrapper to yahpo gym.
+- `yahpo_gym` (python): The core package allowing for  inference on the surrogates
+- `yahpo_train` (python): Module for training surrogate models used in `yahpo_gym`.
+- `yahpo_gym_r`(R): An R wrapper for  `yahpo gym`.
 
 
 ### Why should I use it?
