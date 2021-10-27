@@ -45,32 +45,42 @@ class BenchmarkSet():
         Parameters
         ----------
         configuration: Dict
-            A valid dict containing hyperparameters to be evaluated. 
+            A valid dict or list of dicts containing hyperparameters to be evaluated. 
             Attention: `configuration` is not checked for internal validity for speed purposes.
         """
         if not self.active_session:
             self.set_session()
-        x_cont, x_cat = self._config_to_xs(configuration)
-        # input & output names and dims
+
+        # Always work with a list of configurations
+        if isinstance(configuration, dict):
+            configuration = [configuration]
+
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
-        results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
-        return {k:v for k,v in zip(self.config.y_names, results)}
+
+        results_list = [None]*len(configuration)
+        for i in range(len(configuration)):
+            x_cont, x_cat = self._config_to_xs(configuration[i])
+            results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
+            results_dict = {k:v for k,v in zip(self.config.y_names, results)}
+            results_list[i] = results_dict
+        return results_list
 
     def _objective_function_timed(self, configuration: Union[Dict, List[Dict]]):
         """
         Evaluate the surrogate for a given configuration and sleep for quant * predicted runtime.
         Not exported yet since this is not well tested right now.
+        If configuration ist a list of dicts, sleep is done after all evaluations.
 
         Parameters
         ----------
         configuration: Dict
-            A valid dict containing hyperparameters to be evaluated. 
+            A valid dict or list of dicts containing hyperparameters to be evaluated. 
             Attention: `configuration` is not checked for internal validity for speed purposes.
         """
         start_time = time.time()
         results = self.objective_function(configuration)
-        rt = results[self.config.runtime_name]
+        rt = sum([result.get(self.config.runtime_name) for result in results])
         offset = time.time() - start_time
         sleepit = (rt - offset) * self.quant
         time.sleep(sleepit)
@@ -88,7 +98,7 @@ class BenchmarkSet():
             A valid value for the parameter `param`.
         """
         hpar = self.config_space.get_hyperparameter(self.config.instance_names)
-        # FIXMER: value in hpar.choices
+        # FIXME: assert value is in hpar.choices
         self.constants[param] = value
     
     def set_instance(self, value):
@@ -178,12 +188,14 @@ class BenchmarkSet():
         return f"BenchmarkInstance ({self.config.config_id})"
 
     def _config_to_xs(self, configuration):
-        # FIXME: This should work with configuration as a `List` of Dicts
+        """
+        Converts a configuration to separate array represenations of continuous and categorical values.
+        """
         # Update with constants (constants overwrite configuration values)
         if len(self.constants):
             [configuration.update({k : v}) for k,v in self.constants.items()]
 
-        # FIXME: check NA handling below
+        # Missing values get '#na#' for cats, 0 for everything else
         all = self.config_space.get_hyperparameter_names()
         missing = list(set(all).difference(set(configuration.keys())))
         for hp in missing:
@@ -198,7 +210,7 @@ class BenchmarkSet():
         """
         Integer encode categorical variables.
         """
-        # see model.py dl_from_config on how the encoding was generated and stored
+        # See model.py dl_from_config on how the encoding was generated and stored
         return self.encoding.get(name).get(value)
 
     def _get_encoding(self):

@@ -134,7 +134,7 @@ class lcbench(Worker):
         """
 
         config.update({"epoch": int(np.round(budget))})  # update epoch
-        result = bench.objective_function(config)  # evaluate
+        result = bench.objective_function(config)[0]  # evaluate
 
         time.sleep(self.sleep_interval)
 
