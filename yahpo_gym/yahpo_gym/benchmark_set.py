@@ -34,6 +34,7 @@ class BenchmarkSet():
         self.quant = 0.1
         self.constants = {}
         self.session = None
+        self.archive = []
 
         if self.active_session or (session is not None):
             self.set_session(session)
@@ -55,7 +56,10 @@ class BenchmarkSet():
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
         results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
-        return {k:v for k,v in zip(self.config.y_names, results)}
+        results_dict = {k:v for k,v in zip(self.config.y_names, results)}
+        timedate = time.strftime("%D|%H:%M:%S", time.localtime())
+        self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
+        return results_dict
 
     def _objective_function_timed(self, configuration: Union[Dict, List[Dict]]):
         """
@@ -70,11 +74,14 @@ class BenchmarkSet():
         """
         start_time = time.time()
         results = self.objective_function(configuration)
+        results_dict = {k:v for k,v in zip(self.config.y_names, results)}
         rt = results[self.config.runtime_name]
         offset = time.time() - start_time
         sleepit = (rt - offset) * self.quant
         time.sleep(sleepit)
-        return results
+        timedate = time.strftime("%D|%H:%M:%S", time.localtime())
+        self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
+        return results_dict
 
     def set_constant(self, param: str, value = None):
         """
