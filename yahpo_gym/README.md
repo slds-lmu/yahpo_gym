@@ -49,7 +49,7 @@ pip install "git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory
 
 To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`).
 
-You can download these [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
+You can download these [here (Github)](https://github.com/pfistfl/yahpo_data) or [here (Synchshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
 You should pertain the folder structure as on the hosting site (i.e., create a `"path-to-data"` directory, for example named `"multifidelity_data"`, containing the individual, e.g., `"lcench"`, directories).
 
