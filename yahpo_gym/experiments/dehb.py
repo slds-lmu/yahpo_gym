@@ -1,15 +1,7 @@
-# export PYTHONPATH="$PYTHONPATH:/home/lps/Phd/DEHB" must be on path
-
-import time
-import warnings
-import numpy as np
-import ConfigSpace
-from typing import Dict, Union, List
-warnings.filterwarnings('ignore')
-
 from yahpo_gym import benchmark_set
 import yahpo_gym.benchmarks.lcbench
 
+# export PYTHONPATH="$PYTHONPATH:/home/lps/Phd/DEHB" must be on path
 from dehb import DEHB
 
 bench = benchmark_set.BenchmarkSet("lcbench")
@@ -25,12 +17,13 @@ def dehb_target_function(configuration, budget, **kwargs):
     fidelity_param_id = kwargs["fidelity_param_id"]
     bench = kwargs["bench"]
     X = configuration.get_dictionary()
+    # FIXME: rounding of budget?
     X.update({fidelity_param_id: budget})
     y = bench.objective_function(X)
 
     result = {
-        "fitness": - y.get("val_accuracy"),  # FIXME: should be changed, see #21, #20
-        "cost": y.get("time"),
+        "fitness": - float(y.get("val_accuracy")),  # FIXME: should be changed, see #21, #20
+        "cost": float(y.get("time")),
         "info": {
             "budget": budget
         }
