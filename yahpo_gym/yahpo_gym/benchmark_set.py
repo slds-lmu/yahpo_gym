@@ -2,6 +2,7 @@ from yahpo_gym.configuration import cfg
 import onnxruntime as rt
 import time
 import json
+import copy
 
 from pathlib import Path
 from typing import Union, Dict, List
@@ -12,10 +13,11 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, config_id: str = None, download: bool = True, active_session: bool = False, session: Union[rt.InferenceSession, None] = None):
+    def __init__(self, config_id: str = None, download: bool = True, active_session: bool = False,
+        session: Union[rt.InferenceSession, None] = None, check: bool = True):
         """
         Interface for a benchmark scenario. 
-        Initialized with a valid key for a valid Scenario and optinally an `onnxruntime.InferenceSession`.
+        Initialized with a valid key for a valid scenario and optinally an `onnxruntime.InferenceSession`.
 
         Parameters
         ----------
@@ -26,11 +28,15 @@ class BenchmarkSet():
         session: onnx.Session
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
+        check: bool
+            Should input to objective_function* be checked for validity? Initialized to True, can be
+            disabled for speedups.
         """
         self.config = cfg(config_id, download=download)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
+        self.check = check
         self.quant = 0.1
         self.constants = {}
         self.session = None
@@ -53,21 +59,24 @@ class BenchmarkSet():
         """
         if not self.active_session:
             self.set_session()
+
         x_cont, x_cat = self._config_to_xs(configuration)
         # input & output names and dims
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
         results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
+
         results_dict = {k:v for k,v in zip(self.config.y_names, results)}
         if logging:
             timedate = time.strftime("%D|%H:%M:%S", time.localtime())
             self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
+
         return results_dict
 
-    def _objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
+    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
         """
         Evaluate the surrogate for a given configuration and sleep for quant * predicted runtime.
-        Not exported yet since this is not well tested right now.
+        Note, that this assumes that the predicted runtime is in seconds.
 
         Parameters
         ----------
@@ -78,10 +87,10 @@ class BenchmarkSet():
             Should the evaluation be logged in the `archive`? Initialized to `False`.
         """
         start_time = time.time()
-        results = self.objective_function(configuration, logging = logging)
+        results = self.objective_function(configuration)
         rt = results[self.config.runtime_name]
         offset = time.time() - start_time
-        sleepit = (rt - offset) * self.quant
+        sleepit = max(rt - offset, 0) * self.quant
         time.sleep(sleepit)
         return results
 
@@ -96,8 +105,9 @@ class BenchmarkSet():
         value: int | str | any
             A valid value for the parameter `param`.
         """
-        hpar = self.config_space.get_hyperparameter(self.config.instance_names)
-        # FIXMER: value in hpar.choices
+        hpar = self.config_space.get_hyperparameter(param)
+        if not hpar.is_legal(value):
+            raise Exception(f"Value {value} not allowed for parameter {param}!")
         self.constants[param] = value
     
     def set_instance(self, value):
@@ -129,17 +139,18 @@ class BenchmarkSet():
             Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
         """
         # FIXME: assert instance is a valid choice
-        hps = self.config_space.get_hyperparameters()
-        instance_names_idx = self.config_space.get_hyperparameter_names().index(self.config.instance_names)
+        csn = copy.deepcopy(self.config_space)
+        hps = csn.get_hyperparameters()
+        instance_names_idx = csn.get_hyperparameter_names().index(self.config.instance_names)
         hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
         if drop_instance_param:
             del hps[instance_names_idx]
         if drop_fidelity_params:
-            fidelity_params_idx = [self.config_space.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
+            fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
             for idx in fidelity_params_idx:
                 del hps[idx]
-        cnds = self.config_space.get_conditions()
-        fbds = self.config_space.get_forbiddens()
+        cnds = csn.get_conditions()
+        fbds = csn.get_forbiddens()
         cs = CS.ConfigurationSpace()
         cs.add_hyperparameters(hps)
         cs.add_conditions(cnds)
@@ -150,13 +161,12 @@ class BenchmarkSet():
         """
         Get the fidelity space to be optimized for.
         """
-        hps = self.config_space.get_hyperparameters()
-        fidelity_params_idx = [self.config_space.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
+        csn = copy.deepcopy(self.config_space)
+        hps = csn.get_hyperparameters()
+        fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
         hps = [hps[idx] for idx in fidelity_params_idx]
         cs = CS.ConfigurationSpace()
         cs.add_hyperparameters(hps)
-        cs.add_conditions(self.config_space.get_conditions())
-        cs.add_forbidden_clauses(self.config_space.get_forbiddens())
         return cs
 
 
@@ -191,9 +201,20 @@ class BenchmarkSet():
 
 
     def __repr__(self):
-        return f"BenchmarkInstance ({self.config.config_id})"
+        return f"BenchmarkSet ({self.config.config_id})"
 
     def _config_to_xs(self, configuration):
+        if type(configuration) == CS.Configuration:
+            configuration = configuration.get_dictionary()
+
+        # Re-order:
+        self.config_space._sort_hyperparameters()
+        configuration = configuration.copy()
+        configuration = {k: configuration.get(k) for k in self.config_space.get_hyperparameter_names() if configuration.get(k) is not None}
+
+        if self.check:
+            self.config_space.check_configuration(CS.Configuration(self.config_space, values = configuration, allow_inactive_with_values = False))
+
         # FIXME: This should work with configuration as a `List` of Dicts
         # Update with constants (constants overwrite configuration values)
         if len(self.constants):
@@ -206,7 +227,8 @@ class BenchmarkSet():
             value = '#na#' if hp in self.config.cat_names else 0  # '#na#' for cats, see _integer_encode below
             configuration.update({hp:value})
 
-        x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names]).reshape(1, -1).astype(np.int32)
+
+        x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names if x not in self.config.drop_predict]).reshape(1, -1).astype(np.int32)
         x_cont = np.array([configuration[x] for x in self.config.cont_names]).reshape(1, -1).astype(np.float32)
         return x_cont, x_cat
 
@@ -230,5 +252,4 @@ class BenchmarkSet():
 
     def _eval_random(self):
         cfg = self.config_space.sample_configuration().get_dictionary()
-        print(cfg)
         return self.objective_function_timed(cfg)
