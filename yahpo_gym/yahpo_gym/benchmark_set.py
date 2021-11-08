@@ -111,15 +111,20 @@ class BenchmarkSet():
         """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, instance:str, drop_fidelity_params:bool = True):
+    def get_opt_space(self, instance:str, drop_instance_param:bool = True, drop_fidelity_params:bool = True):
         """
         Get the search space to be optimized.
-        Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
+        Sets 'instance' as a constant instance.
+        Removes the instance parameter if 'drop_instance_param = True'.
+        Otherwise, the instance parameter is set as a constant.
+        Removes all fidelity parameters if 'drop_fidelity_params = True'.
         
         Parameters
         ----------
         instance: str
             A valid instance. See `instances`.
+        drop_fidelity_params: bool
+            Should the instance param be dropped from the `opt_space`? Defaults to `True`.
         drop_fidelity_params: bool
             Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
         """
@@ -127,6 +132,8 @@ class BenchmarkSet():
         hps = self.config_space.get_hyperparameters()
         instance_names_idx = self.config_space.get_hyperparameter_names().index(self.config.instance_names)
         hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
+        if drop_instance_param:
+            del hps[instance_names_idx]
         if drop_fidelity_params:
             fidelity_params_idx = [self.config_space.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
             for idx in fidelity_params_idx:
