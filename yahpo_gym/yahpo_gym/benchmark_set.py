@@ -133,7 +133,7 @@ class BenchmarkSet():
         ----------
         instance: str
             A valid instance. See `instances`.
-        drop_fidelity_params: bool
+        drop_instance_param: bool
             Should the instance param be dropped from the `opt_space`? Defaults to `True`.
         drop_fidelity_params: bool
             Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
