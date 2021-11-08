@@ -220,7 +220,8 @@ class BenchmarkSet():
             value = '#na#' if hp in self.config.cat_names else 0  # '#na#' for cats, see _integer_encode below
             configuration.update({hp:value})
 
-        x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names]).reshape(1, -1).astype(np.int32)
+
+        x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names if x not in self.config.drop_predict]).reshape(1, -1).astype(np.int32)
         x_cont = np.array([configuration[x] for x in self.config.cont_names]).reshape(1, -1).astype(np.float32)
         return x_cont, x_cat
 

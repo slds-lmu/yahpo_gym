@@ -1,7 +1,10 @@
-import pytest
-import yahpo_gym
-import ConfigSpace
 import random
+import time
+import pytest
+
+import ConfigSpace
+
+import yahpo_gym
 from yahpo_gym.benchmark_set import BenchmarkSet
 from yahpo_gym.benchmarks import *
 
@@ -58,7 +61,12 @@ def test_benchmarkset_abstract(key, test_instance, fidelity_config):
   assert b.objective_function(xs2) == out
 
   # timed predict
+  b.quant = max(0, 0.5 / out[b.config.runtime_name]) + .000001
+  start = time.time()
   out = b.objective_function_timed(xs.copy())
+  end = time.time()
+  assert (end - start) < .6
+
   assert type(out) == dict
   assert [k for k in out.keys()] == b.config.y_names
 
@@ -75,7 +83,7 @@ def test_benchmarkset_lcbench():
   test_instance = "3945"
   b = test_benchmarkset_abstract("lcbench", test_instance, fidelity_config)
 
-# FIXME: Incldue this
+# FIXME: Include this
 # def test_benchmarkset_fcnet():
 #   fidelity_config = {"epoch" : 50}
 #   test_instance = "3945"
@@ -84,6 +92,7 @@ def test_benchmarkset_lcbench():
 def test_benchmarkset_nb301():
   fidelity_config = {"epoch" : 50}
   test_instance = "CIFAR10"
+  key = "nb301"
   b = test_benchmarkset_abstract("nb301", test_instance, fidelity_config)
 
 
