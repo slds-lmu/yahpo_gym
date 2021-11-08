@@ -66,12 +66,11 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'  functionality to evaluate the surrogates.
     get_objective = function(instance) {
       assert_choice(instance, self$instances)
-      doms = private$.load_r_domains(instance)
       ObjectiveYAHPO$new(
         instance,
         self$py_instance,
-        doms$domain,
-        doms$codomain
+        self$domain,
+        self$codomain
       )
     },
 
@@ -87,6 +86,19 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     get_opt_space_py = function(instance, drop_fidelity_params = FALSE) {
       assert_choice(instance, self$instances)
       self$py_instance$get_opt_space(instance, drop_fidelity_params)
+    },
+
+    #' @description
+    #' Subset the codomain
+    #'
+    #' @param keep (`character`) \cr
+    #'   Vector of co-domain target names to keep.
+    #' @return
+    #'  A [`paradox::ParamSet`] containing the output space (codomain).
+    subset_codomain = function(keep) {
+      codomain = self$codomain
+      new_domain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
+      private$.domains$codomain = codomain
     }
   ),
   active = list(
@@ -111,13 +123,30 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' A character vector of available instances for the scenario.
     instances = function() {
       self$py_instance$instances
+    },
+
+    #' @field domain `character` \cr
+    #' A [`paradox::ParamSet`] describing the domain to be optimized over.
+    domain = function(){
+      self.load_r_domains()$domain
+    },
+
+    #' @field codomain `character` \cr
+    #' A [`paradox::ParamSet`] describing the output domain.
+    codomain = function() {
+      self.load_r_domains()$codomain
     }
   ),
   private = list(
+    .domains = NULL,
+
     .load_r_domains = function(instance) {
-      ps_path = self$py_instance$config$get_path("param_set")
-      source(ps_path, local = environment())
-      list(domain = domain, codomain = codomain)
+      if (is.null(private$.domains)) {
+        ps_path = self$py_instance$config$get_path("param_set")
+        source(ps_path, local = environment())
+        private$.domains = list(domain = domain, codomain = codomain)
+      }
+      private$.domains
     }
   )
 )
