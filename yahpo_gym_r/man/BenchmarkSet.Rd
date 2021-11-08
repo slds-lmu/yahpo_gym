@@ -59,6 +59,12 @@ The param `sess` is a `onnxruntime.InferenceSession`\cr
 
 \item{\code{instances}}{`character` \cr
 A character vector of available instances for the scenario.}
+
+\item{\code{domain}}{`character` \cr
+A [`paradox::ParamSet`] describing the domain to be optimized over.}
+
+\item{\code{codomain}}{`character` \cr
+A [`paradox::ParamSet`] describing the output domain.}
 }
 \if{html}{\out{</div>}}
 }
@@ -68,6 +74,7 @@ A character vector of available instances for the scenario.}
 \item \href{#method-new}{\code{BenchmarkSet$new()}}
 \item \href{#method-get_objective}{\code{BenchmarkSet$get_objective()}}
 \item \href{#method-get_opt_space_py}{\code{BenchmarkSet$get_opt_space_py()}}
+\item \href{#method-subset_codomain}{\code{BenchmarkSet$subset_codomain()}}
 \item \href{#method-clone}{\code{BenchmarkSet$clone()}}
 }
 }
@@ -81,7 +88,7 @@ Initialize a new object
   key,
   onnx_session = NULL,
   active_session = FALSE,
-  download = TRUE
+  download = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -132,7 +139,7 @@ A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
 \subsection{Method \code{get_opt_space_py()}}{
 Get Optimization ConfigSpace
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance, drop_fidelity_params = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -142,12 +149,33 @@ Get Optimization ConfigSpace
 A valid instance. See `instances`.}
 
 \item{\code{drop_fidelity_params}}{[`logical`] \cr
-Should fidelity params be dropped?}
+Should fidelity params be dropped? Defaults to `FALSE`.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
 A [`paradox::ParamSet`] containing the search space to optimize over.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-subset_codomain"></a>}}
+\if{latex}{\out{\hypertarget{method-subset_codomain}{}}}
+\subsection{Method \code{subset_codomain()}}{
+Subset the codomain
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$subset_codomain(keep)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{keep}}{(`character`) \cr
+Vector of co-domain target names to keep.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A [`paradox::ParamSet`] containing the output space (codomain).
 }
 }
 \if{html}{\out{<hr>}}
