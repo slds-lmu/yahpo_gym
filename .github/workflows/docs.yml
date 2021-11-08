@@ -31,6 +31,7 @@ jobs:
         branch_name=${GITHUB_REF##*/}
         cd ../gh-pages
         rm -rf $branch_name
+        rm -rf docs/*
         cp -r ../yahpo_gym/yahpo_gym/docs/build/html $branch_name
     - name: Push to gh-pages
       if: (contains(github.ref, 'main')) && github.event_name == 'push'
@@ -38,7 +39,7 @@ jobs:
         last_commit=$(git log --pretty=format:"%an: %s")
         cd ../gh-pages
         branch_name=${GITHUB_REF##*/}
-        mv -f $branch_name/* docs
+        mv -r -f $branch_name/* docs
         git add docs
         git config --global user.name 'Github Actions'
         git config --global user.email 'not@mail.com'
