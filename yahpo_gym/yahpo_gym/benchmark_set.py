@@ -2,6 +2,7 @@ from yahpo_gym.configuration import cfg
 import onnxruntime as rt
 import time
 import json
+import copy
 
 from pathlib import Path
 from typing import Union, Dict, List
@@ -133,15 +134,16 @@ class BenchmarkSet():
             Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
         """
         # FIXME: assert instance is a valid choice
-        hps = self.config_space.get_hyperparameters()
-        instance_names_idx = self.config_space.get_hyperparameter_names().index(self.config.instance_names)
+        csn = copy.deepcopy(self.config_space)
+        hps = csn.get_hyperparameters()
+        instance_names_idx = csn.get_hyperparameter_names().index(self.config.instance_names)
         hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
         if drop_fidelity_params:
-            fidelity_params_idx = [self.config_space.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
+            fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
             for idx in fidelity_params_idx:
                 del hps[idx]
-        cnds = self.config_space.get_conditions()
-        fbds = self.config_space.get_forbiddens()
+        cnds = csn.get_conditions()
+        fbds = csn.get_forbiddens()
         cs = CS.ConfigurationSpace()
         cs.add_hyperparameters(hps)
         cs.add_conditions(cnds)
@@ -152,8 +154,9 @@ class BenchmarkSet():
         """
         Get the fidelity space to be optimized for.
         """
-        hps = self.config_space.get_hyperparameters()
-        fidelity_params_idx = [self.config_space.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
+        csn = copy.deepcopy(self.config_space)
+        hps = csn.get_hyperparameters()
+        fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
         hps = [hps[idx] for idx in fidelity_params_idx]
         cs = CS.ConfigurationSpace()
         cs.add_hyperparameters(hps)
@@ -197,9 +200,13 @@ class BenchmarkSet():
         if type(configuration) == CS.Configuration:
             configuration = configuration.get_dictionary()
 
-        if self.check:
-            self.config_space.check_configuration(CS.Configuration(self.config_space, values = configuration))
+        # Re-order:
+        self.config_space._sort_hyperparameters()
+        configuration = configuration.copy()
+        configuration = {k: configuration.get(k) for k in self.config_space.get_hyperparameter_names() if configuration.get(k) is not None}
 
+        if self.check:
+            self.config_space.check_configuration(CS.Configuration(self.config_space, values = configuration, allow_inactive_with_values = False))
 
         # FIXME: This should work with configuration as a `List` of Dicts
         # Update with constants (constants overwrite configuration values)

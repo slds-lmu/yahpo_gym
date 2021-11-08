@@ -44,20 +44,21 @@ def test_benchmarkset_abstract(key, test_instance, fidelity_config):
   with pytest.raises(Exception) as info:
     out = b.objective_function(xs)
 
+  xs = optspace.sample_configuration()
   xs = xs.get_dictionary()
   xs.update(fidelity_config)
-  out = b.objective_function(xs)
+  out = b.objective_function(xs.copy())
   assert type(out) == dict
   assert [k for k in out.keys()] == b.config.y_names
 
   # Invariant to dict order
   tmp = list(xs)
   random.shuffle(tmp)
-  xs = {x:xs.get(x) for x in tmp}
-  assert b.objective_function(xs) == out
+  xs2 = {hp:xs.get(hp) for hp in tmp}
+  assert b.objective_function(xs2) == out
 
   # timed predict
-  out = b.objective_function_timed(xs)
+  out = b.objective_function_timed(xs.copy())
   assert type(out) == dict
   assert [k for k in out.keys()] == b.config.y_names
 
@@ -70,7 +71,7 @@ def test_benchmarkset_abstract(key, test_instance, fidelity_config):
 
 
 def test_benchmarkset_lcbench():
-  fidelity_config = {"epoch" : 50}
+  fidelity_config = {"epochs" : 50}
   test_instance = "3945"
   b = test_benchmarkset_abstract("lcbench", test_instance, fidelity_config)
 
@@ -90,7 +91,6 @@ def test_benchmarkset_rbv2_super():
   fidelity_config = {"trainsize" : .5, "repl":9}
   test_instance = "15"
   b = test_benchmarkset_abstract("rbv2_super", test_instance, fidelity_config)
-
 
 def test_benchmarkset_rbv2_svm():
   fidelity_config = {"trainsize" : .5, "repl":9}
