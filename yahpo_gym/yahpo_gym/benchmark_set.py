@@ -16,7 +16,7 @@ class BenchmarkSet():
         session: Union[rt.InferenceSession, None] = None, check: bool = True):
         """
         Interface for a benchmark scenario. 
-        Initialized with a valid key for a valid Scenario and optinally an `onnxruntime.InferenceSession`.
+        Initialized with a valid key for a valid scenario and optinally an `onnxruntime.InferenceSession`.
 
         Parameters
         ----------
@@ -157,8 +157,6 @@ class BenchmarkSet():
         hps = [hps[idx] for idx in fidelity_params_idx]
         cs = CS.ConfigurationSpace()
         cs.add_hyperparameters(hps)
-        cs.add_conditions(self.config_space.get_conditions())
-        cs.add_forbidden_clauses(self.config_space.get_forbiddens())
         return cs
 
 

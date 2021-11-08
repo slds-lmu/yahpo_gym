@@ -13,6 +13,6 @@ _nasbench_301_dict = {
                   'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_normal_5', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_reduce_3', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_reduce_4', 'NetworkSelectorDatasetInfo_COLON_darts_COLON_inputs_node_reduce_5'],
     'fidelity_params': ['epoch'],
     'runtime_name': 'runtime',
-    'instance_names': 'CIFAR10'
+    'instance_names': 'dataset'
 }
 config_dict.update({'nb301': _nasbench_301_dict})
