@@ -128,13 +128,13 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @field domain `character` \cr
     #' A [`paradox::ParamSet`] describing the domain to be optimized over.
     domain = function(){
-      self.load_r_domains()$domain
+      private$.load_r_domains()$domain
     },
 
     #' @field codomain `character` \cr
     #' A [`paradox::ParamSet`] describing the output domain.
     codomain = function() {
-      self.load_r_domains()$codomain
+      private$.load_r_domains()$codomain
     }
   ),
   private = list(
