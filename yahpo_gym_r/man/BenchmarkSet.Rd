@@ -60,11 +60,14 @@ The param `sess` is a `onnxruntime.InferenceSession`\cr
 \item{\code{instances}}{`character` \cr
 A character vector of available instances for the scenario.}
 
-\item{\code{domain}}{`character` \cr
+\item{\code{domain}}{`ParamSet` \cr
 A [`paradox::ParamSet`] describing the domain to be optimized over.}
 
-\item{\code{codomain}}{`character` \cr
+\item{\code{codomain}}{`ParamSet` \cr
 A [`paradox::ParamSet`] describing the output domain.}
+
+\item{\code{quant}}{`numeric` \cr
+Multiply runtime by this factor. Defaults to 0.01.}
 }
 \if{html}{\out{</div>}}
 }
@@ -117,7 +120,7 @@ Download the required data on instantiation? Default `TRUE`.}
 \subsection{Method \code{get_objective()}}{
 Get the objective function
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(instance)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(instance, check_values = FALSE, timed = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -125,6 +128,12 @@ Get the objective function
 \describe{
 \item{\code{instance}}{[`instance`] \cr
 A valid instance. See `instances`.}
+
+\item{\code{check_values}}{(`logical`) \cr
+Should values be checked by bbotk? Initialized to `FALSE`.}
+
+\item{\code{timed}}{(`logical`) \cr
+Should function evaluation simulate runtime? Initialized to `FALSE`.}
 }
 \if{html}{\out{</div>}}
 }

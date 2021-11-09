@@ -61,16 +61,22 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'
     #' @param instance [`instance`] \cr
     #'   A valid instance. See `instances`.
+    #' @param check_values (`logical`) \cr
+    #'   Should values be checked by bbotk? Initialized to `FALSE`.
+    #' @param timed (`logical`) \cr
+    #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance) {
+    get_objective = function(instance, check_values = FALSE, timed = FALSE) {
       assert_choice(instance, self$instances)
       ObjectiveYAHPO$new(
         instance,
         self$py_instance,
         self$domain,
-        self$codomain
+        self$codomain,
+        check_values = check_values,
+        timed = timed
       )
     },
 
@@ -126,16 +132,25 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       self$py_instance$instances
     },
 
-    #' @field domain `character` \cr
+    #' @field domain `ParamSet` \cr
     #' A [`paradox::ParamSet`] describing the domain to be optimized over.
     domain = function(){
       private$.load_r_domains()$domain
     },
 
-    #' @field codomain `character` \cr
+    #' @field codomain `ParamSet` \cr
     #' A [`paradox::ParamSet`] describing the output domain.
     codomain = function() {
       private$.load_r_domains()$codomain
+    },
+    #' @field quant `numeric` \cr
+    #' Multiply runtime by this factor. Defaults to 0.01.
+    quant = function(val) {
+      if (missing(val)) {
+        return(quant)
+      }
+      assert_number(quant)
+      self$py_instance$quant = val
     }
   ),
   private = list(
