@@ -7,7 +7,7 @@ from fastai.callback.wandb import *
 from functools import partial
 import wandb
 
-def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 3*1e-4, epochs=50, deep=[512,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1.0, bs=2048, mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates'):
+def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 5*1e-4, epochs=100, deep=[512,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1.0, bs=2048, mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates'):
     """
     Fit function with hyperparameters
     """
@@ -154,14 +154,14 @@ def fit_taskset(key='taskset', **kwargs):
 
 if __name__ == '__main__':
     wandb.login()
-    # fit_nb301(dropout=.0) # Done
-    # fit_rbv2_rpart()
-    # fit_rbv2_super()
-    # fit_rbv2_svm()
-    # fit_rbv2_xgboost()
-    # fit_lcbench(export=True)
-    # fit_rbv2_ranger()    
-    fit_rbv2_glmnet()
-    # fit_rbv2_aknn(export=True)
-    # fit_fcnet()
-    # fit_taskset(export=True)
+    fit_nb301(export=True)
+    fit_rbv2_glmnet(export = True)
+    fit_rbv2_rpart(export = True)
+    fit_rbv2_super(export = True)
+    fit_rbv2_svm(export = True)
+    fit_rbv2_xgboost(export = True)
+    fit_lcbench(export=True)
+    fit_rbv2_ranger(export = True)    
+    fit_rbv2_aknn(export=True)
+    fit_fcnet(export=True)
+    fit_taskset(export=True)
