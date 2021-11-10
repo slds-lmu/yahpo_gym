@@ -25,12 +25,10 @@ class ContTransformerNone(nn.Module):
 
 class ContTransformerRange(nn.Module):
     """
-    Transformer for Continuous Variables.
-    Transforms to [p,1-p].
+    Transformer for Continuous Variables. Transforms to [0,1]
     """
-    def __init__(self, x, p=0.01):
+    def __init__(self, x):
         super().__init__()
-        self.p = torch.as_tensor(p)
         self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
         if self.max == self.min:
             raise Exception("Constant feature detected!")
@@ -40,90 +38,97 @@ class ContTransformerRange(nn.Module):
         """
         Batch-wise transform for x
         """
-        x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
+        x = (x - self.min) / (self.max - self.min)
         return x.float()
 
     def invert(self, x):
         """
         Batch-wise inverse transform for x
         """
-        x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
+        x = x * (self.max - self.min) + self.min
+        return x.float()
+    
+class ContTransformerClamp(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms to [0,1]
+    """
+    def __init__(self, x, min = None, max = None):
+        super().__init__()
+        self.min, self.max = min, max
+        # if self.min is not None:
+        #     self.min = torch.Tensor([min])
+        # if self.max is not None:
+        #     self.max = torch.Tensor([max])
+
+    def forward(self, x):
+        """
+        Batch-wise transform for x
+        """
+        return x.float()
+
+    def invert(self, x):
+        """
+        Batch-wise inverse transform for x
+        """
+        x = torch.clamp(x, self.min, self.max)
         return x.float()
 
 
-class ContTransformerNegExpRange(nn.Module):
+class ContTransformerNegExp(nn.Module):
     """
-    Log-Transformer for Continuous Variables.
-    Transforms to [p,1-p] after applying a neg-exp transform
+    Neg-Exp Transformer for Continuous Variables. 
+    With option to scale (= divide by .99 quantile)
     """
-    def __init__(self, x, p=0.01, scale=True, q=1.):
-        self.p = torch.as_tensor(p)
-        self.scale = scale
+    def __init__(self, x, scale = True):
         super().__init__()
-        
         self.max = torch.as_tensor(1.).to(torch.double)
         if scale:
-            self.max = max(torch.quantile(x[~torch.isnan(x)],q=q).to(torch.double), self.max)
-
-        x = x.to(torch.double) / self.max
-        x = torch.exp(-x)
-        self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
-        if self.max == self.min:
-            raise Exception("Constant feature detected!")
+            self.max = torch.max(x[~torch.isnan(x)]).to(torch.double)
+        
         
     def forward(self, x):
         """
-        Batch-wise transform for x: x -> exp(-x / scale) -> [p, 1-p]
+        Batch-wise transform for x: x -> exp(-x / scale)
         """
         x = x.to(torch.double) / self.max
-        x = torch.exp(-x)
-        x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
+        x = torch.exp(-x) - 1e-12
         return x.float()
 
     def invert(self, x):
         """
         Batch-wise inverse transform for x
         """
-        x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
-        x = - torch.log(x.to(torch.double))
+        x = - torch.log(x.to(torch.double) + 1e-12)
         x = x * self.max
         return x.float()
 
 
-class ContTransformerLogRange(nn.Module):
+class ContTransformerLog(nn.Module):
     """
     Log-Transformer for Continuous Variables.
-    Transforms to [p,1-p] after applying a log-transform
 
     logfun :: Can be torch.log
     expfun :: Can be torch.exp
+    eps    :: Small number
     """
-    def __init__(self, x, logfun = torch.log, expfun = torch.exp, p=0.01, eps = 1e-8):
-        self.p = torch.as_tensor(p)
-        self.eps = torch.as_tensor(eps)
+    def __init__(self, x, logfun = torch.log, expfun = torch.exp, eps = 1e-12):
         self.logfun = logfun
         self.expfun = expfun
+        self.eps = eps
         super().__init__()
-
-        x = self.logfun(x + self.eps)
-        self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(x[~torch.isnan(x)])
-        if self.max == self.min:
-            raise Exception("Constant feature detected!")
-        
+   
     def forward(self, x):
         """
         Batch-wise transform for x
         """
         x = self.logfun(x + self.eps)
-        x = (x - self.min) / ((self.max - self.min) / (1. - 2*self.p)) + self.p
         return x.float()
 
     def invert(self, x):
         """
         Batch-wise inverse transform for x
         """
-        x = (x - self.p) * ((self.max - self.min) / (1. - 2*self.p)) + self.min
-        x = torch.clamp(self.expfun(x) - self.eps, min = 0.)
+        x = self.expfun(x) - self.eps
         return x.float()
 
 
@@ -208,10 +213,14 @@ class ContTransformerChain(nn.Module):
     During forward pass, transforms are applied according to the list order,
     during invert, the order is reversed.
     """
-    def __init__(self, x, tfms):
-        self.tfms = [tf(x) for tf in tfms]
+    def __init__(self, x, tfms):  
         super().__init__()
-
+        self.tfms = []
+        for tf in tfms:
+            itf = tf(x)
+            x = itf.forward(x)
+            self.tfms += [itf]
+            
     def forward(self, x):
         """
         Chained batch-wise transform for x 
@@ -229,7 +238,9 @@ class ContTransformerChain(nn.Module):
         return x.float()
 
 
-ContTransformerScaleNegExp = partial(ContTransformerChain,tfms = [partial(ContTransformerRange, p=.1), ContTransformerNegExpRange])
+def tfms_chain(tfms):
+    return partial(ContTransformerChain, tfms = tfms)
+
 
 class ContNormalization(nn.Module):
     """

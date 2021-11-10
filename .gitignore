@@ -133,3 +133,4 @@ dmypy.json
 
 Pipfile
 Pipfile.lock
+*.db

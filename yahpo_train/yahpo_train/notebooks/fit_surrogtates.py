@@ -7,7 +7,7 @@ from fastai.callback.wandb import *
 from functools import partial
 import wandb
 
-def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 1e-4, epochs=25, deep=[512,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1.0, bs=2048, export=False, log_wandb=True, wandb_entity='mfsurrogates'):
+def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 3*1e-4, epochs=50, deep=[512,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1.0, bs=2048, mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates'):
     """
     Fit function with hyperparameters
     """
@@ -17,14 +17,15 @@ def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 1e-4, epochs
     # Construct embds from transforms. tfms overwrites emdbs_dbl, embds_tgt
     if tfms is not None:
         embds_dbl = [tfms.get(name) if tfms.get(name) is not None else ContTransformerNone for name, cont in dls.all_cols[dls.cont_names].iteritems()]
-        embds_tgt = [tfms.get(name) if tfms.get(name) is not None else ContTransformerNone for name, cont in dls.ys.iteritems()]
+        embds_tgt = [tfms.get(name) if tfms.get(name) is not None else ContTransformerNone for name, cont in dls.ys[dls.y_names].iteritems()]
 
     # Instantiate learner
     f = FFSurrogateModel(dls, layers=deep, deeper=deeper, ps=dropout, use_bn = use_bn, wide=wide, embds_dbl=embds_dbl, embds_tgt=embds_tgt)
     l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
-    l.metrics = [AvgTfedMetric(mae),  AvgTfedMetric(r2), AvgTfedMetric(spearman)]
-    l.add_cb(MixHandler)
-    l.add_cb(EarlyStoppingCallback(patience=3))
+    l.metrics = [AvgTfedMetric(mae),  AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
+    if mixup:
+        l.add_cb(MixHandler)
+    l.add_cb(EarlyStoppingCallback(patience=10))
 
     # Log results to wandb
     if log_wandb:
@@ -41,6 +42,8 @@ def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 1e-4, epochs
 
     if export:
         l.export_onnx(cc)
+        
+    return l
 
 
 def fit_nb301(key = 'nb301', **kwargs):
@@ -88,7 +91,7 @@ def fit_rbv2_ranger(key = 'rbv2_ranger', **kwargs):
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc"]]
     [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2,  expfun=torch.exp2 )}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
+    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2,  expfun=torch.exp2)}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
     [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
     fit_config(key, tfms=tfms, **kwargs)
 
@@ -105,10 +108,11 @@ def fit_rbv2_rpart(key = 'rbv2_rpart', **kwargs):
 def fit_rbv2_glmnet(key = 'rbv2_glmnet', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict",]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2,  expfun=torch.exp2 )}) for k in ["s"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0.), ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict",]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["s"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["repl"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
     fit_config(key, tfms=tfms, **kwargs)
 
 
@@ -157,7 +161,7 @@ if __name__ == '__main__':
     # fit_rbv2_xgboost()
     # fit_lcbench(export=True)
     # fit_rbv2_ranger()    
-    # fit_rbv2_glmnet()
+    fit_rbv2_glmnet()
     # fit_rbv2_aknn(export=True)
     # fit_fcnet()
-    fit_taskset(export=True)
+    # fit_taskset(export=True)

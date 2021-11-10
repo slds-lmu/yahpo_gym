@@ -13,7 +13,7 @@ class AvgTfedMetric(Metric):
     def reset(self):           self.total,self.count = 0.,0
     def accumulate(self, learn):
         bs = find_bs(learn.tfyb)
-        self.total += learn.to_detach(self.func(*learn.tfyb, torch.nan_to_num(learn.tfpred, nan = 0.0)))*bs
+        self.total += learn.to_detach(self.func(*learn.tfyb, learn.tfpred))*bs
         self.count += bs
         
     @property
@@ -48,6 +48,9 @@ def spearman(x,y,impute_nan=True):
     
     rho = [spearmanr(xs, ys)[0] if not ((xs[0] == xs).all() or (ys[0] == ys).all()) else 0. for xs,ys in zip(np.rollaxis(x, 1), np.rollaxis(y, 1)) ]
     return np.array(rho)
+
+def napct(x,y,impute_nan=True):
+    return torch.mean(torch.isnan(y).float())
 
 class WandbMetricsTableCallback(WandbCallback):
     def __init__(self, **kwargs):

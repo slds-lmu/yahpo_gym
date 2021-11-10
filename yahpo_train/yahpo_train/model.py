@@ -131,12 +131,12 @@ class FFSurrogateModel(nn.Module):
         if embds_dbl is not None:
             self.embds_dbl = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.all_cols[dls.cont_names].iteritems(), embds_dbl)])
         else:
-            self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), clip_outliers=False) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
-        
+            self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float()) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
+       
         if embds_tgt is not None:
-            self.embds_tgt = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.ys.iteritems(), embds_tgt)])
+            self.embds_tgt = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.ys[dls.y_names].iteritems(), embds_tgt)])
         else:
-            self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float(), normalize='range', clip_outliers=True) for name, cont in dls.ys.iteritems()])
+            self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float()) for name, cont in dls.ys[dls.y_names].iteritems()])
 
         self.n_emb,self.n_cont = sum(e.embedding_dim for e in self.embds_fct), len(dls.cont_names)
         self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
