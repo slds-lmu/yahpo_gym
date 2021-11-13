@@ -307,7 +307,7 @@ This reads from and writes to a configuration file in the YAML format,
 allowing to store paths to the underlying data and models required for
 inference on the fitted surrogates.</p>
 <dl class="simple">
-<dt>settings_path: str</dt><dd><p>Path to the directory where surrogate models and metadata are saved.
+<dt>settings_path: str</dt><dd><p>Path to the local configuration file.
 The default is “~/.config/yahpo_gym”.</p>
 </dd>
 </dl>
@@ -331,7 +331,7 @@ The default is “~/.config/yahpo_gym”.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="yahpo_gym.local_config.LocalConfiguration.init_config">
-<span class="sig-name descname"><span class="pre">init_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'https://syncandshare.lrz.de/dl/fiCMkzqj1bv1LfCUyvZKmLvd'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yahpo_gym.local_config.LocalConfiguration.init_config" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'https://syncandshare.lrz.de/dl/fiCMkzqj1bv1LfCUyvZKmLvd'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yahpo_gym.local_config.LocalConfiguration.init_config" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a new local configuration.</p>
 <p>This writes a local configuration file to the specified ‘settings_path’.
 The 
