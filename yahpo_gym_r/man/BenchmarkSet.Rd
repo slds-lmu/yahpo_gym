@@ -91,7 +91,8 @@ Initialize a new object
   key,
   onnx_session = NULL,
   active_session = FALSE,
-  download = FALSE
+  download = FALSE,
+  check = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -109,7 +110,10 @@ If no session is provided, new session is created.}
 Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.}
 
 \item{\code{download}}{`logical` \cr
-Download the required data on instantiation? Default `TRUE`.}
+Download the required data on instantiation? Default `FALSE`.}
+
+\item{\code{check}}{`logical` \cr
+Check inputs for validity before passing to surrogate model? Default `FALSE`.}
 }
 \if{html}{\out{</div>}}
 }

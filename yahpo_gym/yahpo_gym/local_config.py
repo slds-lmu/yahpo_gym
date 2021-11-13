@@ -14,12 +14,12 @@ class LocalConfiguration():
         Parameters
         ----------
         settings_path: str
-            Path to the directory where surrogate models and metadata are saved.
+            Path to the local configuration file.
             The default is "~/.config/yahpo_gym".
         """
         self.settings_path = Path(settings_path).expanduser().absolute()
     
-    def init_config(self, settings_path: str = "", download_url: str ="https://syncandshare.lrz.de/dl/fiCMkzqj1bv1LfCUyvZKmLvd"):
+    def init_config(self, data_path: str = "", download_url: str ="https://syncandshare.lrz.de/dl/fiCMkzqj1bv1LfCUyvZKmLvd"):
         """
         Initialize a new local configuration.
 
@@ -36,7 +36,7 @@ class LocalConfiguration():
             Path to the directory where surrogate models and metadata are saved.
         """
         os.makedirs(os.path.dirname(self.settings_path), exist_ok=True)
-        config = {'data_path': str(settings_path), 'download_url':download_url}
+        config = {'data_path': str(data_path), 'download_url':download_url}
         with self.settings_path.open('w', encoding='utf-8') as fh:
             yaml.dump(config, fh)
         return None
