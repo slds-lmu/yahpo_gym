@@ -25,7 +25,7 @@ setup(name='yahpo_train',
       license='LGPLv3',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
       include_package_data=True,
-      install_requires=['torch>=1.0.0', 'fastdownload', 'yahpo_gym'],
+      install_requires=['torch>=1.0.0', 'fastdownload', 'fastai', 'yahpo_gym'],
       keywords=['module', 'train', 'yahpo'],
       url="https://github.com/pfistfl/yahpo_gym",
       classifiers=["Development Status :: 3 - Alpha"])
