@@ -7,7 +7,7 @@ from fastai.callback.wandb import *
 from functools import partial
 import wandb
 
-def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1., bs=2048, mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs = [], device='cuda:0'):
+def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1., bs=2048, mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
     """
     Fit function with hyperparameters
     """
@@ -20,7 +20,7 @@ def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr = 1e-4, epochs
         embds_tgt = [tfms.get(name) if tfms.get(name) is not None else ContTransformerNone for name, cont in dls.ys.iteritems()]
 
     # Instantiate learner
-    f = FFSurrogateModel(dls, layers=deep, deeper=deeper, ps=dropout, use_bn = use_bn, wide=wide, embds_dbl=embds_dbl, embds_tgt=embds_tgt)
+    f = FFSurrogateModel(dls, layers=deep, deeper=deeper, ps=dropout, use_bn=use_bn, wide=wide, embds_dbl=embds_dbl, embds_tgt=embds_tgt)
     l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
     l.metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
     if mixup:
@@ -76,19 +76,19 @@ def tune_config(key, name, **kwargs):
     study = optuna.create_study(study_name=name, storage=storage_name, direction="minimize", pruner=pruner, load_if_exists=True)
 
     trange = ContTransformerRange
-    tlog = partial(ContTransformerLogRange, logfun=torch.log, expfun=torch.exp)
-    tlog2 = partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)
+    tlog = ContTransformerLogRange
     tnexp = ContTransformerNegExpRange
-    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp}
+    trafos = {"trange":trange, "tlog":tlog, "tnexp":tnexp}
     
     def objective(trial):
         cc = cfg(key)
         tfms = {}
+        # FIXME: we probably want to be able to manually exclude ys and xs and simply provide tfs
         for y in cc.y_names:
             # if opt_tfms_y is False use ContTransformerRange
             opt_tfms_y = trial.suggest_categorical("opt_tfms_" + y, [True, False])
             if opt_tfms_y:
-                tf = trial.suggest_categorical("tfms_" + y, ["tlog", "tlog2", "tnexp"])
+                tf = trial.suggest_categorical("tfms_" + y, ["tlog", "tnexp"])
             else:
                 tf = "trange"
             tfms.update({y:trafos.get(tf)})
@@ -96,7 +96,7 @@ def tune_config(key, name, **kwargs):
             # if opt_tfms_x is False use ContTransformerRange
             opt_tfms_x = trial.suggest_categorical("opt_tfms_" + x, [True, False])
             if opt_tfms_x:
-                tf = trial.suggest_categorical("tfms_" + x, ["tlog", "tlog2", "tnexp"])
+                tf = trial.suggest_categorical("tfms_" + x, ["tlog", "tnexp"])
             else:
                 tf = "trange"
             tfms.update({x:trafos.get(tf)})
@@ -124,17 +124,63 @@ def tune_config(key, name, **kwargs):
         dropout = trial.suggest_categorical("dropout", [0., 0.25, 0.5])
         cbs = [FastAIPruningCallback(trial=trial, monitor='valid_loss')]
         
-        l = fit_config(key=key, tfms = tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=False, cbs=cbs)
+        l = fit_config(key=key, tfms=tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=False, cbs=cbs, **kwargs)
         return l.recorder.losses[-1]
     
-    study.optimize(objective, n_trials=200, timeout=86400)
-    plot_optimization_history(study)
+    study.optimize(objective, n_trials=100, timeout=86400)
+    # plot_optimization_history(study)
     return study
+
+def fit_from_best_params(key, best_params, log_wandb=False, **kwargs):
+    cc = cfg(key)
+    tfms = {}
+
+    trange = ContTransformerRange
+    tlog = ContTransformerLogRange
+    tnexp = ContTransformerNegExpRange
+    trafos = {"trange":trange, "tlog":tlog, "tnexp":tnexp}
+
+    for y in cc.y_names:
+        # if opt_tfms_y is False use ContTransformerRange
+        opt_tfms_y = best_params.get("opt_tfms_" + y)
+        if opt_tfms_y:
+            tf = best_params.get("tfms_" + y)
+        else:
+            tf = "trange"
+        tfms.update({y:trafos.get(tf)})
+    for x in cc.cont_names:
+        # if opt_tfms_x is False use ContTransformerRange
+        opt_tfms_x = best_params.get("opt_tfms_" + x)
+        if opt_tfms_x:
+            tf = best_params.get("tfms_" + x)
+        else:
+            tf = "trange"
+        tfms.update({x:trafos.get(tf)})
+
+    if best_params.get("opt_deep_arch"):
+        deep = get_arch(best_params.get("deep_u"), best_params.get("deep_n"), best_params.get("deep_s"))
+        use_deeper = best_params.get("use_deeper")
+        if use_deeper:
+            deeper = get_arch(best_params.get("deeper_u"), best_params.get("deep_n") + 2, best_params.get("deep_s"))
+        else:
+            deeper = []
+    else:
+        deep = [1024,512,256]
+        deeper = []
+
+    lr = best_params.get("lr")
+    wide = best_params.get("wide")
+    mixup = best_params.get("mixup")
+    use_bn = best_params.get("use_bn")
+    dropout = best_params.get("dropout")
+    
+    l = fit_config(key=key, tfms=tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=log_wandb, **kwargs)
+    return l
 
 
 def fit_nb301(key='nb301', **kwargs):
-    embds_dbl = [partial(ContTransformerMultScalar, m = 1/52)]
-    embds_tgt = [partial(ContTransformerMultScalar, m = 1/100), ContTransformerRange]
+    embds_dbl = [partial(ContTransformerMultScalar, m=1/52)]
+    embds_tgt = [partial(ContTransformerMultScalar, m=1/100), ContTransformerRange]
     return fit_config(key, embds_dbl=embds_dbl, embds_tgt=embds_tgt, **kwargs)
 
 
@@ -256,14 +302,9 @@ def fit_iaml_rpart(key='iaml_rpart', **kwargs):
 def fit_iaml_glmnet(key='iaml_glmnet', **kwargs):
     # Transforms
     tfms = {}
-    #[tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "mec", "ias", "nf"]]
-    #[tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict"]]
-    #[tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["s"]]
-    #[tfms.update({k:partial(ContTransformerNegExpRange, q=.975)}) for k in ["logloss"]]
-    [tfms.update({k:ContTransformerRange}) for k in ["alpha", "auc", "f1", "logloss", "mec", "nf", "rampredict", "timepredict", "trainsize"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["ias", "s"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["rammodel", "ramtrain", "timerain"]]
-    [tfms.update({k:partial(ContTransformerNegExpRange)}) for k in ["mmce"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["auc", "ias", "mec", "mmce", "nf", "rammodel", "ramtrain", "timepredict"]]
+    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["alpha", "rampredict", "timetrain", "logloss", "s", "trainsize"]]
+    [tfms.update({k:partial(ContTransformerNegExpRange)}) for k in ["f1"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
 
@@ -293,16 +334,15 @@ if __name__ == '__main__':
     # fit_rbv2_super()
     # fit_rbv2_svm()
     # fit_rbv2_xgboost()
-    # fit_lcbench(export=True)
+    # fit_lcbench()
     # fit_rbv2_ranger()
     # fit_rbv2_glmnet()
-    # fit_rbv2_aknn(export=True)
+    # fit_rbv2_aknn()
     # fit_fcnet()
-    # fit_taskset(export=True)
-    # fit_iaml_ranger(lr = 1e-3, epochs=50)
-    # fit_iaml_rpart(epochs=50)
-    # tune_config(fit_iaml_glmnet, "tune_iaml_glmnet", epochs = 150)
-    # fit_iaml_glmnet(epochs=150)
-    # fit_iaml_xgboost(epochs=25)
-    # fit_iaml_super(epochs=25, bs=4096)
+    # fit_taskset()
+    #
+    # study_iaml_glmnet = tune_config("iaml_glmnet", "tune_iaml_glmnet")
+    # fit_from_best_params("iaml_glmnet", study_iaml_glmnet.best_params)
+    # study_iaml_rpart = tune_config("iaml_rpart", "tune_iaml_rpart")
+    # fit_from_best_params("iaml_rpart", study_iaml_rpart.best_params)
 
