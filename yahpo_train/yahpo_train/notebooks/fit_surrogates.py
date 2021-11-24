@@ -345,4 +345,10 @@ if __name__ == '__main__':
     # fit_from_best_params("iaml_glmnet", study_iaml_glmnet.best_params)
     # study_iaml_rpart = tune_config("iaml_rpart", "tune_iaml_rpart")
     # fit_from_best_params("iaml_rpart", study_iaml_rpart.best_params)
+    device = torch.device("cpu")
+    fit_iaml_ranger(epochs=10,device=device, export=True, log_wandb=False)
+    fit_iaml_rpart(epochs=10,device=device, export=True, log_wandb=False)
+    fit_iaml_glmnet(epochs=10,device=device, export=True, log_wandb=False)
+    fit_iaml_xgboost(epochs=10,device=device, export=True, log_wandb=False)
+    fit_iaml_super(epochs=10,device=device, export=True, log_wandb=False)
 
