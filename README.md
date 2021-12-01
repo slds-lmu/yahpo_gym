@@ -1,5 +1,5 @@
 # YAHPO GYM
-
+[[Module Handbook]](https://pfistfl.github.io/yahpo_gym/) [[Paper]](https://arxiv.org/abs/2109.03670) [[Software (Python)]](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym) [[Software (R)]](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 ### What is YAHPO GYM? 
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
