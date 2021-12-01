@@ -13,8 +13,8 @@ _iaml_dict = {
 _iaml_ranger = _iaml_dict.copy()
 _iaml_ranger.update({
     'config_id' : 'iaml_ranger',
-    'cont_names': ['num.trees', 'replace', 'sample.fraction', 'mtry.ratio', 'min.node.size', 'num.random.splits', 'trainsize'],
-    'cat_names': ['task_id', 'respect.unordered.factors', 'splitrule']
+    'cont_names': ['num.trees', 'sample.fraction', 'mtry.ratio', 'min.node.size', 'num.random.splits', 'trainsize'],
+    'cat_names': ['task_id', 'replace', 'respect.unordered.factors', 'splitrule']
 })
 config_dict.update({'iaml_ranger' : _iaml_ranger})
 
@@ -49,11 +49,11 @@ config_dict.update({'iaml_xgboost' : _iaml_xgboost})
 _iaml_super = _iaml_dict.copy()
 _iaml_super.update({
     'config_id' : 'iaml_super',
-    'cont_names': ['ranger.num.trees', 'ranger.replace', 'ranger.sample.fraction', 'ranger.mtry.ratio', 'ranger.min.node.size', 'ranger.num.random.splits',
+    'cont_names': ['ranger.num.trees', 'ranger.sample.fraction', 'ranger.mtry.ratio', 'ranger.min.node.size', 'ranger.num.random.splits',
                    'rpart.cp', 'rpart.maxdepth', 'rpart.minbucket', 'rpart.minsplit',
                    'glmnet.alpha', 'glmnet.s',
                    'xgboost.nrounds', 'xgboost.eta', 'xgboost.gamma', 'xgboost.lambda', 'xgboost.alpha', 'xgboost.subsample', 'xgboost.max_depth', 'xgboost.min_child_weight', 'xgboost.colsample_bytree', 'xgboost.colsample_bylevel', 'xgboost.rate_drop', 'xgboost.skip_drop',
                    'trainsize'],
-    'cat_names': ['task_id', 'learner', 'ranger.respect.unordered.factors', 'ranger.splitrule', 'xgboost.booster']
+    'cat_names': ['task_id', 'learner', 'ranger.replace', 'ranger.respect.unordered.factors', 'ranger.splitrule', 'xgboost.booster']
 })
 config_dict.update({'iaml_super' : _iaml_super})
