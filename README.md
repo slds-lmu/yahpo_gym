@@ -74,3 +74,8 @@ A quick introduction is given in the accompanying [jupyter notebook](https://git
 YAHPO Train is the module for training new surrogate models.
 
 YAHPO Train is still in a preliminary state but can already be used to reproduce and refit models introduced in our [paper](https://arxiv.org/abs/2109.03670).
+
+#### Related Software:
+
+- [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
+- [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench): can be used to reproduce several other scenarios in a real setting. Furthermroe, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
