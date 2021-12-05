@@ -34,8 +34,8 @@ Now we can instantiate a local config that sets up the path files are downloaded
 
 ```r
 reticulate::use_condaenv("yahpo_gym", required=TRUE)
-library("yahpo_gym")
-init_local_config(path = "~/multifidelity_data")
+library("yahpogym")
+init_local_config(data_path = "~/multifidelity_data")
 ```
 
 

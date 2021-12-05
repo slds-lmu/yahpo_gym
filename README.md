@@ -1,11 +1,14 @@
 # YAHPO GYM
-
+[[Module Handbook]](https://pfistfl.github.io/yahpo_gym/) [[Paper]](https://arxiv.org/abs/2109.03670) [[Software (Python)]](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym) [[Software (R)]](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 ### What is YAHPO GYM? 
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
 The underlying software with additional documentation and background can be found [here](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
 See the [module Documentation](https://pfistfl.github.io/yahpo_gym/) for more info.
 
+- **Problem Variety**: Optimization problems in YAHPO Gym stem from diverse Hyperparameter Optimization scenarios on tabular as well as image data
+- **Multi-Fidelity**: Allows for simulating low-fidelity approximations to the real target values to simulate multi-fidelity HPO.
+- **Multi-Objective**: Benchmarks usually contain multiple objectives: performance metrics, runtime and memory consumption allowing for multi-objective HPO.
 
 YAHPO Gym distinguishes between `scenarios` and `instances`.
 A `scenario` is a collection of `instances` that share the same hyperparameter space. In practice, a `scenario` usually consists of a single algorithm fitted on a variety of datasets (= `instances`).
@@ -71,3 +74,8 @@ A quick introduction is given in the accompanying [jupyter notebook](https://git
 YAHPO Train is the module for training new surrogate models.
 
 YAHPO Train is still in a preliminary state but can already be used to reproduce and refit models introduced in our [paper](https://arxiv.org/abs/2109.03670).
+
+#### Related Software:
+
+- [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
+- [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench): can be used to reproduce several other scenarios in a real setting. Furthermroe, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
