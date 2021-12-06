@@ -14,6 +14,7 @@ _nasbench_301_dict = {
     'fidelity_params': ['epoch'],
     'runtime_name': 'runtime',
     'instance_names': 'dataset',
-    'drop_predict': 'dataset'
+    'drop_predict': 'dataset',
+    'citation' : 'J. Siems, L. Zimmer, A. Zela, J. Lukasik, M. Keuper, and F. Hutter, “NAS-Bench-301 and the Case for Surrogate Benchmarks for Neural Architecture Search.” arXiv:2008.09777, 2020.'
 }
 config_dict.update({'nb301': _nasbench_301_dict})

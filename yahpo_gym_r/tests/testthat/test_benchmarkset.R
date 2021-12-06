@@ -44,3 +44,11 @@ test_that("benchmarkset can be instantiated", {
   expect_true(nrow(ois2$archive$data) == 10L)
   expect_true(id == reticulate::py_id(b2$session))
 })
+
+test_that("subsetting works", {
+  reticulate::use_condaenv("yahpo_gym", required=TRUE)
+  devtools::load_all()
+  b = BenchmarkSet$new("lcbench", active_session = TRUE)
+  b$subset_codomain("val_accuracy")
+  expect_true(names(b$codomain$params) == "val_accuracy")
+})

@@ -4,10 +4,10 @@
 \alias{init_local_config}
 \title{Initialize a local configuration}
 \usage{
-init_local_config(path = NULL, settings_path = "~/.config/yahpo_gym")
+init_local_config(data_path = NULL, settings_path = "~/.config/yahpo_gym")
 }
 \arguments{
-\item{path}{`character`\cr
+\item{data_path}{`character`\cr
 Path to save meta-data to.}
 
 \item{settings_path}{`character`\cr

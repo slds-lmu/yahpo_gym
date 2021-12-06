@@ -43,13 +43,15 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @param active_session `logical` \cr
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     #' @param download `logical` \cr
-    #'   Download the required data on instantiation? Default `TRUE`.
-    initialize = function(key, onnx_session = NULL, active_session = FALSE,  download = FALSE) {
+    #'   Download the required data on instantiation? Default `FALSE`.
+    #' @param check `logical` \cr
+    #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
+    initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
       # Initialize python instance
       gym = reticulate::import("yahpo_gym")
       self$id = assert_string(key)
       self$py_instance = gym$benchmark_set$BenchmarkSet(key, session=onnx_session,
-        active_session = assert_flag(active_session), download = FALSE)
+        active_session = assert_flag(active_session), download = FALSE, check = assert_flag(check))
       # Download files
       if (assert_flag(download)) {
         self$py_instance$config$download_files(files = list("param_set.R"))
@@ -61,16 +63,23 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'
     #' @param instance [`instance`] \cr
     #'   A valid instance. See `instances`.
+    #' @param check_values (`logical`) \cr
+    #'   Should values be checked by bbotk? Initialized to `FALSE`.
+    #' @param timed (`logical`) \cr
+    #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance) {
+    get_objective = function(instance, check_values = FALSE, timed = FALSE) {
       assert_choice(instance, self$instances)
+      assert_flag(check_values)
       ObjectiveYAHPO$new(
         instance,
         self$py_instance,
         self$domain,
-        self$codomain
+        self$codomain,
+        check_values = check_values,
+        timed = timed
       )
     },
 
@@ -97,8 +106,9 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'  A [`paradox::ParamSet`] containing the output space (codomain).
     subset_codomain = function(keep) {
       codomain = self$codomain
+      assert_choice(keep, names(codomain$params))
       new_domain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
-      private$.domains$codomain = codomain
+      private$.domains$codomain = new_domain
     }
   ),
   active = list(
@@ -125,16 +135,25 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       self$py_instance$instances
     },
 
-    #' @field domain `character` \cr
+    #' @field domain `ParamSet` \cr
     #' A [`paradox::ParamSet`] describing the domain to be optimized over.
     domain = function(){
-      self.load_r_domains()$domain
+      private$.load_r_domains()$domain
     },
 
-    #' @field codomain `character` \cr
+    #' @field codomain `ParamSet` \cr
     #' A [`paradox::ParamSet`] describing the output domain.
     codomain = function() {
-      self.load_r_domains()$codomain
+      private$.load_r_domains()$codomain
+    },
+    #' @field quant `numeric` \cr
+    #' Multiply runtime by this factor. Defaults to 0.01.
+    quant = function(val) {
+      if (missing(val)) {
+        return(quant)
+      }
+      assert_number(quant)
+      self$py_instance$quant = val
     }
   ),
   private = list(

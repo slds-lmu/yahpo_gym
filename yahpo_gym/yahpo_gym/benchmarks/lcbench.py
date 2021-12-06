@@ -8,6 +8,7 @@ _lcbench_dict = {
     'cat_names': ['OpenML_task_id'],
     'instance_names' : 'OpenML_task_id',
     'fidelity_params': ['epoch'],
-    'runtime_name': 'time'
+    'runtime_name': 'time',
+    'citation' : 'L. Zimmer, M. Lindauer, and F. Hutter, “Auto-pytorch tabular: Multi-fidelity metalearning for efficient and robust autodl,” IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 43, no. 9, pp. 3079 – 3090, 2021.'
 }
 config_dict.update({'lcbench' : _lcbench_dict})
