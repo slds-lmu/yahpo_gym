@@ -4,7 +4,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     timed = NULL,
     logging = NULL,
 
-    initialize = function(instance, py_instance, domain, codomain = NULL, check_values = FALSE, timed = FALSE, logging= FALSE) {
+    initialize = function(instance, py_instance, domain, codomain = NULL, check_values = FALSE, timed = FALSE, logging = FALSE) {
       self$timed = assert_flag(timed)
       assert_flag(logging)
       assert_flag(check_values)
@@ -19,9 +19,13 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       domain$values = setNames(map(pars, function(x) to_tune()), pars)
 
       # Define constants param_set
-      cst = domain$params[instance_param]
-      cst = invoke(ps, .args = cst)
-      cst$values = setNames(list(instance), instance_param)
+      if (length(instance_param)) {
+        cst = domain$params[instance_param]
+        cst = invoke(ps, .args = cst)
+        cst$values = setNames(list(instance), instance_param)
+      } else {
+        cst = ps()
+      }
 
       if (self$timed) {
         fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging=logging)}
