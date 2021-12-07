@@ -67,10 +67,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should values be checked by bbotk? Initialized to `FALSE`.
     #' @param timed (`logical`) \cr
     #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
+    #' @param logging (`logical`) \cr
+    #'   Should function evaluationd be logged? Initialized to `FALSE`.
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, check_values = FALSE, timed = FALSE) {
+    get_objective = function(instance, check_values = FALSE, timed = FALSE, logging = FALSE) {
       assert_choice(instance, self$instances)
       assert_flag(check_values)
       ObjectiveYAHPO$new(
