@@ -282,7 +282,8 @@ def fit_taskset(key='taskset', **kwargs):
 def fit_iaml_ranger(key='iaml_ranger', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "mec", "nf"]]
+    [tfms.update({k:ContTransformerInt}) for k in ["nf"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "mec"]]
     [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict", "ias"]]
     [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
     [tfms.update({k:partial(ContTransformerNegExpRange, q=.975)}) for k in ["logloss"]]
@@ -302,9 +303,10 @@ def fit_iaml_rpart(key='iaml_rpart', **kwargs):
 def fit_iaml_glmnet(key='iaml_glmnet', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["auc", "ias", "mec", "mmce", "nf", "rammodel", "ramtrain", "timepredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["alpha", "rampredict", "timetrain", "logloss", "s", "trainsize"]]
-    [tfms.update({k:partial(ContTransformerNegExpRange)}) for k in ["f1"]]
+    [tfms.update({k:ContTransformerInt}) for k in ["nf"]]
+    [tfms.update({k:partial(ContTransformerRange, p = 0)}) for k in ["auc", "ias", "mec", "mmce", "rammodel", "ramtrain", "timepredict"]]
+    [tfms.update({k:partial(ContTransformerLogRange, p = 0)}) for k in ["alpha", "rampredict", "timetrain", "logloss", "s", "trainsize"]]
+    [tfms.update({k:partial(ContTransformerNegExpRange, p = 0)}) for k in ["f1"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
 
@@ -348,7 +350,7 @@ if __name__ == '__main__':
     device = torch.device("cpu")
     fit_iaml_ranger(epochs=10,device=device, export=True, log_wandb=False)
     fit_iaml_rpart(epochs=10,device=device, export=True, log_wandb=False)
-    fit_iaml_glmnet(epochs=10,device=device, export=True, log_wandb=False)
+    fit_iaml_glmnet(epochs=100,device=device, export=True, log_wandb=False)
     fit_iaml_xgboost(epochs=10,device=device, export=True, log_wandb=False)
     fit_iaml_super(epochs=10,device=device, export=True, log_wandb=False)
 
