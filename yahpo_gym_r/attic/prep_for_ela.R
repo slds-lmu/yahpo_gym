@@ -19,5 +19,13 @@ obj = bs$get_objective("CIFAR10")
 
 
 library("bbotk")
-
+# Run 100 random evaluations
 ins = bb_optimize(obj, max_evals = 100)
+# Obtain results
+df = ins$instance$archive$data[, c(names(bs$domain$params), names(bs$codomain$params)), with = FALSE] 
+str(df, 1)
+
+# Compute gower distance
+library("gower")
+gower_dist(df[1,], df[2,])
+
