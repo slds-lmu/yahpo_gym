@@ -80,7 +80,7 @@ def tune_config(key, name, **kwargs):
     tlog2 = ContTransformerLog2Range
     tnexp = ContTransformerNegExpRange
     tclamp = ContTransformerClamp01Range
-    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp, "clamp":tclamp}
+    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp, "tclamp":tclamp}
     
     def objective(trial):
         cc = cfg(key)
@@ -90,7 +90,7 @@ def tune_config(key, name, **kwargs):
             # if opt_tfms_y is False use ContTransformerRange
             opt_tfms_y = trial.suggest_categorical("opt_tfms_" + y, [True, False])
             if opt_tfms_y:
-                tf = trial.suggest_categorical("tfms_" + y, ["tlog", "tnexp"])
+                tf = trial.suggest_categorical("tfms_" + y, ["tlog", "tnexp", "tclamp"])
             else:
                 tf = "trange"
             tfms.update({y:trafos.get(tf)})
@@ -98,7 +98,7 @@ def tune_config(key, name, **kwargs):
             # if opt_tfms_x is False use ContTransformerRange
             opt_tfms_x = trial.suggest_categorical("opt_tfms_" + x, [True, False])
             if opt_tfms_x:
-                tf = trial.suggest_categorical("tfms_" + x, ["tlog", "tnexp"])
+                tf = trial.suggest_categorical("tfms_" + x, ["tlog", "tlog2", "tnexp"])
             else:
                 tf = "trange"
             tfms.update({x:trafos.get(tf)})
@@ -289,7 +289,6 @@ def fit_iaml_ranger(key='iaml_ranger', **kwargs):
     [tfms.update({k:partial(ContTransformerNegExpRange, q=.975)}) for k in ["logloss"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
-
 def fit_iaml_rpart(key='iaml_rpart', **kwargs):
     # Transforms
     tfms = {}
@@ -345,9 +344,11 @@ if __name__ == '__main__':
     # fit_from_best_params("iaml_glmnet", study_iaml_glmnet.best_params)
     # study_iaml_rpart = tune_config("iaml_rpart", "tune_iaml_rpart")
     # fit_from_best_params("iaml_rpart", study_iaml_rpart.best_params)
-    device = torch.device("cpu")
-    fit_iaml_ranger(epochs=10,device=device, export=True, log_wandb=False)
-    fit_iaml_rpart(epochs=10,device=device, export=True, log_wandb=False)
-    fit_iaml_glmnet(epochs=100,device=device, export=True, log_wandb=False)
-    fit_iaml_xgboost(epochs=10,device=device, export=True, log_wandb=False)
-    fit_iaml_super(epochs=10,device=device, export=True, log_wandb=False)
+    # device = torch.device("cpu")
+    # fit_iaml_ranger(epochs=10,device=device, export=True, log_wandb=False)
+    # fit_iaml_rpart(epochs=10,device=device, export=True, log_wandb=False)
+    # fit_iaml_glmnet(epochs=100,device=device, export=True, log_wandb=False)
+    # fit_iaml_xgboost(epochs=10,device=device, export=True, log_wandb=False)
+    # fit_iaml_super(epochs=10,device=device, export=True, log_wandb=False)
+    
+    study_rpart = tune_config("rbv2_glmnet", "tune_rbv2_glmnet")
