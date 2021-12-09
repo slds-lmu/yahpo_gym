@@ -41,6 +41,8 @@ def spearman(x,y,impute_nan=True):
     
     # Return 0.5 for constant batches
     if torch.all(y == y[1]) or torch.all(x == x[1]):
+        x = np.array(x.cpu())
+        y = np.array(y.cpu())
         return np.array([0.5 for _,_ in zip(np.rollaxis(x, 1), np.rollaxis(y, 1))])
 
     x = np.array(x.cpu())

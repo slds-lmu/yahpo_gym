@@ -43,13 +43,15 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @param active_session `logical` \cr
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     #' @param download `logical` \cr
-    #'   Download the required data on instantiation? Default `TRUE`.
-    initialize = function(key, onnx_session = NULL, active_session = FALSE,  download = FALSE) {
+    #'   Download the required data on instantiation? Default `FALSE`.
+    #' @param check `logical` \cr
+    #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
+    initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
       # Initialize python instance
       gym = reticulate::import("yahpo_gym")
       self$id = assert_string(key)
       self$py_instance = gym$benchmark_set$BenchmarkSet(key, session=onnx_session,
-        active_session = assert_flag(active_session), download = FALSE)
+        active_session = assert_flag(active_session), download = FALSE, check = assert_flag(check))
       # Download files
       if (assert_flag(download)) {
         self$py_instance$config$download_files(files = list("param_set.R"))
@@ -65,11 +67,14 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should values be checked by bbotk? Initialized to `FALSE`.
     #' @param timed (`logical`) \cr
     #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
+    #' @param logging (`logical`) \cr
+    #'   Should function evaluationd be logged? Initialized to `FALSE`.
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, check_values = FALSE, timed = FALSE) {
+    get_objective = function(instance, check_values = FALSE, timed = FALSE, logging = FALSE) {
       assert_choice(instance, self$instances)
+      assert_flag(check_values)
       ObjectiveYAHPO$new(
         instance,
         self$py_instance,

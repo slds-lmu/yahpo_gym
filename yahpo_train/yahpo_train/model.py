@@ -109,8 +109,8 @@ class SurrogateTabularLearner(Learner):
     
     def _end_cleanup(self): self.dl,self.xb,self.yb,self.pred,self.loss, self.tfpred, self.tfyb = None,(None,),(None,),None,None,None,None
 
-    def export_onnx(self, config):
-        return self.model.export_onnx(config)
+    def export_onnx(self, config, device):
+        return self.model.export_onnx(config, device)
     
     def __repr__(self): 
         return f"{self.wide} \n {self.deep}  \n {self.deeper}"

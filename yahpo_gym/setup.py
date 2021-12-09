@@ -19,7 +19,7 @@ if __version__ is None:
 
 setup(name='yahpo_gym',
       version=__version__,
-      author='Florian Pfisterer',
+      author='Florian Pfisterer, Lennart Schneider',
       description='Inference module for the yahpo gym',
       long_description=long_description,
       license='LGPLv3',

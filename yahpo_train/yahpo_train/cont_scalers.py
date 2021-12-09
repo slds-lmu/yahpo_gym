@@ -207,6 +207,28 @@ class ContTransformerClipOutliers(nn.Module):
         return x
 
 
+class ContTransformerInt(nn.Module):
+    """
+
+    Transform doubles to their nearest integer.
+    Assumes that the input is integer. Therefore, the forward step is simply the identity.
+    Note that the data type remains unchanged.
+
+    """
+    def __init__(self, x):
+        super().__init__()
+
+    def forward(self, x):
+        """
+        Identity.
+        """
+        return x
+
+    def invert(self, x):
+        x = torch.round(x)
+        return x
+
+
 class ContTransformerChain(nn.Module):
     """
     Chained transformer Continuous Variables. Chains several transforms.

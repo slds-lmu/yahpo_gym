@@ -39,10 +39,11 @@ jobs:
         last_commit=$(git log --pretty=format:"%an: %s")
         cd ../gh-pages
         branch_name=${GITHUB_REF##*/}
-        mv $branch_name/* docs
+        mv -f $branch_name/* docs
+        rm -r $branch_name
         git add docs
         git config --global user.name 'Github Actions'
         git config --global user.email 'not@mail.com'
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-        git commit -am "$last_commit"
+        git commit --allow-empty -am "$last_commit"
         git push
