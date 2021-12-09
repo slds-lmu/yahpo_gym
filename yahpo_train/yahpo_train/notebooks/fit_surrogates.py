@@ -77,8 +77,10 @@ def tune_config(key, name, **kwargs):
 
     trange = ContTransformerRange
     tlog = ContTransformerLogRange
+    tlog2 = ContTransformerLog2Range
     tnexp = ContTransformerNegExpRange
-    trafos = {"trange":trange, "tlog":tlog, "tnexp":tnexp}
+    tclamp = ContTransformerClamp01Range
+    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp, "clamp":tclamp}
     
     def objective(trial):
         cc = cfg(key)
@@ -178,114 +180,112 @@ def fit_from_best_params(key, best_params, log_wandb=False, **kwargs):
     return l
 
 
-def fit_nb301(key='nb301', **kwargs):
-    embds_dbl = [partial(ContTransformerMultScalar, m=1/52)]
-    embds_tgt = [partial(ContTransformerMultScalar, m=1/100), ContTransformerRange]
-    return fit_config(key, embds_dbl=embds_dbl, embds_tgt=embds_tgt, **kwargs)
-
-
-def fit_rbv2_super(key='rbv2_super', **kwargs):
+def fit_nb301(key = 'nb301', **kwargs):
+    embds_dbl = [partial(ContTransformerMultScalar, m = 1/52)]
+    embds_tgt = [partial(ContTransformerMultScalar, m = 1/100), ContTransformerRange]
+    fit_config(key, embds_dbl=embds_dbl, embds_tgt=embds_tgt, **kwargs)
+        
+def fit_rbv2_super(key = 'rbv2_super', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "aknn.k", "aknn.M", "rpart.maxdepth", "rpart.minsplit", "rpart.minbucket", "xgboost.max_depth"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict", "svm.cost", "svm.gamma"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["glmnet.s", "rpart.cp", "aknn.ef", "aknn.ef_construction", "xgboost.nrounds", "xgboost.eta", "xgboost.gamma", "xgboost.lambda", "xgboost.alpha", "xgboost.min_child_weight", "ranger.num.trees", "ranger.min.node.size", 'ranger.num.random.splits']]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
-
-
-def fit_rbv2_svm(key='rbv2_svm', **kwargs):
+    [tfms.update({k:ContTransformerClamp01Range}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["aknn.k", "aknn.M", "rpart.maxdepth", "rpart.minsplit", "rpart.minbucket", "xgboost.max_depth"]]
+    [tfms.update({k:tfms_chain([ContTransformerLog, ContTransformerRange])}) for k in ["svm.cost", "svm.gamma"]]
+    [tfms.update({k:ContTransformerClamp0LogRange}) for k in ["timetrain", "timepredict"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["glmnet.s", "rpart.cp", "aknn.ef", "aknn.ef_construction", "xgboost.nrounds", "xgboost.eta", "xgboost.gamma", "xgboost.lambda", "xgboost.alpha", "xgboost.min_child_weight", "ranger.num.trees", "ranger.min.node.size", 'ranger.num.random.splits']]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
+    fit_config(key, tfms=tfms, **kwargs)
+  
+def fit_rbv2_svm(key = 'rbv2_svm', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log, expfun=torch.exp)}) for k in ["timetrain", "timepredict", "cost", "gamma"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
+    [tfms.update({k:ContTransformerClamp01Range}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:ContTransformerClamp0LogRange}) for k in ["timetrain", "timepredict"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["cost", "gamma"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
-
-def fit_rbv2_xgboost(key='rbv2_xgboost', **kwargs):
+def fit_rbv2_xgboost(key = 'rbv2_xgboost', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "max_depth"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log, expfun=torch.exp)}) for k in ["timetrain", "timepredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["nrounds", "eta", "gamma", "lambda", "alpha", "min_child_weight"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
+    [tfms.update({k:ContTransformerClamp01Range}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["max_depth"]]
+    [tfms.update({k:ContTransformerClamp0LogRange}) for k in ["timetrain", "timepredict"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])})for k in ["nrounds", "eta", "gamma", "lambda", "alpha", "min_child_weight"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
-
-def fit_rbv2_ranger(key='rbv2_ranger', **kwargs):
+def fit_rbv2_ranger(key = 'rbv2_ranger', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
+    [tfms.update({k:ContTransformerClamp01Range}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:ContTransformerClamp0LogRange}) for k in ["timetrain", "timepredict"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
-
-def fit_rbv2_rpart(key='rbv2_rpart', **kwargs):
+def fit_rbv2_rpart(key = 'rbv2_rpart', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "maxdepth", "minsplit", "minbucket"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["cp"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
-
-
-def fit_rbv2_glmnet(key='rbv2_glmnet', **kwargs):
+    [tfms.update({k:ContTransformerClamp01Range}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["maxdepth", "minsplit", "minbucket"]]
+    [tfms.update({k:ContTransformerClamp0LogRange}) for k in ["timetrain", "timepredict"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["cp"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
+    fit_config(key, tfms=tfms, **kwargs)
+    
+def fit_rbv2_glmnet(key = 'rbv2_glmnet', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict",]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["s"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
+    [tfms.update({k:ContTransformerClamp01Range}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:ContTransformerClamp0LogRange}) for k in ["timetrain", "timepredict"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["s"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["repl"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
-
-def fit_rbv2_aknn(key='rbv2_aknn', **kwargs):
+def fit_rbv2_aknn(key = 'rbv2_aknn', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "k", "M"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["ef", "ef_construction"]]
-    [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
+    [tfms.update({k:ContTransformerClamp01Range}) for k in ["mmce", "f1", "auc"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["k", "M"]]
+    [tfms.update({k:ContTransformerClamp0LogRange}) for k in ["timetrain", "timepredict"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["ef", "ef_construction"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
-
-def fit_fcnet(key='fcnet', **kwargs):
+def fit_fcnet(key = 'fcnet', **kwargs):
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ["batch_size", "n_units_1", "n_units_2"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log, expfun=torch.exp)}) for k in ["init_lr", "runtime", "n_params"]]
-    [tfms.update({k:partial(ContTransformerNegExpRange, q=.975)}) for k in ["valid_loss"]]
-    return fit_config(key, tfms=tfms, **kwargs)
-
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["init_lr", "runtime", "n_params"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["valid_loss"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
 def fit_lcbench(key='lcbench', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerRange}) for k in ["val_accuracy", "val_balanced_accuracy", "test_balanced_accuracy", "batch_size", "max_units"]]
-    [tfms.update({k:partial(ContTransformerNegExpRange, q=1.)}) for k in ["val_cross_entropy", "test_cross_entropy", "time"]]
-    return fit_config(key, tfms=tfms, **kwargs)
-
+    [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["val_accuracy", "val_balanced_accuracy", "test_balanced_accuracy"]]
+    [tfms.update({k:ContTransformerRange}) for k in ["batch_size", "max_units"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["time"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in  ["val_cross_entropy", "test_cross_entropy"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
 def fit_taskset(key='taskset', **kwargs):
     # Transforms
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ['replication']]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["epoch"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log, expfun=torch.exp)}) for k in ["learning_rate", 'beta1', 'beta2', 'epsilon', 'l1', 'l2', 'linear_decay', 'exponential_decay']]
-    [tfms.update({k:partial(ContTransformerNegExpRange, q=.99)}) for k in ["train", "valid1", "valid2", "test"]]
-    return fit_config(key, tfms=tfms, **kwargs)
-
+    [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["epoch"]]
+    [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log, expfun=torch.exp), ContTransformerRange])})  for k in ["learning_rate", 'beta1', 'beta2', 'epsilon', 'l1', 'l2', 'linear_decay', 'exponential_decay']]
+    [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in  ["train", "valid1", "valid2", "test"]]
+    fit_config(key, tfms=tfms, **kwargs)
 
 def fit_iaml_ranger(key='iaml_ranger', **kwargs):
     # Transforms
     tfms = {}
     [tfms.update({k:ContTransformerInt}) for k in ["nf"]]
     [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "mec"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict", "ias"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
+    [tfms.update({k:ContTransformerLogRange}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict", "ias"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
     [tfms.update({k:partial(ContTransformerNegExpRange, q=.975)}) for k in ["logloss"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
@@ -294,11 +294,10 @@ def fit_iaml_rpart(key='iaml_rpart', **kwargs):
     # Transforms
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "mec", "ias", "nf", "maxdepth", "minsplit", "minbucket"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["cp"]]
+    [tfms.update({k:ContTransformerLogRange}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["cp"]]
     [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
     return fit_config(key, tfms=tfms, **kwargs)
-
 
 def fit_iaml_glmnet(key='iaml_glmnet', **kwargs):
     # Transforms
@@ -309,13 +308,12 @@ def fit_iaml_glmnet(key='iaml_glmnet', **kwargs):
     [tfms.update({k:partial(ContTransformerNegExpRange, p = 0)}) for k in ["f1"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
-
 def fit_iaml_xgboost(key='iaml_xgboost', **kwargs):
     # Transforms
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "mec", "ias", "nf", "max_depth"]]
     [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["nrounds", "eta", "gamma", "lambda", "alpha", "min_child_weight"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["nrounds", "eta", "gamma", "lambda", "alpha", "min_child_weight"]]
     [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
@@ -323,8 +321,8 @@ def fit_iaml_super(key='iaml_super', **kwargs):
     # Transforms
     tfms = {}
     [tfms.update({k:ContTransformerRange}) for k in ["mmce", "f1", "auc", "mec", "nf", "rpart.maxdepth", "rpart.minsplit", "rpart.minbucket", "xgboost.max_depth"]]
-    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict", "ias"]]
-    [tfms.update({k:partial(ContTransformerLogRange, logfun=torch.log2, expfun=torch.exp2)}) for k in ["ranger.num.trees", "ranger.min.node.size", 'ranger.num.random.splits', "rpart.cp", "glmnet.s", "xgboost.nrounds", "xgboost.eta", "xgboost.gamma", "xgboost.lambda", "xgboost.alpha", "xgboost.min_child_weight"]]
+    [tfms.update({k:ContTransformerLogRange}) for k in ["timetrain", "timepredict", "ramtrain", "rammodel", "rampredict", "ias"]]
+    [tfms.update({k:ContTransformerLog2Range}) for k in ["ranger.num.trees", "ranger.min.node.size", 'ranger.num.random.splits', "rpart.cp", "glmnet.s", "xgboost.nrounds", "xgboost.eta", "xgboost.gamma", "xgboost.lambda", "xgboost.alpha", "xgboost.min_child_weight"]]
     [tfms.update({k:ContTransformerNegExpRange}) for k in ["logloss"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
@@ -353,117 +351,3 @@ if __name__ == '__main__':
     fit_iaml_glmnet(epochs=100,device=device, export=True, log_wandb=False)
     fit_iaml_xgboost(epochs=10,device=device, export=True, log_wandb=False)
     fit_iaml_super(epochs=10,device=device, export=True, log_wandb=False)
-
-
-if False:
-    def fit_nb301(key = 'nb301', **kwargs):
-        embds_dbl = [partial(ContTransformerMultScalar, m = 1/52)]
-        embds_tgt = [partial(ContTransformerMultScalar, m = 1/100), ContTransformerRange]
-        fit_config(key, embds_dbl=embds_dbl, embds_tgt=embds_tgt, **kwargs)
-
-
-    def fit_rbv2_super(key = 'rbv2_super', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
-        [tfms.update({k:ContTransformerRange}) for k in ["aknn.k", "aknn.M", "rpart.maxdepth", "rpart.minsplit", "rpart.minbucket", "xgboost.max_depth"]]
-        [tfms.update({k:tfms_chain([ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict", "svm.cost", "svm.gamma"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["glmnet.s", "rpart.cp", "aknn.ef", "aknn.ef_construction", "xgboost.nrounds", "xgboost.eta", "xgboost.gamma", "xgboost.lambda", "xgboost.alpha", "xgboost.min_child_weight", "ranger.num.trees", "ranger.min.node.size", 'ranger.num.random.splits']]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
-
-        fit_config(key, tfms=tfms, **kwargs)
-
-    
-
-    def fit_rbv2_svm(key = 'rbv2_svm', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0.), ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["cost", "gamma"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
-
-        fit_config(key, tfms=tfms, **kwargs)
-
-
-
-    def fit_rbv2_xgboost(key = 'rbv2_xgboost', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
-        [tfms.update({k:ContTransformerRange}) for k in ["max_depth"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0.), ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])})for k in ["nrounds", "eta", "gamma", "lambda", "alpha", "min_child_weight"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
-
-        fit_config(key, tfms=tfms, **kwargs)
-
-
-    def fit_rbv2_ranger(key = 'rbv2_ranger', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0.), ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["num.trees", "min.node.size", 'num.random.splits']]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
-        fit_config(key, tfms=tfms, **kwargs)
-
-
-    def fit_rbv2_rpart(key = 'rbv2_rpart', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
-        [tfms.update({k:ContTransformerRange}) for k in ["maxdepth", "minsplit", "minbucket"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0.), ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["cp"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
-        fit_config(key, tfms=tfms, **kwargs)
-
-    def fit_rbv2_glmnet(key = 'rbv2_glmnet', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0.), ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["s"]]
-        [tfms.update({k:ContTransformerRange}) for k in ["repl"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
-        fit_config(key, tfms=tfms, **kwargs)
-
-
-    def fit_rbv2_aknn(key = 'rbv2_aknn', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["mmce", "f1", "auc"]]
-        [tfms.update({k:ContTransformerRange}) for k in ["k", "M"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0.), ContTransformerLog, ContTransformerRange])}) for k in ["timetrain", "timepredict"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["ef", "ef_construction"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["logloss"]]
-        fit_config(key, tfms=tfms, **kwargs)
-
-
-    def fit_fcnet(key = 'fcnet', **kwargs):
-        tfms = {}
-        [tfms.update({k:ContTransformerRange}) for k in ["batch_size", "n_units_1", "n_units_2"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["init_lr", "runtime", "n_params"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in ["valid_loss"]]
-        fit_config(key, tfms=tfms, **kwargs)
-
-
-    def fit_lcbench(key='lcbench', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:tfms_chain([partial(ContTransformerClamp, min=0., max = 1.), ContTransformerRange])}) for k in ["val_accuracy", "val_balanced_accuracy", "test_balanced_accuracy"]]
-        [tfms.update({k:ContTransformerRange}) for k in ["batch_size", "max_units"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["time"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in  ["val_cross_entropy", "test_cross_entropy"]]
-        fit_config(key, tfms=tfms, **kwargs)
-
-
-    def fit_taskset(key='taskset', **kwargs):
-        # Transforms
-        tfms = {}
-        [tfms.update({k:ContTransformerRange}) for k in ['replication']]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log2, expfun=torch.exp2), ContTransformerRange])}) for k in ["epoch"]]
-        [tfms.update({k:tfms_chain([partial(ContTransformerLog, logfun=torch.log, expfun=torch.exp), ContTransformerRange])})  for k in ["learning_rate", 'beta1', 'beta2', 'epsilon', 'l1', 'l2', 'linear_decay', 'exponential_decay']]
-        [tfms.update({k:tfms_chain([partial(ContTransformerNegExp), ContTransformerRange])}) for k in  ["train", "valid1", "valid2", "test"]]
-        fit_config(key, tfms=tfms, **kwargs)
