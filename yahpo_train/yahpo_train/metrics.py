@@ -10,10 +10,15 @@ class AvgTfedMetric(Metric):
     Specializes to "transformed metrics saved during get_one_batch
     """
     def __init__(self, func):  self.func = func
+    
     def reset(self):           self.total,self.count = 0.,0
+    
     def accumulate(self, learn):
         bs = find_bs(learn.tfyb)
-        self.total += learn.to_detach(self.func(*learn.tfyb, learn.tfpred))*bs
+        if not learn.noisy:
+            self.total += learn.to_detach(self.func(*learn.tfyb, learn.tfpred))*bs
+        else:
+            self.total += learn.to_detach(self.func(*learn.tfyb, learn.tfpred))*bs
         self.count += bs
         
     @property

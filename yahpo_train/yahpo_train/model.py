@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.onnx
 from fastai.tabular.all import *
+from yahpo_train.cont_scalers import ContTransformerRange
 from yahpo_train.embed_helpers import *
 
 def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, nrows=None, frac=1., **kwargs):
@@ -95,7 +96,10 @@ class SurrogateTabularLearner(Learner):
 
         self('after_pred')
         if len(self.yb):
-            self.loss_grad = self.loss_func(self.pred, *self.yb)
+            if not self.noisy:
+                self.loss_grad = self.loss_func(self.pred, *self.yb)
+            else:
+                self.loss_grad = self.loss_func(self.pred[0], *self.yb, torch.square(self.pred[1]))
             self.loss = self.loss_grad.clone()
 
         self('after_loss')
@@ -117,8 +121,9 @@ class SurrogateTabularLearner(Learner):
 
 
 class FFSurrogateModel(nn.Module):
-    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None):
+    def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None, noisy = False):
         super().__init__()
+        self.noisy = noisy
 
         if not (len(layers) | len(deeper) | wide):
             raise Exception("One of layers, deeper or wide has to be set!")
@@ -130,17 +135,18 @@ class FFSurrogateModel(nn.Module):
         if embds_dbl is not None:
             self.embds_dbl = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.all_cols[dls.cont_names].iteritems(), embds_dbl)])
         else:
-            self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float()) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
+            self.embds_dbl = nn.ModuleList([ContTransformerRange(torch.from_numpy(cont.values).float()) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
        
         if embds_tgt is not None:
             self.embds_tgt = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.ys[dls.y_names].iteritems(), embds_tgt)])
         else:
-            self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float()) for name, cont in dls.ys[dls.y_names].iteritems()])
+            self.embds_tgt = nn.ModuleList([ContTransformerRange(torch.from_numpy(cont.values).float()) for name, cont in dls.ys[dls.y_names].iteritems()])
 
         self.n_emb,self.n_cont = sum(e.embedding_dim for e in self.embds_fct), len(dls.cont_names)
         self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
 
         self.deep, self.deeper, self.wide = nn.Sequential(), nn.Sequential(), nn.Sequential()
+        
         # Deep Part
         if len(layers):
             ps1 = [ps for i in layers]
@@ -160,6 +166,11 @@ class FFSurrogateModel(nn.Module):
 
         if wide:
             self.wide = nn.Sequential(nn.Linear(self.sizes[0], self.sizes[-1]))
+            
+        if self.noisy:
+            self.deep_sd = deepcopy(self.deep)
+            self.deeper_sd = deepcopy(self.deeper)
+            self.wide_sd = deepcopy(self.wide)
 
         self.final_act = final_act
         
@@ -179,12 +190,29 @@ class FFSurrogateModel(nn.Module):
             xs = xs.add(self.deep(x))
         if len(self.deeper):
             xs = xs.add(self.deeper(x))
-
-        y = self.final_act(xs)
-        if invert_ytrafo:
-            return self.inv_trafo_ys(y)
+            
+        if not self.noisy:
+            y = self.final_act(xs)
+            if invert_ytrafo:
+                return self.inv_trafo_ys(y)
+            else:
+                return y
         else:
-            return y
+            xsd = torch.zeros(x.shape[0], self.sizes[-1], device = x.device)
+            if len(self.wide_sd):
+                xsd = xsd.add(self.wide_sd(x))
+            if len(self.deep_sd):
+                xsd = xsd.add(self.deep_sd(x))
+            if len(self.deeper_sd):
+                xsd = xsd.add(self.deeper_sd(x))
+            mu = self.final_act(xs)
+            sd = nn.SELU()(xsd)
+    
+            if invert_ytrafo:
+                y = (torch.rand_like(mu)*0.0*sd) + mu
+                return self.inv_trafo_ys(y)
+            else:
+                return mu, sd
             
     def trafo_ys(self, ys):
         ys = [e(ys[:,i]).unsqueeze(1) for i,e in enumerate(self.embds_tgt)]
@@ -214,14 +242,30 @@ class FFSurrogateModel(nn.Module):
 if __name__ == '__main__':
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
+    from yahpo_train.metrics import *
     cfg = cfg("lcbench")
     dls = dl_from_config(cfg)
-    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
-    l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
-    l.add_cb(MixHandler)
-    l.fit_one_cycle(5, 1e-4)
-    for p in l.model.wide.parameters():
-        p.requires_grad = False
-    l.fit_flat_cos(5, 1e-4)
-    l.export_onnx(cfg)
+    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False, noisy = True)
+    metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
+    learn = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'))
+    learn.metrics = metrics
+    learn.add_cb(MixHandler)
+    
+    for i in range(5):
+        f.noisy = False
+        learn.fit_one_cycle(1, 1e-3)
+        
+    for i in range(20):
+        learn.loss_func = nn.GaussianNLLLoss(reduction='mean')
+        learn.noisy = f.noisy = True
+        # freeze var, train mean
+        for x in [learn.wide, learn.deep, learn.deeper]: x.requires_grad = True
+        for x in [learn.wide_sd, learn.deep_sd, learn.deeper_sd]: x.requires_grad = False
+        learn.fit_one_cycle(1, 1e-3)
+        # freeze mean, train var
+        for x in [learn.wide, learn.deep, learn.deeper]: x.requires_grad = False
+        for x in [learn.wide_sd, learn.deep_sd, learn.deeper_sd]: x.requires_grad = True
+        learn.fit_one_cycle(1, 1e-3)
+        
+
 
