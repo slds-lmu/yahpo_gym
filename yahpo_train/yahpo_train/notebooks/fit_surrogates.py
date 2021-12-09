@@ -7,12 +7,12 @@ from fastai.callback.wandb import *
 from functools import partial
 import wandb
 
-def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1., bs=10240, mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
+def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, frac=1., bs=10240, mixup=True, export=False, validate_on_testset=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
     """
     Fit function with hyperparameters
     """
     cc = cfg(key)
-    dls = dl_from_config(cc, bs=bs, frac=frac)
+    dls_train, dls_test = dl_from_config(cc, bs=bs, frac=frac)  # train_frac is set to 0.8, so for frac = 1 we have 0.64 train, 0.16 valid and 0.2 test
 
     # Construct embds from transforms. tfms overwrites emdbs_dbl, embds_tgt
     if tfms is not None:
@@ -38,6 +38,22 @@ def fit_config(key, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=1
 
     # Fit
     l.fit_flat_cos(epochs, lr)
+
+    if validate_on_testset:
+        test_set_metrics = l.validate(dl = dls_test)  # FIXME: how to log this on wandb
+        if log_wandb:
+            log_dict = {}
+            metric_names = copy(l.recorder.metric_names)
+            metric_names.remove("epoch")
+            metric_names.remove("train_loss")
+            metric_names.remove("time")
+            for n,s in zip(metric_names, test_set_metrics):
+                if hasattr(s, "__len__"):
+                    for m, nm in zip(s, l.recorder.dls.y_names):
+                        log_dict.update({"test_"+n+nm:m})
+                else:
+                    log_dict.update({"test_"+n:s})
+            wandb.log(log_dict)
 
     if log_wandb: 
         wandb.finish()
@@ -301,10 +317,10 @@ def fit_iaml_rpart(key='iaml_rpart', **kwargs):
 def fit_iaml_glmnet(key='iaml_glmnet', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:ContTransformerInt}) for k in ["nf"]]
-    [tfms.update({k:partial(ContTransformerRange, p = 0)}) for k in ["auc", "ias", "mec", "mmce", "rammodel", "ramtrain", "timepredict"]]
-    [tfms.update({k:partial(ContTransformerLogRange, p = 0)}) for k in ["alpha", "rampredict", "timetrain", "logloss", "s", "trainsize"]]
-    [tfms.update({k:partial(ContTransformerNegExpRange, p = 0)}) for k in ["f1"]]
+    [tfms.update({k:tfms_chain([ContTransformerInt, ContTransformerRange])}) for k in ["nf"]]
+    [tfms.update({k:partial(ContTransformerRange)}) for k in ["auc", "ias", "mec", "mmce", "rammodel", "ramtrain", "timepredict"]]
+    [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["alpha", "rampredict", "timetrain", "logloss", "s", "trainsize"]]
+    [tfms.update({k:partial(ContTransformerNegExpRange)}) for k in ["f1"]]
     return fit_config(key, tfms=tfms, **kwargs)
 
 def fit_iaml_xgboost(key='iaml_xgboost', **kwargs):
