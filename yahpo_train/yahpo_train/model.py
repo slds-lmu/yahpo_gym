@@ -124,6 +124,7 @@ class FFSurrogateModel(nn.Module):
     def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None, noisy = False):
         super().__init__()
         self.noisy = noisy
+        self.noise_multiplier = torch.Tensor([1.], device = self.device)
 
         if not (len(layers) | len(deeper) | wide):
             raise Exception("One of layers, deeper or wide has to be set!")
@@ -191,13 +192,16 @@ class FFSurrogateModel(nn.Module):
         if len(self.deeper):
             xs = xs.add(self.deeper(x))
             
+        # Compute mean
+        y = self.final_act(xs)
+        
         if not self.noisy:
-            y = self.final_act(xs)
             if invert_ytrafo:
                 return self.inv_trafo_ys(y)
             else:
                 return y
         else:
+            # Compute sd
             xsd = torch.zeros(x.shape[0], self.sizes[-1], device = x.device)
             if len(self.wide_sd):
                 xsd = xsd.add(self.wide_sd(x))
@@ -205,14 +209,13 @@ class FFSurrogateModel(nn.Module):
                 xsd = xsd.add(self.deep_sd(x))
             if len(self.deeper_sd):
                 xsd = xsd.add(self.deeper_sd(x))
-            mu = self.final_act(xs)
-            sd = nn.SELU()(xsd)
+            sd = nn.Sigmoid()(xsd)
     
             if invert_ytrafo:
-                y = (torch.rand_like(mu)*0.0*sd) + mu
+                y = (torch.rand_like(y)*self.noise_multiplier*sd) + y
                 return self.inv_trafo_ys(y)
             else:
-                return mu, sd
+                return y, sd
             
     def trafo_ys(self, ys):
         ys = [e(ys[:,i]).unsqueeze(1) for i,e in enumerate(self.embds_tgt)]
@@ -224,14 +227,14 @@ class FFSurrogateModel(nn.Module):
         ys = torch.cat(ys, 1)
         return ys
     
-    def export_onnx(self, config_dict, device='cuda:0'):
+    def export_onnx(self, config_dict, device='cuda:0', postfix=''):
         """
         Export model to an ONNX file. We can safely ignore tracing errors with respect to lambda since lambda will be constant during inference.
         """
         self.eval()
         torch.onnx.export(self,
             (torch.ones(1, len(config_dict.cat_names), dtype=torch.int, device=device), {'x_cont': torch.randn(1, len(config_dict.cont_names), device=device)}),
-            config_dict.get_path("model"),
+            config_dict.get_path("model")+postfix,
             do_constant_folding=True,
             export_params=True,
             input_names=['x_cat', 'x_cont'],
@@ -243,29 +246,43 @@ if __name__ == '__main__':
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
     from yahpo_train.metrics import *
+    
+    
+    def set_grad_mean(learn, flag):
+        for mod in [learn.wide, learn.deep, learn.deeper, *learn.embds_fct]:
+            for param in mod.parameters():
+                param.requires_grad = flag
+                
+    def set_grad_sd(learn, flag):
+        for mod in [learn.wide_sd, learn.deep_sd, learn.deeper_sd]:
+            for param in mod.parameters():
+                param.requires_grad = flag
+            
+            
     cfg = cfg("lcbench")
     dls = dl_from_config(cfg)
-    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False, noisy = True)
+    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False, noisy=True)
     metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
     learn = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'))
     learn.metrics = metrics
     learn.add_cb(MixHandler)
+    for param in learn.parameters(): param.requires_grad = True
+
+    learn.loss_func=nn.MSELoss(reduction='mean')
+    f.noisy = False
+    learn.fit_one_cycle(15, 1e-3)
     
-    for i in range(5):
-        f.noisy = False
-        learn.fit_one_cycle(1, 1e-3)
-        
-    for i in range(20):
-        learn.loss_func = nn.GaussianNLLLoss(reduction='mean')
-        learn.noisy = f.noisy = True
-        # freeze var, train mean
-        for x in [learn.wide, learn.deep, learn.deeper]: x.requires_grad = True
-        for x in [learn.wide_sd, learn.deep_sd, learn.deeper_sd]: x.requires_grad = False
-        learn.fit_one_cycle(1, 1e-3)
-        # freeze mean, train var
-        for x in [learn.wide, learn.deep, learn.deeper]: x.requires_grad = False
-        for x in [learn.wide_sd, learn.deep_sd, learn.deeper_sd]: x.requires_grad = True
-        learn.fit_one_cycle(1, 1e-3)
-        
+    set_grad_mean(learn, False)
+    set_grad_sd(learn, True)
+    learn.loss_func = nn.GaussianNLLLoss(reduction='mean')
+    f.noisy = True
+    learn.fit_one_cycle(15, 1e-3)
+    
+    f.export_onnx(cfg, postfix='_noisy')
+    
+    
+
+
+    
 
 
