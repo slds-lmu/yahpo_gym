@@ -4,7 +4,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     timed = NULL,
     logging = NULL,
 
-    initialize = function(instance, py_instance, domain, codomain = NULL, check_values = FALSE, timed = FALSE, logging = FALSE) {
+    initialize = function(instance, py_instance, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE) {
       self$timed = assert_flag(timed)
       assert_flag(logging)
       assert_flag(check_values)
@@ -16,7 +16,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       # Set constant "instance" and define search space over all other values
       instance_param = names(which(map_lgl(domain$params, function(x) "task_id" %in% x$tags)))
       pars = setdiff(domain$ids(), instance_param)
-      domain$values = setNames(map(pars, function(x) to_tune()), pars)
+      #domain$values = setNames(map(pars, function(x) to_tune()), pars) # NOTE: we now separate domain and search_space
 
       # Define constants param_set
       if (length(instance_param)) {
