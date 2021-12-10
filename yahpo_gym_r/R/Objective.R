@@ -59,7 +59,12 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
 #' @export
 preproc_xs = function(xs, ...) {
   csts = list(...)
-  keep(c(as.list(xs), csts), Negate(is.na))
+  xs = map(as.list(xs), function(x) {
+    if (is.logical(x)) {
+      as.character(x)  # NOTE: logical parameters are represented as categoricals in ConfigSpace and we fix this here
+    } else {
+      x
+    }
+  })
+  keep(c(xs, csts), Negate(is.na))
 }
-
-
