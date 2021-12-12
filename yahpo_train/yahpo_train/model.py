@@ -6,8 +6,9 @@ import torch.nn.functional as F
 import torch.onnx
 from fastai.tabular.all import *
 from yahpo_train.embed_helpers import *
+from yahpo_train.cont_scalers import *
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, nrows=None, frac=1., train_frac=.8, **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=True, nrows=None, frac=1., train_frac=.9, **kwargs):
     """
     Instantiate a pytorch dataloader from a YAHPO config
     """
@@ -26,6 +27,9 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, n
     df_train = df[df.index.isin(train_ids)].reset_index()
     df_test = df[~df.index.isin(train_ids)].reset_index()
 
+    if save_df_test:
+        df_test.to_csv(config.get_path("test_dataset"), index=False)
+
     dls = TabularDataLoaders.from_df(
         df = df_train,
         path = config.config_path,
@@ -42,11 +46,11 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, n
     # Save the encoding of categories
     encoding = {cat_name:dict(dls.classes[cat_name].o2i) for cat_name in config.cat_names}
 
-    if (save_encoding):       
+    if save_encoding:
         with open(config.get_path("encoding"), 'w') as f:
             json.dump(encoding, fp=f, sort_keys=True)
 
-    return dls, dls.test_dl(df_test)
+    return dls
 
 def _get_valid_idx(df, config, frac=.2, rng_seed=10):
     """
@@ -134,12 +138,12 @@ class FFSurrogateModel(nn.Module):
         if embds_dbl is not None:
             self.embds_dbl = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.all_cols[dls.cont_names].iteritems(), embds_dbl)])
         else:
-            self.embds_dbl = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float()) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
+            self.embds_dbl = nn.ModuleList([ContTransformerRange(torch.from_numpy(cont.values).float()) for name, cont in dls.all_cols[dls.cont_names].iteritems()])
        
         if embds_tgt is not None:
             self.embds_tgt = nn.ModuleList([f(torch.from_numpy(cont[1].values).float()) for cont, f in zip(dls.ys[dls.y_names].iteritems(), embds_tgt)])
         else:
-            self.embds_tgt = nn.ModuleList([ContNormalization(torch.from_numpy(cont.values).float()) for name, cont in dls.ys[dls.y_names].iteritems()])
+            self.embds_tgt = nn.ModuleList([ContTransformerRange(torch.from_numpy(cont.values).float()) for name, cont in dls.ys[dls.y_names].iteritems()])
 
         self.n_emb,self.n_cont = sum(e.embedding_dim for e in self.embds_fct), len(dls.cont_names)
         self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
