@@ -1,15 +1,15 @@
 # YAHPO GYM (R Package)
 
-R Interface for the YAHPO GYM python module
+R Interface for the YAHPO GYM python module.
 
 
 ## Installation
 
-The package can be installed from Github via
+The package can be installed from GitHub via
 
 
 ```r
-remotes::install_github("pfistfl/yahpo_gym/yahpo_gym_r")
+remotes::install_github("pfistfl/yahpo_gym/yahpo_gym_r").
 ```
 
 ### Setup
@@ -48,11 +48,11 @@ reticulate::use_condaenv("yahpo_gym", required=TRUE)
 library("yahpogym")
 ```
 
-and subsequently instantiate the benchmark to obtain our objective.
+and subsequently instantiate the benchmark (random search, full fidelity) to obtain our objective.
 
 ```r
-b = BenchmarkSet$new("lcbench", download = FALSE)
-obj = b$get_objective("3945")
+b = BenchmarkSet$new("iaml_glmnet", download = FALSE)
+obj = b$get_objective("40981", multifidelity = FALSE)
 ```
 
 and run our search procedure.
@@ -60,7 +60,7 @@ and run our search procedure.
 ```r
 library("bbotk")
 p = opt("random_search")
-ois = OptimInstanceMultiCrit$new(obj, search_space = b$search_space, terminator = trm("evals", n_evals = 10))
+ois = OptimInstanceMultiCrit$new(obj, search_space = b$get_search_space(drop_fidelity_params = TRUE), terminator = trm("evals", n_evals = 10))
 p$optimize(ois)
 ```
 
@@ -70,8 +70,9 @@ p$optimize(ois)
 
 ```r
 library(mlr3hyperband)
+obj = b$get_objective("40981", multifidelity = TRUE)
+ois = OptimInstanceMultiCrit$new(obj, search_space = b$get_search_space(), terminator = trm("none"))
 p = opt("hyperband")
-ois = OptimInstanceMultiCrit$new(obj, search_space = b$search_space, terminator = trm("evals", n_evals = 10))
 p$optimize(ois)
 ```
 
