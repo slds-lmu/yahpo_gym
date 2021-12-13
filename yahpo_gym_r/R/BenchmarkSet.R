@@ -108,7 +108,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'  A [`paradox::ParamSet`] containing the output space (codomain).
     subset_codomain = function(keep) {
       codomain = self$codomain
-      assert_choice(keep, names(codomain$params))
+      assert_subset(keep, names(codomain$params))
       new_domain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
       private$.domains$codomain = new_domain
     }
