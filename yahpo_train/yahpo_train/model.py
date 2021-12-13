@@ -124,7 +124,7 @@ class FFSurrogateModel(nn.Module):
     def __init__(self, dls, emb_szs = None, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None, noisy = False):
         super().__init__()
         self.noisy = noisy
-        self.noise_multiplier = torch.Tensor([1.], device = self.device)
+        self.noise_multiplier = 1.
 
         if not (len(layers) | len(deeper) | wide):
             raise Exception("One of layers, deeper or wide has to be set!")
@@ -270,13 +270,13 @@ if __name__ == '__main__':
 
     learn.loss_func=nn.MSELoss(reduction='mean')
     f.noisy = False
-    learn.fit_one_cycle(15, 1e-3)
+    learn.fit_one_cycle(30, 1e-3)
     
     set_grad_mean(learn, False)
     set_grad_sd(learn, True)
     learn.loss_func = nn.GaussianNLLLoss(reduction='mean')
     f.noisy = True
-    learn.fit_one_cycle(15, 1e-3)
+    learn.fit_one_cycle(30, 1e-3)
     
     f.export_onnx(cfg, postfix='_noisy')
     
