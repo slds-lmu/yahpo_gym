@@ -137,6 +137,16 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       self$py_instance$instances
     },
 
+    #' @field search_space `ParamSet` \cr
+    #' A [`paradox::ParamSet`] describing the search_space used during optimization.
+    #' Typically, this is the same as the domain but, e.g., with some parameters on log scale.
+    #' This is the same space as the one returned by `get_opt_space_py`.
+    #' Typically this search_space should be provided when creating an [bbotk::OptimInstance]
+    search_space = function(){
+      private$.load_r_domains()$search_space
+    },
+
+
     #' @field domain `ParamSet` \cr
     #' A [`paradox::ParamSet`] describing the domain to be optimized over.
     domain = function(){
@@ -165,7 +175,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       if (is.null(private$.domains)) {
         ps_path = self$py_instance$config$get_path("param_set")
         source(ps_path, local = environment())
-        private$.domains = list(domain = domain, codomain = codomain)
+        private$.domains = list(search_space = search_space, domain = domain, codomain = codomain)
       }
       private$.domains
     }

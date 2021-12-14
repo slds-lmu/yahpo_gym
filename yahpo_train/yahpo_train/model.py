@@ -7,8 +7,9 @@ import torch.onnx
 from fastai.tabular.all import *
 from yahpo_train.cont_scalers import ContTransformerRange
 from yahpo_train.embed_helpers import *
+from yahpo_train.cont_scalers import *
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, nrows=None, frac=1., **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=True, nrows=None, frac=1., train_frac=.9, **kwargs):
     """
     Instantiate a pytorch dataloader from a YAHPO config
     """
@@ -21,16 +22,23 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, n
     # Get rid of irrelevant columns
     df = df[config.cat_names+config.cont_names+config.y_names]
     # Fill missing target with 0
-    df[config.y_names] = df[config.y_names].fillna(0.) 
+    df[config.y_names] = df[config.y_names].fillna(0.)
+
+    train_ids = _get_valid_idx(df, config, frac = train_frac)
+    df_train = df[df.index.isin(train_ids)].reset_index()
+    df_test = df[~df.index.isin(train_ids)].reset_index()
+
+    if save_df_test:
+        df_test.to_csv(config.get_path("test_dataset"), index=False)
 
     dls = TabularDataLoaders.from_df(
-        df = df,
+        df = df_train,
         path = config.config_path,
         y_names = config.y_names,
         cont_names = config.cont_names,
         cat_names = config.cat_names,
         procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=False, fill_vals=dict((k, 0.) for k in config.cat_names+config.cont_names))],
-        valid_idx = _get_valid_idx(df, config),
+        valid_idx = _get_valid_idx(df_train, config),
         bs = bs,
         shuffle=True,
         **kwargs
@@ -39,13 +47,13 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_encoding=True, n
     # Save the encoding of categories
     encoding = {cat_name:dict(dls.classes[cat_name].o2i) for cat_name in config.cat_names}
 
-    if (save_encoding):       
+    if save_encoding:
         with open(config.get_path("encoding"), 'w') as f:
             json.dump(encoding, fp=f, sort_keys=True)
 
     return dls
 
-def _get_valid_idx(df, config, frac=.1, rng_seed=10):
+def _get_valid_idx(df, config, frac=.2, rng_seed=10):
     """
     Include or exclude blocks of hyperparameters with differing fidelity
     The goal here is to not sample from the dataframe randomly, but instead either keep a hyperparameter group
@@ -175,7 +183,7 @@ class FFSurrogateModel(nn.Module):
 
         self.final_act = final_act
         
-    def forward(self, x_cat, x_cont=None, invert_ytrafo = True):
+    def forward(self, x_cat, x_cont=None, invert_ytrafo=True):
         if self.n_emb != 0:
             x = [e(x_cat[:,i]) for i,e in enumerate(self.embds_fct)]
             x = torch.cat(x, 1)

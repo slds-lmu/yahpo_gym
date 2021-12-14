@@ -21,8 +21,6 @@ from functools import partial
 #   ContTransformerClamp0LogRange ::  clamp 0,Inf -> range
 
 
-
-
 class ContTransformerNone(nn.Module):
     """
     Transformer for Continuous Variables. Performs no transformation (default operation)
@@ -241,11 +239,11 @@ class ContTransformerInt(nn.Module):
         """
         Identity.
         """
-        return x
+        return x.float()
 
     def invert(self, x):
         x = torch.round(x)
-        return x
+        return x.float()
 
 
 class ContTransformerChain(nn.Module):

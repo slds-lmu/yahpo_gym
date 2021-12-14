@@ -1,4 +1,4 @@
-from yahpo_gym.configuration import config_dict
+from yahpo_gym.configuration import config_dict, cfg
 
 # Default dict, holds for all 'iaml_' benchmarks
 _iaml_dict = {

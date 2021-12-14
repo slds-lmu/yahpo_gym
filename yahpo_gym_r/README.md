@@ -58,8 +58,9 @@ obj = b$get_objective("3945")
 and run our search procedure.
 
 ```r
+library("bbotk")
 p = opt("random_search")
-ois = OptimInstanceMultiCrit$new(obj, terminator = trm("evals", n_evals = 10), check_values = FALSE)
+ois = OptimInstanceMultiCrit$new(obj, search_space = b$search_space, terminator = trm("evals", n_evals = 10))
 p$optimize(ois)
 ```
 
@@ -69,9 +70,8 @@ p$optimize(ois)
 
 ```r
 library(mlr3hyperband)
-library(bbotk)
 p = opt("hyperband")
-ois = OptimInstanceMultiCrit$new(obj, terminator = trm("evals", n_evals = 10), check_values = FALSE)
+ois = OptimInstanceMultiCrit$new(obj, search_space = b$search_space, terminator = trm("evals", n_evals = 10))
 p$optimize(ois)
 ```
 
@@ -90,17 +90,3 @@ and available instances in a `Benchmark`:
 b$instances
 ```
 
-```r
-reticulate::conda_create(
-  envname = "yahpo_gym",
-  packages = c("onnxruntime", "pip", "pyyaml", "pandas"),
-  channel = "conda-forge",
-  python_version = "3.8"
-)
-reticulate::conda_install(envname = "yahpo_gym",
-  packages="configspace", channel="conda-forge")
-reticulate::conda_install(envname = "yahpo_gym",
-  packages="pandas", channel="conda-forge")
-reticulate::conda_install(envname = "yahpo_gym",
-  packages="fastdownload", channel="fastai")
-```

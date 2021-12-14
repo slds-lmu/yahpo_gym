@@ -11,6 +11,7 @@ _yahpo_default_dict = {
     'config_id': '',
     'model': 'new_model.onnx',
     'dataset': 'data.csv',
+    'test_dataset': 'test_data.csv',
     'config_space': 'config_space.json',
     'param_set': 'param_set.R',
     'encoding': 'encoding.json',
