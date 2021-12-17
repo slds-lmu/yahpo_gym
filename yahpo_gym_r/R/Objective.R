@@ -4,39 +4,52 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     timed = NULL,
     logging = NULL,
 
-    initialize = function(instance, py_instance, domain, codomain = NULL, check_values = FALSE, timed = FALSE, logging = FALSE) {
+    initialize = function(instance, multifidelity = TRUE, py_instance, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE) {
+      assert_flag(multifidelity)
+      self$timed = assert_flag(timed)
+      assert_flag(check_values)
       self$timed = assert_flag(timed)
       assert_flag(logging)
-      assert_flag(check_values)
       if (is.null(codomain)) {
         codomain = ps(y = p_dbl(tags = "minimize"))
       }
       private$.py_instance = py_instance
 
-      # Set constant "instance" and define search space over all other values
-      instance_param = names(which(map_lgl(domain$params, function(x) "task_id" %in% x$tags)))
-      pars = setdiff(domain$ids(), instance_param)
-      domain$values = setNames(map(pars, function(x) to_tune()), pars)
+      # set constant instance / fidelities and define domain over all other values
+      instance_param = py_instance$config$instance_names
+      fidelity_params = if (!multifidelity) py_instance$config$fidelity_params else NULL
+      pars = setdiff(domain$ids(), c(instance_param, fidelity_params))
+      domain_new = ParamSet$new(domain$params[pars])
+      if (domain$has_trafo) {
+        domain_new$trafo = domain$trafo
+      }
+      if (domain$has_deps) {
+        domain_new$deps = domain$deps
+      }
 
-      # Define constants param_set
+      # define constants param_set
+      cst = ps()
       if (length(instance_param)) {
-        cst = domain$params[instance_param]
-        cst = invoke(ps, .args = cst)
-        cst$values = setNames(list(instance), instance_param)
-      } else {
-        cst = ps()
+        cst$add(domain$params[[instance_param]])
+        cst$values = insert_named(cst$values, y = setNames(list(instance), nm = instance_param))
+      }
+      if (length(fidelity_params)) {
+        for (fidelity_param in fidelity_params) {
+          cst$add(domain$params[[fidelity_param]])
+          cst$values = insert_named(cst$values, y = setNames(list(domain$params[[fidelity_param]]$upper), nm = fidelity_param))
+        }
       }
 
       if (self$timed) {
-        fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging=logging)}
+        fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = logging)}
       } else {
-        fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging=logging)}
+        fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = logging)}
       }
 
       # asserts id, domain, codomain, properties
       super$initialize(
-        id = paste0("YAHPO_", private$.py_instance$config$config_id),
-        domain = domain,
+        id = paste0("YAHPO_", py_instance$config$config_id),
+        domain = domain_new,
         codomain = codomain,
         properties = character(),
         constants = cst,
@@ -45,9 +58,11 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       )
     }
   ),
+
   private = list(
     .py_instance = NULL
   ),
+
   active = list(
     py_instance = function() {
       private$.py_instance
@@ -63,7 +78,12 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
 #' @export
 preproc_xs = function(xs, ...) {
   csts = list(...)
-  keep(c(as.list(xs), csts), Negate(is.na))
+  xs = map(as.list(xs), function(x) {
+    if (is.logical(x)) {
+      as.character(x)  # NOTE: logical parameters are represented as categoricals in ConfigSpace and we fix this here
+    } else {
+      x
+    }
+  })
+  keep(c(xs, csts), Negate(is.na))
 }
-
-

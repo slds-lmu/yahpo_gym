@@ -68,10 +68,13 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @description
     #' Get the objective function
     #'
-    #' @param instance [`instance`] \cr
+    #' @param instance [`character`] \cr
     #'   A valid instance. See `instances`.
+    #' @param multifidelity (`logical`) \cr
+    #'   Should the objective function respect multifidelity?
+    #'   If `FALSE`, fidelity params are set as constants with their max fidelity in the domain.
     #' @param check_values (`logical`) \cr
-    #'   Should values be checked by bbotk? Initialized to `FALSE`.
+    #'   Should values be checked by bbotk? Initialized to `TRUE`.
     #' @param timed (`logical`) \cr
     #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
     #' @param logging (`logical`) \cr
@@ -79,11 +82,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, check_values = FALSE, timed = FALSE, logging = FALSE) {
+    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE) {
       assert_choice(instance, self$instances)
       assert_flag(check_values)
       ObjectiveYAHPO$new(
         instance,
+        multifidelity,
         self$py_instance,
         self$domain,
         self$codomain,
@@ -93,15 +97,47 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     },
 
     #' @description
-    #' Get Optimization ConfigSpace
+    #' Get Optimization Search Space
     #'
-    #' @param instance [`instance`] \cr
-    #'   A valid instance. See `instances`.
+    #' A [`paradox::ParamSet`] describing the search_space used during optimization.
+    #' Typically, this is the same as the domain but, e.g., with some parameters on log scale.
+    #' This is the same space as the one returned by `get_opt_space_py` (with the instance param dropped).
+    #' Typically this search_space should be provided when creating an [bbotk::OptimInstance].
+    #' @param drop_instance_param [`logical`] \cr
+    #'   Should the instance param (e.g., task id) be dropped? Defaults to `TRUE`.
     #' @param drop_fidelity_params [`logical`] \cr
     #'   Should fidelity params be dropped? Defaults to `FALSE`.
     #' @return
     #'  A [`paradox::ParamSet`] containing the search space to optimize over.
-    get_opt_space_py = function(instance, drop_fidelity_params = FALSE) {
+    get_search_space = function(drop_instance_param = TRUE, drop_fidelity_params = FALSE) {
+      search_space = private$.load_r_domains()$search_space
+      params = search_space$params
+      if (drop_instance_param) {
+        params[self$py_instance$config$instance_names] = NULL
+      }
+      if (drop_fidelity_params) {
+        params[self$py_instance$config$fidelity_params] = NULL
+      }
+      search_space_new = ParamSet$new(params)
+      if (search_space$has_trafo) {
+        search_space_new$trafo = search_space$trafo
+      }
+      if (search_space$has_deps) {
+        search_space_new$deps = search_space$deps
+      }
+      search_space_new
+    },
+
+    #' @description
+    #' Get Optimization ConfigSpace
+    #'
+    #' @param instance [`character`] \cr
+    #'   A valid instance. See `instances`.
+    #' @param drop_fidelity_params [`logical`] \cr
+    #'   Should fidelity params be dropped? Defaults to `TRUE`.
+    #' @return
+    #'  A configspace containing the search space to optimize over.
+    get_opt_space_py = function(instance, drop_fidelity_params = TRUE) {
       assert_choice(instance, self$instances)
       self$py_instance$get_opt_space(instance, drop_fidelity_params)
     },
@@ -115,11 +151,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'  A [`paradox::ParamSet`] containing the output space (codomain).
     subset_codomain = function(keep) {
       codomain = self$codomain
-      assert_choice(keep, names(codomain$params))
+      assert_subset(keep, names(codomain$params))
       new_domain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
       private$.domains$codomain = new_domain
     }
   ),
+
   active = list(
 
     #' @field session `onnxruntime.InferenceSession` \cr
@@ -146,7 +183,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
 
     #' @field domain `ParamSet` \cr
     #' A [`paradox::ParamSet`] describing the domain to be optimized over.
-    domain = function(){
+    domain = function() {
       private$.load_r_domains()$domain
     },
 
@@ -178,6 +215,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       return(private$.py_instance)
     }
   ),
+
   private = list(
     .domains = NULL,
 
@@ -185,7 +223,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       if (is.null(private$.domains)) {
         ps_path = self$py_instance$config$get_path("param_set")
         source(ps_path, local = environment())
-        private$.domains = list(domain = domain, codomain = codomain)
+        private$.domains = list(search_space = search_space, domain = domain, codomain = codomain)
       }
       private$.domains
     }

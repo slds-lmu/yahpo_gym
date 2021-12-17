@@ -12,10 +12,10 @@ def test_cont_scaler():
 
     x = torch.rand(100)
 
-    for transformer in [ContTransformerNone, ContTransformerRange, ContTransformerNegExpRange, ContTransformerLogRange, ContTransformerMultScalar]:
+    for transformer in [ContTransformerNone, ContTransformerRange, ContTransformerNegExp, ContTransformerLog, ContTransformerMultScalar]:
         cont_scaler_helper(x, transformer)
 
-    for transformer in [ContTransformerNone, ContTransformerRange, ContTransformerNegExpRange, ContTransformerMultScalar]:
+    for transformer in [ContTransformerNone, ContTransformerRange, ContTransformerNegExp, ContTransformerMultScalar]:
         cont_scaler_helper(-x, transformer)
 
 if __name__ == '__main__':
