@@ -24,13 +24,21 @@
 BenchmarkSet = R6::R6Class("BenchmarkSet",
   public = list(
 
-    #' @field py_instance [`BenchmarkSet`] \cr
-    #'   A python `yahpo_gym.BenchmarkSet`.
-    py_instance = NULL,
-
     #' @field id `character` \cr
     #'   The scenario identifier.
     id = NULL,
+
+    #' @field onnx_session `onnxruntime.InferenceSession` \cr
+    #'   A session to use for the predict. If `NULL` a new session is initialized.
+    onnx_session = NULL,
+
+    #' @field download `logical` \cr
+    #'   Download data in case it is not available?
+    download = NULL,
+
+    #' @field check `logical` \cr
+    #'   Check whether values coincide with `domain`.
+    check = NULL,
 
     #' @description
     #' Initialize a new object
@@ -47,11 +55,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @param check `logical` \cr
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
     initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
-      # Initialize python instance
-      gym = reticulate::import("yahpo_gym")
       self$id = assert_string(key)
-      self$py_instance = gym$benchmark_set$BenchmarkSet(key, session=onnx_session,
-        active_session = assert_flag(active_session), download = FALSE, check = assert_flag(check))
+      self$session = onnx_session
+      self$download = asser_flag(self$download)
+      self$check = assert_flag(check)
       # Download files
       if (assert_flag(download)) {
         self$py_instance$config$download_files(files = list("param_set.R"))
@@ -156,6 +163,19 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       }
       assert_number(quant)
       self$py_instance$quant = val
+    },
+
+    #' @field py_instance [`BenchmarkSet`] \cr
+    #'   A python `yahpo_gym.BenchmarkSet`.
+    py_instance = function() {
+      if (is.null(self$.py_instance)) {
+        gym = reticulate::import("yahpo_gym")
+        private$.py_instance = gym$benchmark_set$BenchmarkSet(
+          self$id, session=self$onnx_session, active_session = self$active_session,
+          download = self$download, check = self$check
+        )
+      }
+      return(private$.py_instance)
     }
   ),
   private = list(

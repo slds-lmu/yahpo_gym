@@ -56,6 +56,10 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
 )
 
 #' @title Preprocess r object for use with python's YAHPO GYM
+#' @param xs `list` \cr
+#'   List of hyperparams
+#' @param ... `any` \cr
+#'   Named params, appended to `xs`.
 #' @export
 preproc_xs = function(xs, ...) {
   csts = list(...)

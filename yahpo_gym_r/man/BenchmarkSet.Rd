@@ -37,11 +37,17 @@ b$instances
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{py_instance}}{[`BenchmarkSet`] \cr
-A python `yahpo_gym.BenchmarkSet`.}
-
 \item{\code{id}}{`character` \cr
 The scenario identifier.}
+
+\item{\code{onnx_session}}{`onnxruntime.InferenceSession` \cr
+A session to use for the predict. If `NULL` a new session is initialized.}
+
+\item{\code{download}}{`logical` \cr
+Download data in case it is not available?}
+
+\item{\code{check}}{`logical` \cr
+Check whether values coincide with `domain`.}
 }
 \if{html}{\out{</div>}}
 }
@@ -68,6 +74,9 @@ A [`paradox::ParamSet`] describing the output domain.}
 
 \item{\code{quant}}{`numeric` \cr
 Multiply runtime by this factor. Defaults to 0.01.}
+
+\item{\code{py_instance}}{[`BenchmarkSet`] \cr
+A python `yahpo_gym.BenchmarkSet`.}
 }
 \if{html}{\out{</div>}}
 }
@@ -124,7 +133,12 @@ Check inputs for validity before passing to surrogate model? Default `FALSE`.}
 \subsection{Method \code{get_objective()}}{
 Get the objective function
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(instance, check_values = FALSE, timed = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(
+  instance,
+  check_values = FALSE,
+  timed = FALSE,
+  logging = FALSE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -138,6 +152,9 @@ Should values be checked by bbotk? Initialized to `FALSE`.}
 
 \item{\code{timed}}{(`logical`) \cr
 Should function evaluation simulate runtime? Initialized to `FALSE`.}
+
+\item{\code{logging}}{(`logical`) \cr
+Should function evaluationd be logged? Initialized to `FALSE`.}
 }
 \if{html}{\out{</div>}}
 }

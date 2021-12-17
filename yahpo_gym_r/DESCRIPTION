@@ -14,8 +14,6 @@ Description:
     Exposes YAHPO GYM's objective function and parameter space for R.
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
-StagedInstall: no
 Depends:
     R (>= 3.5)
 Imports:

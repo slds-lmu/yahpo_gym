@@ -1,6 +1,6 @@
 test_that("benchmarkset can be instantiated", {
+  skip("Tested locally")
   reticulate::use_condaenv("yahpo_gym", required=TRUE)
-  devtools::load_all()
   b = BenchmarkSet$new("lcbench", active_session = TRUE)
   id = reticulate::py_id(b$session)
   expect_r6(b, "BenchmarkSet")
@@ -46,8 +46,8 @@ test_that("benchmarkset can be instantiated", {
 })
 
 test_that("subsetting works", {
+  skip("Tested locally")
   reticulate::use_condaenv("yahpo_gym", required=TRUE)
-  devtools::load_all()
   b = BenchmarkSet$new("lcbench", active_session = TRUE)
   b$subset_codomain("val_accuracy")
   expect_true(names(b$codomain$params) == "val_accuracy")
