@@ -57,7 +57,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
       self$id = assert_string(key)
       self$session = onnx_session
-      self$download = asser_flag(self$download)
+      self$download = assert_flag(download)
       self$check = assert_flag(check)
       # Download files
       if (assert_flag(download)) {
@@ -152,8 +152,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     subset_codomain = function(keep) {
       codomain = self$codomain
       assert_subset(keep, names(codomain$params))
-      new_domain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
-      private$.domains$codomain = new_domain
+      new_codomain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
+      private$.domains$codomain = new_codomain
     }
   ),
 
@@ -217,6 +217,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
   ),
 
   private = list(
+    .py_instance = NULL,
+
     .domains = NULL,
 
     .load_r_domains = function(instance) {
