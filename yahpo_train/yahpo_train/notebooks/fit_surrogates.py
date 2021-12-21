@@ -54,13 +54,15 @@ def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, 
 
 def get_testset_metrics(key):
     bench = benchmark_set.BenchmarkSet(key)
+    bench.check = False  # see note below
     dtypes = dict(zip(bench.config.cat_names, ["object"] * len(bench.config.cat_names)))
     dtypes.update(dict(zip(bench.config.cont_names+bench.config.y_names, ["float32"] * len(bench.config.cont_names+bench.config.y_names))))
     df = pd.read_csv(bench.config.get_path("test_dataset"), dtype=dtypes)
 
     x = df[bench.config.hp_names]
     truth = df[bench.config.y_names]
-    response = x.apply(lambda point: bench.objective_function(point.to_dict()), axis=1, result_type="expand")
+    # note that the following is somewhat unsafe: we assume that dtypes are correctly represented as expected by the ConfigSpace
+    response = x.apply(lambda point: bench.objective_function(point[~point.isna()].to_dict()), axis=1, result_type="expand")
     truth_tensor = torch.tensor(truth.values)
     response_tensor = torch.tensor(response.values)
 
@@ -157,9 +159,10 @@ def tune_config(key, name, tfms_fixed={}, **kwargs):
         l = fit_config(key=key, dls_train=dls_train, tfms=tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=False, cbs=cbs, **kwargs)
         return l.recorder.losses[-1]
     
-    study.optimize(objective, n_trials=100, timeout=86400)
+    study.optimize(objective, n_trials=1000, timeout=86400)
     # plot_optimization_history(study)
     return study
+
 
 def fit_from_best_params(key, best_params, tfms_fixed={}, log_wandb=False, **kwargs):
     cc = cfg(key)
@@ -369,11 +372,22 @@ if __name__ == '__main__':
     tfms_xgboost = {}
     tfms_xgboost.update({"nf":tfms_chain([ContTransformerInt, ContTransformerRange])})
     # 2. tune by providing the fixed transformers (if any)
-    study_xgboost = tune_config("iaml_xgboost", name="tune_iaml_xgboost", tfms_fixed=tfms_xgboost)
+    study_xgboost = tune_config("iaml_xgboost", name="tune_iaml_xgboost_new", tfms_fixed=tfms_xgboost)
     # 3. extract the best params and refit the model (FIXME: could refit on whole train + valid data?)
     #    set export = True so that the onnx model is exported
     #    caveat: this overwrites the exiting model! # FIXME: should versionize this automatically
-    l = fit_from_best_params("iaml_xgboost", best_params=study.best_params, tfms_fixed=tfms_xgboost, export=True, device=decive)
+    l = fit_from_best_params("iaml_xgboost", best_params=study_xgboost.best_params, tfms_fixed=tfms_xgboost, export=True, device=device, epochs=100)
     # 4. get the performance metrics on the test set relying on the newly exported onnx model
     get_testset_metrics("iaml_xgboost")
+
+    # load existing one:
+    name = storage_name = "sqlite:///{}.db".format("tune_iaml_xgboost_new")
+    study_xgboost = optuna.load_study(None, storage = name)
+
+    # tfms_super nf tfms_chain([ContTransformerInt, ContTransformerRange]
+    tfms_super.update({"timetrain":ContTransformerLogRange})
+    tfms_super.update({"timepredict":ContTransformerLogRange})
+    tfms_super.update({"rammodel":ContTransformerLogRange})
+    tfms_super.update({"ias":ContTransformerLogRange})
+    fit_from_best_params("iaml_super", study_super.best_params, tfms_fixed=tfms_super, log_wandb=True, export=True, epochs=100)
 
