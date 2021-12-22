@@ -32,6 +32,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   A session to use for the predict. If `NULL` a new session is initialized.
     onnx_session = NULL,
 
+    #' @field active_session `logical` \cra
+    #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
+    active_session = NULL,
+
     #' @field download `logical` \cr
     #'   Download data in case it is not available?
     download = NULL,
@@ -56,7 +60,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
     initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
       self$id = assert_string(key)
-      self$session = onnx_session
+      self$onnx_session = onnx_session
+      self$active_session = assert_flag(active_session)
       self$download = assert_flag(download)
       self$check = assert_flag(check)
       # Download files
@@ -205,10 +210,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @field py_instance [`BenchmarkSet`] \cr
     #'   A python `yahpo_gym.BenchmarkSet`.
     py_instance = function() {
-      if (is.null(self$.py_instance)) {
+      if (is.null(private$.py_instance)) {
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
-          self$id, session=self$onnx_session, active_session = self$active_session,
+          self$id, session = self$onnx_session, active_session = self$active_session,
           download = self$download, check = self$check
         )
       }
