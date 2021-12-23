@@ -52,3 +52,21 @@ test_that("subsetting works", {
   b$subset_codomain("val_accuracy")
   expect_true(names(b$codomain$params) == "val_accuracy")
 })
+
+test_that("Parallel", {
+  skip("Tested locally")
+  options(future.globals.onReference = "error")
+  reticulate::use_condaenv("yahpo_gym", required=TRUE)
+
+  b = BenchmarkSet$new("iaml_xgboost")
+  objective = b$get_objective("40981", timed = TRUE)
+
+  xdt = generate_design_random(b$get_search_space(), 1)$data
+  xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
+
+  future::plan("multisession")
+  promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym")
+
+  
+  
+})

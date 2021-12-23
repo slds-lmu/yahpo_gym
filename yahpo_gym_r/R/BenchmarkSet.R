@@ -56,8 +56,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
     initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
       self$id = assert_string(key)
-      self$session = onnx_session
-      self$download = asser_flag(self$download)
+      self$onnx_session = onnx_session
+      self$download = assert_flag(download)
       self$check = assert_flag(check)
       # Download files
       if (assert_flag(download)) {
@@ -88,14 +88,16 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       ObjectiveYAHPO$new(
         instance,
         multifidelity,
-        self$py_instance,
+        list(
+          config_id = self$id, session = self$onnx_session, sactive_session = self$active_session, 
+          download = self$download, check = self$check
+        ),
         self$domain,
         self$codomain,
         check_values = check_values,
         timed = timed
       )
     },
-
     #' @description
     #' Get Optimization Search Space
     #'

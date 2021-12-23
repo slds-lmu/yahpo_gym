@@ -4,7 +4,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     timed = NULL,
     logging = NULL,
 
-    initialize = function(instance, multifidelity = TRUE, py_instance, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE) {
+    initialize = function(instance, multifidelity = TRUE, py_instance_args, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE) {
       assert_flag(multifidelity)
       self$timed = assert_flag(timed)
       assert_flag(check_values)
@@ -13,7 +13,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       if (is.null(codomain)) {
         codomain = ps(y = p_dbl(tags = "minimize"))
       }
-      private$.py_instance = py_instance
+      private$.py_instance_args = assert_list(py_instance_args)
 
       # set constant instance / fidelities and define domain over all other values
       instance_param = py_instance$config$instance_names
@@ -60,12 +60,23 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
   ),
 
   private = list(
-    .py_instance = NULL
+    .py_instance = NULL,
+    .py_instance_args = NULL
   ),
+
 
   active = list(
     py_instance = function() {
-      private$.py_instance
+      if (is.null(self$.py_instance)) {
+        gym = reticulate::import("yahpo_gym")
+        args = private$.py_instance_arga
+        browser()
+        private$.py_instance = gym$benchmark_set$BenchmarkSet(
+          args$config_id, session=args$onnx_session, active_session = args$active_session,
+          download = args$download, check = args$check
+        )
+      }
+      return(private$.py_instance)
     }
   )
 )
