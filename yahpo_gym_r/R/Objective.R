@@ -41,9 +41,9 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       }
 
       if (self$timed) {
-        fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = logging)}
+        fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = logging)[self$codomain$ids()]}
       } else {
-        fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = logging)}
+        fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = logging)[self$codomain$ids()]}
       }
 
       # asserts id, domain, codomain, properties

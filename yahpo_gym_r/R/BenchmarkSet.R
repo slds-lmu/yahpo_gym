@@ -32,6 +32,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   A session to use for the predict. If `NULL` a new session is initialized.
     onnx_session = NULL,
 
+    #' @field active_session `logical` \cra
+    #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
+    active_session = NULL,
+
     #' @field download `logical` \cr
     #'   Download data in case it is not available?
     download = NULL,
@@ -57,6 +61,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
       self$id = assert_string(key)
       self$onnx_session = onnx_session
+<<<<<<< HEAD
+=======
+      self$active_session = assert_flag(active_session)
+>>>>>>> b30f760365f48d1600d062969c148875c9b8362e
       self$download = assert_flag(download)
       self$check = assert_flag(check)
       # Download files
@@ -154,8 +162,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     subset_codomain = function(keep) {
       codomain = self$codomain
       assert_subset(keep, names(codomain$params))
-      new_domain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
-      private$.domains$codomain = new_domain
+      new_codomain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
+      private$.domains$codomain = new_codomain
     }
   ),
 
@@ -207,10 +215,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @field py_instance [`BenchmarkSet`] \cr
     #'   A python `yahpo_gym.BenchmarkSet`.
     py_instance = function() {
-      if (is.null(self$.py_instance)) {
+      if (is.null(private$.py_instance)) {
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
-          self$id, session=self$onnx_session, active_session = self$active_session,
+          self$id, session = self$onnx_session, active_session = self$active_session,
           download = self$download, check = self$check
         )
       }
@@ -219,6 +227,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
   ),
 
   private = list(
+    .py_instance = NULL,
+
     .domains = NULL,
 
     .load_r_domains = function(instance) {
