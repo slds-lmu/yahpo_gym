@@ -183,7 +183,7 @@ class BenchmarkSet():
             options = rt.SessionOptions()
             options.inter_op_num_threads = 1L
             optionss.intra_op_num_threads = 1L
-            self.session = rt.InferenceSession(model_path, sess_options = options)
+            self.session = rt.InferenceSession(model_path, sess_options=options)
 
     @property
     def instances(self):
