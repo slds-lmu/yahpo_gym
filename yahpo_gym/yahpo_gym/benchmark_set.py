@@ -181,8 +181,8 @@ class BenchmarkSet():
             if not Path(model_path).is_file():
                 raise Exception(f("ONNX file {model_path} not found!"))
             options = rt.SessionOptions()
-            options.inter_op_num_threads = 1L
-            options.intra_op_num_threads = 1L
+            options.inter_op_num_threads = 1
+            options.intra_op_num_threads = 1
             self.session = rt.InferenceSession(model_path, sess_options=options)
 
     @property
