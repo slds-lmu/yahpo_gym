@@ -109,7 +109,6 @@ def tune_config(key, name, tfms_fixed={}, **kwargs):
     tlog = ContTransformerLogRange
     tlog2 = ContTransformerLog2Range
     tnexp = ContTransformerNegExpRange
-    tclamp = ContTransformerClamp01Range
     trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp, "tclamp":tclamp}
 
     def objective(trial):
@@ -376,7 +375,7 @@ if __name__ == '__main__':
     # 3. extract the best params and refit the model (FIXME: could refit on whole train + valid data?)
     #    set export = True so that the onnx model is exported
     #    caveat: this overwrites the exiting model! # FIXME: should versionize this automatically
-    l = fit_from_best_params("iaml_xgboost", best_params=study_xgboost.best_params, tfms_fixed=tfms_xgboost, export=True, device=device, epochs=100)
+    l = fit_from_best_params("iaml_xgboost", best_params=study_xgboost.best_params, tfms_fixed=tfms_xgboost, export=True, device=device, epochs=300)
     # 4. get the performance metrics on the test set relying on the newly exported onnx model
     get_testset_metrics("iaml_xgboost")
 
@@ -385,9 +384,10 @@ if __name__ == '__main__':
     study_xgboost = optuna.load_study(None, storage = name)
 
     # tfms_super nf tfms_chain([ContTransformerInt, ContTransformerRange]
-    tfms_super.update({"timetrain":ContTransformerLogRange})
-    tfms_super.update({"timepredict":ContTransformerLogRange})
-    tfms_super.update({"rammodel":ContTransformerLogRange})
+    tfms_super = {}
+    tfms_super.update({"nf":tfms_chain([ContTransformerInt, ContTransformerRange])})
     tfms_super.update({"ias":ContTransformerLogRange})
-    fit_from_best_params("iaml_super", study_super.best_params, tfms_fixed=tfms_super, log_wandb=True, export=True, epochs=100)
+    params_super = copy(study_super.best_params)
+    params_super.update({"tfms_logloss":"tlog"})
+    fit_from_best_params("iaml_super", params_super, tfms_fixed=tfms_super, log_wandb=False, export=True, epochs=300)
 
