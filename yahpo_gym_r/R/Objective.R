@@ -1,5 +1,5 @@
 ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
-  inherit = bbotk::ObjectiveRFun,
+  inherit = bbotk::Objective,
   public = list(
     timed = NULL,
     logging = NULL,
@@ -47,13 +47,13 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         codomain = codomain,
         properties = character(),
         constants = cst,
-        check_values = assert_flag(check_values),
-        fun = function(xs, ...) {print("foo")}
+        check_values = assert_flag(check_values)
       )
+
     },
     eval = function(xs) {
       if (self$check_values) self$domain$assert(xs)
-      if (inherits(self$py_instance, "yahpo_gym.benchmark_set.BenchmarkSet")) {
+      if (is.null(private$.fun)) {
         private$.set_fun()
       }
       res = invoke(private$.fun, xs, .args = self$constants$values)
@@ -63,6 +63,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
   ),
 
   private = list(
+    .fun = NULL,
     .py_instance = NULL,
     .py_instance_args = NULL,
     .drop_py_instances = function() {
@@ -70,7 +71,6 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       private$.fun = NULL
     },
     .set_fun = function() {
-      private$.drop_py_instances()
       if (self$timed) {
         private$.fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = self$logging)[self$codomain$ids()]}
       } else {
@@ -81,8 +81,10 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
 
 
   active = list(
+    #' @field py_instance (`yahpogym.BenchmarkInstnace`)\cr
+    #' Python object.
     py_instance = function() {
-      if (is.null(private$.py_instance)) {
+      if (is.null(private$.py_instance) | is0x0ptr(private$.py_instance)) {
         gym = reticulate::import("yahpo_gym")
         args = private$.py_instance_args
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
@@ -91,6 +93,12 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         )
       }
       return(private$.py_instance)
+    },
+    #' @field fun (`function`)\cr
+    #' Objective function.
+    fun = function(lhs) {
+      if (!missing(lhs) && !identical(lhs, private$.fun)) stop("fun is read-only")
+      private$.fun
     }
   )
 )

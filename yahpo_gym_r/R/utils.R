@@ -24,3 +24,8 @@ list_benchmarks = function() {
   yp = reticulate::import("yahpo_gym.configuration")
   yp$cfg()
 }
+
+is0x0ptr = function(pointer) {
+  out = capture.output(pointer)
+  return(out == "<pointer: 0x0>")
+}
