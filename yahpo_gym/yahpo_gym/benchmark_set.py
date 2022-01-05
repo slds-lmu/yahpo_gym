@@ -14,7 +14,7 @@ import ConfigSpace.hyperparameters as CSH
 class BenchmarkSet():
 
     def __init__(self, config_id: str = None, download: bool = True, active_session: bool = False,
-        session: Union[rt.InferenceSession, None] = None, check: bool = True):
+        session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True):
         """
         Interface for a benchmark scenario. 
         Initialized with a valid key for a valid scenario and optinally an `onnxruntime.InferenceSession`.
@@ -28,9 +28,12 @@ class BenchmarkSet():
         session: onnx.Session
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no session is given.
         check: bool
-            Should input to objective_function* be checked for validity? Initialized to True, can be
-            disabled for speedups.
+            Should input to objective_function be checked for validity? Initialized to `True`, but can be disabled for speedups.
         """
         self.config = cfg(config_id, download=download)
         self.encoding = self._get_encoding()
@@ -43,9 +46,9 @@ class BenchmarkSet():
         self.archive = []
 
         if self.active_session or (session is not None):
-            self.set_session(session)
+            self.set_session(session, multithread=multithread)
 
-    def objective_function(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
+    def objective_function(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
         """
         Evaluate the surrogate for a given configuration.
 
@@ -56,9 +59,13 @@ class BenchmarkSet():
             Attention: `configuration` is not checked for internal validity for speed purposes.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no active session has been set.
         """
         if not self.active_session:
-            self.set_session()
+            self.set_session(multithread=multithread)
 
         x_cont, x_cat = self._config_to_xs(configuration)
         # input & output names and dims
@@ -163,7 +170,7 @@ class BenchmarkSet():
         return cs
 
 
-    def set_session(self, session: Union[rt.InferenceSession, None] = None):
+    def set_session(self, session: Union[rt.InferenceSession, None] = None, multithread: bool = True):
         """
         Set the session for inference on the surrogate model.
 
@@ -172,6 +179,10 @@ class BenchmarkSet():
         session: onnxruntime.InferenceSession
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no session is given.
         """
         # Either overwrite session or instantiate a new one if no active session exists
         if (session is not None):
@@ -180,8 +191,11 @@ class BenchmarkSet():
             model_path = self.config.get_path("model")
             if not Path(model_path).is_file():
                 raise Exception(f("ONNX file {model_path} not found!"))
-            self.session = rt.InferenceSession(model_path)
-    
+            options = rt.SessionOptions()
+            if not multithread:
+              options.inter_op_num_threads = 1
+              options.intra_op_num_threads = 1
+            self.session = rt.InferenceSession(model_path, sess_options=options)
 
     @property
     def instances(self):
