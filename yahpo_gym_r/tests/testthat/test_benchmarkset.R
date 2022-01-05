@@ -55,18 +55,22 @@ test_that("subsetting works", {
 
 test_that("Parallel", {
   skip("Tested locally")
-  options(future.globals.onReference = "error")
+  setwd("yahpo_gym_r")
+  options(future.globals.onReference = "string")
   reticulate::use_condaenv("yahpo_gym", required=TRUE)
 
-  b = BenchmarkSet$new("iaml_xgboost")
-  objective = b$get_objective("40981", timed = TRUE)
+  b = BenchmarkSet$new("lcbench")
+  objective = b$get_objective("3945", timed = FALSE, check_values = FALSE)
 
   xdt = generate_design_random(b$get_search_space(), 1)$data
   xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
-
+  # objective$eval_many(xss_trafoed)
+  
   future::plan("multisession")
-  promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym")
+  promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
+  future::value(promise)
 
-  
-  
+  future:::assert_no_references(objective)
+  future:::find_references(objective, first_only = TRUE)
+
 })
