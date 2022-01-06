@@ -59,6 +59,9 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       res = invoke(private$.fun, xs, .args = self$constants$values)
       if (self$check_values) self$codomain$assert(as.list(res)[self$codomain$ids()])
       return(res)
+    },
+    export = function() {
+      private$.export()
     }
   ),
 
@@ -66,9 +69,11 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     .fun = NULL,
     .py_instance = NULL,
     .py_instance_args = NULL,
-    .drop_py_instances = function() {
+    .export = function() {
       private$.py_instance = NULL
       private$.fun = NULL
+      private$.py_instance_args$onnx_session = NULL
+      private$.py_instance_args$active_session = FALSE
     },
     .set_fun = function() {
       if (self$timed) {

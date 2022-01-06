@@ -94,7 +94,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         instance,
         multifidelity,
         list(
-          config_id = self$id, session = self$onnx_session, sactive_session = self$active_session, 
+          config_id = self$id, session = self$onnx_session, active_session = self$active_session, 
           download = self$download, check = self$check
         ),
         self$domain,

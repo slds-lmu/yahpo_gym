@@ -67,4 +67,8 @@ test_that("Parallel", {
   future::plan("multisession")
   promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
   future::value(promise)
+
+  objective$export()
+  promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
+  future::value(promise)
 })
