@@ -4,12 +4,13 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     timed = NULL,
     logging = NULL,
 
-    initialize = function(instance, multifidelity = TRUE, py_instance, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE) {
+    initialize = function(instance, multifidelity = TRUE, py_instance, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE) {
       assert_flag(multifidelity)
       self$timed = assert_flag(timed)
       assert_flag(check_values)
       self$timed = assert_flag(timed)
       assert_flag(logging)
+      assert_flag(multithread)
       if (is.null(codomain)) {
         codomain = ps(y = p_dbl(tags = "minimize"))
       }
@@ -41,9 +42,9 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       }
 
       if (self$timed) {
-        fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = logging)[self$codomain$ids()]}
+        fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = logging, multithread = multithread)[self$codomain$ids()]}
       } else {
-        fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = logging)[self$codomain$ids()]}
+        fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = logging, multithread = multithread)[self$codomain$ids()]}
       }
 
       # asserts id, domain, codomain, properties
