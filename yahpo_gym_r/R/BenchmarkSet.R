@@ -32,7 +32,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   A session to use for the predict. If `NULL` a new session is initialized.
     onnx_session = NULL,
 
-    #' @field active_session `logical` \cra
+    #' @field active_session `logical` \cr
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     active_session = NULL,
 
@@ -40,9 +40,14 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Download data in case it is not available?
     download = NULL,
 
+    #' @field multithread `logical` \cr
+    #'   Should the ONNX session be allowed to leverage multithreading capabilities?
+    multithread = NULL,
+
     #' @field check `logical` \cr
     #'   Check whether values coincide with `domain`.
     check = NULL,
+
 
     #' @description
     #' Initialize a new object
@@ -56,13 +61,16 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     #' @param download `logical` \cr
     #'   Download the required data on instantiation? Default `FALSE`.
+    #' @param multithread `logical` \cr
+    #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @param check `logical` \cr
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
-    initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
+    initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, multithread = FALSE, check = FALSE) {
       self$id = assert_string(key)
       self$onnx_session = onnx_session
       self$active_session = assert_flag(active_session)
       self$download = assert_flag(download)
+      self$multithread = assert_flag(multithread)
       self$check = assert_flag(check)
       # Download files
       if (assert_flag(download)) {
@@ -84,10 +92,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
     #' @param logging (`logical`) \cr
     #'   Should function evaluationd be logged? Initialized to `FALSE`.
+    #' @param multithread `logical` \cr
+    #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE) {
+    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE) {
       assert_choice(instance, self$instances)
       assert_flag(check_values)
       ObjectiveYAHPO$new(
@@ -100,7 +110,9 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         self$domain,
         self$codomain,
         check_values = check_values,
-        timed = timed
+        timed = timed,
+        logging = logging,
+        multithread = multithread
       )
     },
     #' @description
@@ -216,7 +228,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
           config_id = self$id, session = self$onnx_session, active_session = self$active_session,
-          download = self$download# , check = self$check
+          download = self$download, multithread = self$multithread#, check = self$check
         )
       }
       return(private$.py_instance)

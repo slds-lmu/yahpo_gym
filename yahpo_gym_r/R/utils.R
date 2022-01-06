@@ -26,6 +26,6 @@ list_benchmarks = function() {
 }
 
 is0x0ptr = function(pointer) {
-  out = capture.output(pointer)
+  out = utils::capture.output(pointer)
   return(out == "<pointer: 0x0>")
 }
