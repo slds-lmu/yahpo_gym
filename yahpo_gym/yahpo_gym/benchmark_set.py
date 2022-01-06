@@ -80,7 +80,7 @@ class BenchmarkSet():
 
         return results_dict
 
-    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
+    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
         """
         Evaluate the surrogate for a given configuration and sleep for quant * predicted runtime.
         Note, that this assumes that the predicted runtime is in seconds.
@@ -92,9 +92,13 @@ class BenchmarkSet():
             Attention: `configuration` is not checked for internal validity for speed purposes.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no active session has been set.
         """
         start_time = time.time()
-        results = self.objective_function(configuration)
+        results = self.objective_function(configuration, logging = logging, multithread = multithread)
         rt = results[self.config.runtime_name]
         offset = time.time() - start_time
         sleepit = max(rt - offset, 0) * self.quant
