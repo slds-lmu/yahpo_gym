@@ -77,6 +77,17 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         self$py_instance$config$download_files(files = list("param_set.R"))
       }
     },
+    #' @description
+    #' Printer
+    print = function() {
+      cat(format(self))
+      cat("\n\n Targets: (Codomain)\n")
+      print(self$codomain)
+      cat("\nHyperparameters: (Domain)\n")
+      print(self$domain)
+      cat("\nAvailable instances:\n")
+      print(self$instances)
+    },
 
     #' @description
     #' Get the objective function
