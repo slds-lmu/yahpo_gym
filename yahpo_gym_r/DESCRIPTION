@@ -27,7 +27,8 @@ Suggests:
     testthat,
     covr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    future
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 Config/testthat/edition: 3

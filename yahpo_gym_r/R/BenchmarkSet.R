@@ -227,10 +227,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       if (is.null(private$.py_instance)) {
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
-          self$id, session = self$onnx_session, active_session = self$active_session,
-          download = self$download, multithread = self$multithread#, check = self$check
           config_id = self$id, session = self$onnx_session, active_session = self$active_session,
-          download = self$download# , check = self$check
+          download = self$download, multithread = self$multithread#, check = self$check
         )
       }
       return(private$.py_instance)
