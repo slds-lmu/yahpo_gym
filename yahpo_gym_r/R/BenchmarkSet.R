@@ -103,7 +103,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       ObjectiveYAHPO$new(
         instance,
         multifidelity,
-        self$py_instance,
+        list(
+          config_id = self$id, session = self$onnx_session, sactive_session = self$active_session, 
+          download = self$download, check = self$check
+        ),
         self$domain,
         self$codomain,
         check_values = check_values,
@@ -112,7 +115,6 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         multithread = multithread
       )
     },
-
     #' @description
     #' Get Optimization Search Space
     #'
@@ -226,7 +228,9 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
           self$id, session = self$onnx_session, active_session = self$active_session,
-          download = self$download, multithread = self$multithread, check = self$check
+          download = self$download, multithread = self$multithread#, check = self$check
+          config_id = self$id, session = self$onnx_session, active_session = self$active_session,
+          download = self$download# , check = self$check
         )
       }
       return(private$.py_instance)

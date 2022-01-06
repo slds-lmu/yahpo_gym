@@ -91,3 +91,26 @@ and available instances in a `Benchmark`:
 b$instances
 ```
 
+## Using yahpogym with `future`:
+
+Parallelization with `future` and `reticulate` does not always work out of the box.
+The following configurations allow to use `yahpogym` together with `future`.
+
+1. If `yahpogym` requires a conda env / virtual env set up the `.Renvirion` file by adding 
+  `RETICULATE_PYTHON=path_to_conda_python_bin`. This path can be obtained through `reticulate::py_discover_config()`.
+
+2. Silence `future` warnings using `options(future.globals.onReference = "string")`.
+  Note: `future`s check will still find unresolved references, but `yahpogym` constructs those on the child process via active bindings.
+
+3. Run the evaluation using `future`:
+  ```r
+    b = BenchmarkSet$new("lcbench")
+    objective = b$get_objective("3945", check_values = FALSE)
+
+    xdt = generate_design_random(b$get_search_space(), 1)$data
+    xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
+
+    future::plan("multisession")
+    promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
+    future::value(promise)
+  ```
