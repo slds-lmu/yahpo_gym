@@ -41,12 +41,6 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         }
       }
 
-      if (self$timed) {
-        fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = logging, multithread = multithread)[self$codomain$ids()]}
-      } else {
-        fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = logging, multithread = multithread)[self$codomain$ids()]}
-      }
-
       # asserts id, domain, codomain, properties
       super$initialize(
         id = paste0("YAHPO_", py_instance_args$config_id),
