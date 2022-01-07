@@ -64,7 +64,7 @@ class BenchmarkSet():
             Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
             Only relevant if no active session has been set.
         """
-        if not self.active_session:
+        if not self.active_session or self.session is None:
             self.set_session(multithread=multithread)
 
         x_cont, x_cat = self._config_to_xs(configuration)
@@ -78,7 +78,8 @@ class BenchmarkSet():
             timedate = time.strftime("%D|%H:%M:%S", time.localtime())
             self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
             
-        del self.session # Drop session to avoid memory leaks
+        if not self.active_session:
+            self.session = None
 
         return results_dict
 

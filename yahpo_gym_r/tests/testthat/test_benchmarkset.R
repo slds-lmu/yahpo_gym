@@ -73,7 +73,7 @@ test_that("Parallel", {
   })
   map(pss, future::value)
 
-  objective$export()
   promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
   future::value(promise)
 })
+
