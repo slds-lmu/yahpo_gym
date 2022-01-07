@@ -64,9 +64,14 @@ test_that("Parallel", {
   xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
   objective$eval_many(xss_trafoed)
   
+
   future::plan("multisession")
-  promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
-  future::value(promise)
+  pss = replicate(2, {
+    xdt = generate_design_random(b$get_search_space(), 1)$data
+    xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
+    promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL, lazy = TRUE)
+  })
+  map(pss, future::value)
 
   objective$export()
   promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)

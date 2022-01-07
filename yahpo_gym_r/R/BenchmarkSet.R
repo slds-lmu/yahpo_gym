@@ -78,7 +78,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       }
     },
     #' @description
-    #' Printer
+    #' Printer with some additional information.
     print = function() {
       cat(format(self))
       cat("\n\n Targets: (Codomain)\n")
