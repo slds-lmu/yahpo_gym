@@ -90,6 +90,7 @@ A python `yahpo_gym.BenchmarkSet`.}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{BenchmarkSet$new()}}
+\item \href{#method-print}{\code{BenchmarkSet$print()}}
 \item \href{#method-get_objective}{\code{BenchmarkSet$get_objective()}}
 \item \href{#method-get_search_space}{\code{BenchmarkSet$get_search_space()}}
 \item \href{#method-get_opt_space_py}{\code{BenchmarkSet$get_opt_space_py()}}
@@ -137,6 +138,16 @@ Check inputs for validity before passing to surrogate model? Default `FALSE`.}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
+\subsection{Method \code{print()}}{
+Printer
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$print()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_objective"></a>}}
