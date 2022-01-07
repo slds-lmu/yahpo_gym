@@ -3,13 +3,14 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
   public = list(
     timed = NULL,
     logging = NULL,
+    multithread = NULL,
 
     initialize = function(instance, multifidelity = TRUE, py_instance_args, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE) {
       assert_flag(multifidelity)
       assert_flag(check_values)
       self$timed = assert_flag(timed)
       self$logging = assert_flag(logging)
-      assert_flag(multithread)
+      self$multithread = assert_flag(multithread)
       if (is.null(codomain)) {
         codomain = ps(y = p_dbl(tags = "minimize"))
       }
@@ -83,9 +84,9 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     },
     .set_fun = function() {
       if (self$timed) {
-        private$.fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = self$logging)[self$codomain$ids()]}
+        private$.fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[self$codomain$ids()]}
       } else {
-        private$.fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = self$logging)[self$codomain$ids()]}
+        private$.fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[self$codomain$ids()]}
       }
     }
   ),
