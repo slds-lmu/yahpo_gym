@@ -40,7 +40,7 @@ class BenchmarkSet():
         self.config_space = self._get_config_space()
         self.active_session = active_session
         self.check = check
-        self.quant = 0.1
+        self.quant = None
         self.constants = {}
         self.session = None
         self.archive = []
@@ -100,10 +100,13 @@ class BenchmarkSet():
             Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
             Only relevant if no active session has been set.
         """
+        if self.quant is None:
+            self.quant = self._infer_quant()
+            
         start_time = time.time()
         results = self.objective_function(configuration, logging = logging, multithread = multithread)
         rt = results[self.config.runtime_name]
-        offset = time.time() - start_time
+        offset = time.time() - start_time    
         sleepit = max(rt - offset, 0) * self.quant
         time.sleep(sleepit)
         return results
@@ -266,4 +269,19 @@ class BenchmarkSet():
 
     def _eval_random(self):
         cfg = self.config_space.sample_configuration().get_dictionary()
-        return self.objective_function_timed(cfg)
+        return self.objective_function(cfg, logging = False, multithread=False)
+    
+    def _infer_quant(self):
+        offsets = []
+        runtimes = [] 
+        for i in range(15):
+            start_time = time.time()
+            results = self._eval_random()
+            runtimes += [results[self.config.runtime_name]]
+            offsets += [time.time() - start_time]
+            
+        # Compute average predicted runtime
+        rt = np.mean(np.maximum(np.array(runtimes), 0.))
+        # Set the quantization factor as X offsets
+        quant = np.minimum(20 * np.max(np.array(offsets)) / rt, 1.)
+        return(quant)
