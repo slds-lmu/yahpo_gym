@@ -244,7 +244,6 @@ class BenchmarkSet():
         if self.check:
             self.config_space.check_configuration(CS.Configuration(self.config_space, values = configuration, allow_inactive_with_values = False))
 
-        # FIXME: This should work with configuration as a `List` of Dicts
         # Update with constants (constants overwrite configuration values)
         if len(self.constants):
             [configuration.update({k : v}) for k,v in self.constants.items()]
@@ -281,7 +280,7 @@ class BenchmarkSet():
 
     def _eval_random(self):
         cfg = self.config_space.sample_configuration().get_dictionary()
-        return self.objective_function(cfg, logging = False, multithread=False)
+        return self.objective_function(cfg, logging = False, multithread=False)[0]
     
     def _infer_quant(self):
         offsets = []

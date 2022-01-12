@@ -1,0 +1,20 @@
+name: UnitTests [python]
+on: [pull_request, push]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        cd yahpo_gym
+        pip install -e .[test]
+    - name: Run yahpo_gym tests
+      run: |
+        cd yahpo_gym
+        pytest -sv tests/

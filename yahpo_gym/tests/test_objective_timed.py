@@ -48,5 +48,3 @@ def test_objective_timed_lcbench():
         
         b.quant = None
         
-
-test_objective_timed_lcbench()
