@@ -78,9 +78,9 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     },
     .set_fun = function() {
       if (self$timed) {
-        private$.fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[self$codomain$ids()]}
+        private$.fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[[1]][self$codomain$ids()]}
       } else {
-        private$.fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[self$codomain$ids()]}
+        private$.fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[[1]][self$codomain$ids()]}
       }
     }
   ),

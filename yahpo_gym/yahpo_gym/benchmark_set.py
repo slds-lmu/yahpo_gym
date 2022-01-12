@@ -87,9 +87,6 @@ class BenchmarkSet():
         if not self.active_session:
             self.session = None
 
-        if len(results_list) == 1:
-            results_list = results_list[0]  # return only the first dict of the list if a single configuration has been provided
-
         return results_list
 
     def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):

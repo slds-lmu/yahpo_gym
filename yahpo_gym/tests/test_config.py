@@ -1,7 +1,7 @@
 import pytest
 
 def test_config():
-  from yahpo_gym.configuration import *
+  import yahpo_gym.configuration
   _test_dict = {
       'config_id' : 'TEST_BENCHMARK',
       'y_names' : ['valid_loss', 'runtime','n_params'],

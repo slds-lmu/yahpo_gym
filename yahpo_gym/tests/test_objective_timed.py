@@ -32,7 +32,7 @@ def test_objective_timed_lcbench():
         assert b.quant < 1
         
         # Predicted runtime:
-        rth = (out[b.config.runtime_name])
+        rth = (out[0][b.config.runtime_name])
         assert rth > 0
         
         # Runtime:
@@ -41,7 +41,7 @@ def test_objective_timed_lcbench():
         tt = time.time() - start_time  
 
         # Sped up runtime
-        rtt = out[b.config.runtime_name] * b.quant
+        rtt = out[0][b.config.runtime_name] * b.quant
         assert rtt > 0
         # Sped up runtime and actual runtime match
         assert rtt / tt > 0.85
