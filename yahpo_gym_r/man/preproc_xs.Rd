@@ -6,6 +6,13 @@
 \usage{
 preproc_xs(xs, ...)
 }
+\arguments{
+\item{xs}{`list` \cr
+List of hyperparams}
+
+\item{...}{`any` \cr
+Named params, appended to `xs`.}
+}
 \description{
 Preprocess r object for use with python's YAHPO GYM
 }

@@ -14,8 +14,6 @@ Description:
     Exposes YAHPO GYM's objective function and parameter space for R.
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
-StagedInstall: no
 Depends:
     R (>= 3.5)
 Imports:
@@ -29,7 +27,8 @@ Suggests:
     testthat,
     covr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    future
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 Config/testthat/edition: 3

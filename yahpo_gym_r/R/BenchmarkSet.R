@@ -24,13 +24,30 @@
 BenchmarkSet = R6::R6Class("BenchmarkSet",
   public = list(
 
-    #' @field py_instance [`BenchmarkSet`] \cr
-    #'   A python `yahpo_gym.BenchmarkSet`.
-    py_instance = NULL,
-
     #' @field id `character` \cr
     #'   The scenario identifier.
     id = NULL,
+
+    #' @field onnx_session `onnxruntime.InferenceSession` \cr
+    #'   A session to use for the predict. If `NULL` a new session is initialized.
+    onnx_session = NULL,
+
+    #' @field active_session `logical` \cr
+    #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
+    active_session = NULL,
+
+    #' @field download `logical` \cr
+    #'   Download data in case it is not available?
+    download = NULL,
+
+    #' @field multithread `logical` \cr
+    #'   Should the ONNX session be allowed to leverage multithreading capabilities?
+    multithread = NULL,
+
+    #' @field check `logical` \cr
+    #'   Check whether values coincide with `domain`.
+    check = NULL,
+
 
     #' @description
     #' Initialize a new object
@@ -44,57 +61,113 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     #' @param download `logical` \cr
     #'   Download the required data on instantiation? Default `FALSE`.
+    #' @param multithread `logical` \cr
+    #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @param check `logical` \cr
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
-    initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, check = FALSE) {
-      # Initialize python instance
-      gym = reticulate::import("yahpo_gym")
+    initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, multithread = FALSE, check = FALSE) {
       self$id = assert_string(key)
-      self$py_instance = gym$benchmark_set$BenchmarkSet(key, session=onnx_session,
-        active_session = assert_flag(active_session), download = FALSE, check = assert_flag(check))
+      self$onnx_session = onnx_session
+      self$active_session = assert_flag(active_session)
+      self$download = assert_flag(download)
+      self$multithread = assert_flag(multithread)
+      self$check = assert_flag(check)
       # Download files
       if (assert_flag(download)) {
         self$py_instance$config$download_files(files = list("param_set.R"))
       }
     },
+    #' @description
+    #' Printer with some additional information.
+    print = function() {
+      cat(format(self))
+      cat("\n\n Targets: (Codomain)\n")
+      print(self$codomain)
+      cat("\nHyperparameters: (Domain)\n")
+      print(self$domain)
+      cat("\nAvailable instances:\n")
+      print(self$instances)
+    },
 
     #' @description
     #' Get the objective function
     #'
-    #' @param instance [`instance`] \cr
+    #' @param instance [`character`] \cr
     #'   A valid instance. See `instances`.
+    #' @param multifidelity (`logical`) \cr
+    #'   Should the objective function respect multifidelity?
+    #'   If `FALSE`, fidelity params are set as constants with their max fidelity in the domain.
     #' @param check_values (`logical`) \cr
-    #'   Should values be checked by bbotk? Initialized to `FALSE`.
+    #'   Should values be checked by bbotk? Initialized to `TRUE`.
     #' @param timed (`logical`) \cr
     #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
     #' @param logging (`logical`) \cr
     #'   Should function evaluationd be logged? Initialized to `FALSE`.
+    #' @param multithread `logical` \cr
+    #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, check_values = FALSE, timed = FALSE, logging = FALSE) {
+    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE) {
       assert_choice(instance, self$instances)
       assert_flag(check_values)
       ObjectiveYAHPO$new(
         instance,
-        self$py_instance,
+        multifidelity,
+        list(
+          config_id = self$id, session = self$onnx_session, active_session = self$active_session, 
+          download = self$download, check = self$check
+        ),
         self$domain,
         self$codomain,
         check_values = check_values,
-        timed = timed
+        timed = timed,
+        logging = logging,
+        multithread = multithread
       )
+    },
+    #' @description
+    #' Get Optimization Search Space
+    #'
+    #' A [`paradox::ParamSet`] describing the search_space used during optimization.
+    #' Typically, this is the same as the domain but, e.g., with some parameters on log scale.
+    #' This is the same space as the one returned by `get_opt_space_py` (with the instance param dropped).
+    #' Typically this search_space should be provided when creating an [bbotk::OptimInstance].
+    #' @param drop_instance_param [`logical`] \cr
+    #'   Should the instance param (e.g., task id) be dropped? Defaults to `TRUE`.
+    #' @param drop_fidelity_params [`logical`] \cr
+    #'   Should fidelity params be dropped? Defaults to `FALSE`.
+    #' @return
+    #'  A [`paradox::ParamSet`] containing the search space to optimize over.
+    get_search_space = function(drop_instance_param = TRUE, drop_fidelity_params = FALSE) {
+      search_space = private$.load_r_domains()$search_space
+      params = search_space$params
+      if (drop_instance_param) {
+        params[self$py_instance$config$instance_names] = NULL
+      }
+      if (drop_fidelity_params) {
+        params[self$py_instance$config$fidelity_params] = NULL
+      }
+      search_space_new = ParamSet$new(params)
+      if (search_space$has_trafo) {
+        search_space_new$trafo = search_space$trafo
+      }
+      if (search_space$has_deps) {
+        search_space_new$deps = search_space$deps
+      }
+      search_space_new
     },
 
     #' @description
     #' Get Optimization ConfigSpace
     #'
-    #' @param instance [`instance`] \cr
+    #' @param instance [`character`] \cr
     #'   A valid instance. See `instances`.
     #' @param drop_fidelity_params [`logical`] \cr
-    #'   Should fidelity params be dropped? Defaults to `FALSE`.
+    #'   Should fidelity params be dropped? Defaults to `TRUE`.
     #' @return
-    #'  A [`paradox::ParamSet`] containing the search space to optimize over.
-    get_opt_space_py = function(instance, drop_fidelity_params = FALSE) {
+    #'  A configspace containing the search space to optimize over.
+    get_opt_space_py = function(instance, drop_fidelity_params = TRUE) {
       assert_choice(instance, self$instances)
       self$py_instance$get_opt_space(instance, drop_fidelity_params)
     },
@@ -108,11 +181,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'  A [`paradox::ParamSet`] containing the output space (codomain).
     subset_codomain = function(keep) {
       codomain = self$codomain
-      assert_choice(keep, names(codomain$params))
-      new_domain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
-      private$.domains$codomain = new_domain
+      assert_subset(keep, names(codomain$params))
+      new_codomain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
+      private$.domains$codomain = new_codomain
     }
   ),
+
   active = list(
 
     #' @field session `onnxruntime.InferenceSession` \cr
@@ -137,19 +211,9 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       self$py_instance$instances
     },
 
-    #' @field search_space `ParamSet` \cr
-    #' A [`paradox::ParamSet`] describing the search_space used during optimization.
-    #' Typically, this is the same as the domain but, e.g., with some parameters on log scale.
-    #' This is the same space as the one returned by `get_opt_space_py`.
-    #' Typically this search_space should be provided when creating an [bbotk::OptimInstance]
-    search_space = function(){
-      private$.load_r_domains()$search_space
-    },
-
-
     #' @field domain `ParamSet` \cr
     #' A [`paradox::ParamSet`] describing the domain to be optimized over.
-    domain = function(){
+    domain = function() {
       private$.load_r_domains()$domain
     },
 
@@ -166,9 +230,25 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       }
       assert_number(quant)
       self$py_instance$quant = val
+    },
+
+    #' @field py_instance [`BenchmarkSet`] \cr
+    #'   A python `yahpo_gym.BenchmarkSet`.
+    py_instance = function() {
+      if (is.null(private$.py_instance)) {
+        gym = reticulate::import("yahpo_gym")
+        private$.py_instance = gym$benchmark_set$BenchmarkSet(
+          config_id = self$id, session = self$onnx_session, active_session = self$active_session,
+          download = self$download, multithread = self$multithread#, check = self$check
+        )
+      }
+      return(private$.py_instance)
     }
   ),
+
   private = list(
+    .py_instance = NULL,
+
     .domains = NULL,
 
     .load_r_domains = function(instance) {

@@ -10,3 +10,5 @@
 .onLoad = function(libname, pkgname) { # nocov start
     reticulate::configure_environment(pkgname)
 } # nocov end
+
+leanify_package()

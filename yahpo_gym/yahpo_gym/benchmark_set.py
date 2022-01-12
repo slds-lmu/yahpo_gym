@@ -14,7 +14,7 @@ import ConfigSpace.hyperparameters as CSH
 class BenchmarkSet():
 
     def __init__(self, config_id: str = None, download: bool = True, active_session: bool = False,
-        session: Union[rt.InferenceSession, None] = None, check: bool = True):
+        session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True):
         """
         Interface for a benchmark scenario. 
         Initialized with a valid key for a valid scenario and optinally an `onnxruntime.InferenceSession`.
@@ -28,67 +28,99 @@ class BenchmarkSet():
         session: onnx.Session
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no session is given.
         check: bool
-            Should input to objective_function* be checked for validity? Initialized to True, can be
-            disabled for speedups.
+            Should input to objective_function be checked for validity? Initialized to `True`, but can be disabled for speedups.
         """
         self.config = cfg(config_id, download=download)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
         self.check = check
-        self.quant = 0.1
+        self.quant = None
         self.constants = {}
         self.session = None
         self.archive = []
 
         if self.active_session or (session is not None):
-            self.set_session(session)
+            self.set_session(session, multithread=multithread)
 
-    def objective_function(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
+    def objective_function(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
         """
-        Evaluate the surrogate for a given configuration.
+        Evaluate the surrogate for (a) given configuration(s).
 
         Parameters
         ----------
         configuration: Dict
-            A valid dict containing hyperparameters to be evaluated. 
+            A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no active session has been set.
         """
-        if not self.active_session:
-            self.set_session()
+        if not self.active_session or self.session is None:
+            self.set_session(multithread=multithread)
 
-        x_cont, x_cat = self._config_to_xs(configuration)
-        # input & output names and dims
+        # Always work with a list of configurations
+        if isinstance(configuration, dict):
+            configuration = [configuration]
+
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
-        results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
 
-        results_dict = {k:v for k,v in zip(self.config.y_names, results)}
-        if logging:
-            timedate = time.strftime("%D|%H:%M:%S", time.localtime())
-            self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
+        results_list = [None]*len(configuration)
+        for i in range(len(configuration)):
+            x_cont, x_cat = self._config_to_xs(configuration[i])
+            results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
+            results_dict = {k:v for k,v in zip(self.config.y_names, results)}
+            if logging:
+                timedate = time.strftime("%D|%H:%M:%S", time.localtime())
+                self.archive.append({'time':timedate, 'x':configuration[i], 'y':results_dict})
+            results_list[i] = results_dict
 
-        return results_dict
+        if not self.active_session:
+            self.session = None
 
-    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False):
+        if len(results_list) == 1:
+            results_list = results_list[0]  # return only the first dict of the list if a single configuration has been provided
+
+        return results_list
+
+    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
         """
-        Evaluate the surrogate for a given configuration and sleep for quant * predicted runtime.
+        Evaluate the surrogate for (a) given configuration(s) and sleep for quant * predicted runtime(s).
+        If configuration is a list of dicts, sleep is done after all evaluations.
         Note, that this assumes that the predicted runtime is in seconds.
 
         Parameters
         ----------
         configuration: Dict
-            A valid dict containing hyperparameters to be evaluated. 
+            A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no active session has been set.
         """
+        if self.quant is None:
+            self.quant = self._infer_quant()
+            
         start_time = time.time()
-        results = self.objective_function(configuration)
-        rt = results[self.config.runtime_name]
+
+        # Always work with a list of results
+        results = self.objective_function(configuration, logging = logging, multithread = multithread)
+        if isinstance(results, dict):
+            results = [results]
+
+        rt = sum([result.get(self.config.runtime_name) for result in results])
         offset = time.time() - start_time
         sleepit = max(rt - offset, 0) * self.quant
         time.sleep(sleepit)
@@ -163,7 +195,7 @@ class BenchmarkSet():
         return cs
 
 
-    def set_session(self, session: Union[rt.InferenceSession, None] = None):
+    def set_session(self, session: Union[rt.InferenceSession, None] = None, multithread: bool = True):
         """
         Set the session for inference on the surrogate model.
 
@@ -172,6 +204,10 @@ class BenchmarkSet():
         session: onnxruntime.InferenceSession
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
+        multithread: bool
+            Should the ONNX session be allowed to leverage multithreading capabilities?
+            Initialized to `True` but on some HPC clusters it may be needed to set this to `False`, depending on your setup.
+            Only relevant if no session is given.
         """
         # Either overwrite session or instantiate a new one if no active session exists
         if (session is not None):
@@ -180,8 +216,11 @@ class BenchmarkSet():
             model_path = self.config.get_path("model")
             if not Path(model_path).is_file():
                 raise Exception(f("ONNX file {model_path} not found!"))
-            self.session = rt.InferenceSession(model_path)
-    
+            options = rt.SessionOptions()
+            if not multithread:
+              options.inter_op_num_threads = 1
+              options.intra_op_num_threads = 1
+            self.session = rt.InferenceSession(model_path, sess_options=options)
 
     @property
     def instances(self):
@@ -229,7 +268,7 @@ class BenchmarkSet():
         """
         Integer encode categorical variables.
         """
-        # see model.py dl_from_config on how the encoding was generated and stored
+        # See model.py dl_from_config on how the encoding was generated and stored
         return self.encoding.get(name).get(value)
 
     def _get_encoding(self):
@@ -245,4 +284,19 @@ class BenchmarkSet():
 
     def _eval_random(self):
         cfg = self.config_space.sample_configuration().get_dictionary()
-        return self.objective_function_timed(cfg)
+        return self.objective_function(cfg, logging = False, multithread=False)
+    
+    def _infer_quant(self):
+        offsets = []
+        runtimes = [] 
+        for i in range(15):
+            start_time = time.time()
+            results = self._eval_random()
+            runtimes += [results[self.config.runtime_name]]
+            offsets += [time.time() - start_time]
+            
+        # Compute average predicted runtime
+        rt = np.mean(np.maximum(np.array(runtimes), 0.))
+        # Set the quantization factor as X offsets
+        quant = np.minimum(20 * np.max(np.array(offsets)) / rt, 1.)
+        return(quant)
