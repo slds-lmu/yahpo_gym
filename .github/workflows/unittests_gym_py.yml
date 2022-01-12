@@ -16,10 +16,10 @@ jobs:
         git clone https://github.com/pfistfl/yahpo_data.git
     - name: Install dependencies
       run: |
-        cd yahpo_gym/yahpo_gym
+        cd ~/yahpo_gym/yahpo_gym
         pip install -e .[test]
     - name: Set up local config
-          printf "data_path: ~/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
+        printf "data_path: ~/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
     - name: Run yahpo_gym tests
       run: |
         pytest -sv tests/
