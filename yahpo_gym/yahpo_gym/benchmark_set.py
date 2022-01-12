@@ -50,12 +50,12 @@ class BenchmarkSet():
 
     def objective_function(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
         """
-        Evaluate the surrogate for a given configuration.
+        Evaluate the surrogate for (a) given configuration(s).
 
         Parameters
         ----------
         configuration: Dict
-            A valid dict containing hyperparameters to be evaluated. 
+            A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
@@ -67,31 +67,41 @@ class BenchmarkSet():
         if not self.active_session or self.session is None:
             self.set_session(multithread=multithread)
 
-        x_cont, x_cat = self._config_to_xs(configuration)
-        # input & output names and dims
+        # Always work with a list of configurations
+        if isinstance(configuration, dict):
+            configuration = [configuration]
+
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
-        results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
 
-        results_dict = {k:v for k,v in zip(self.config.y_names, results)}
-        if logging:
-            timedate = time.strftime("%D|%H:%M:%S", time.localtime())
-            self.archive.append({'time':timedate, 'x':configuration, 'y':results_dict})
-            
+        results_list = [None]*len(configuration)
+        for i in range(len(configuration)):
+            x_cont, x_cat = self._config_to_xs(configuration[i])
+            results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
+            results_dict = {k:v for k,v in zip(self.config.y_names, results)}
+            if logging:
+                timedate = time.strftime("%D|%H:%M:%S", time.localtime())
+                self.archive.append({'time':timedate, 'x':configuration[i], 'y':results_dict})
+            results_list[i] = results_dict
+
         if not self.active_session:
             self.session = None
 
-        return results_dict
+        if len(results_list) == 1:
+            results_list = results_list[0]  # return only the first dict of the list if a single configuration has been provided
+
+        return results_list
 
     def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
         """
-        Evaluate the surrogate for a given configuration and sleep for quant * predicted runtime.
+        Evaluate the surrogate for (a) given configuration(s) and sleep for quant * predicted runtime(s).
+        If configuration is a list of dicts, sleep is done after all evaluations.
         Note, that this assumes that the predicted runtime is in seconds.
 
         Parameters
         ----------
         configuration: Dict
-            A valid dict containing hyperparameters to be evaluated. 
+            A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
@@ -104,9 +114,14 @@ class BenchmarkSet():
             self.quant = self._infer_quant()
             
         start_time = time.time()
+
+        # Always work with a list of results
         results = self.objective_function(configuration, logging = logging, multithread = multithread)
-        rt = results[self.config.runtime_name]
-        offset = time.time() - start_time    
+        if isinstance(results, dict):
+            results = [results]
+
+        rt = sum([result.get(self.config.runtime_name) for result in results])
+        offset = time.time() - start_time
         sleepit = max(rt - offset, 0) * self.quant
         time.sleep(sleepit)
         return results
@@ -253,7 +268,7 @@ class BenchmarkSet():
         """
         Integer encode categorical variables.
         """
-        # see model.py dl_from_config on how the encoding was generated and stored
+        # See model.py dl_from_config on how the encoding was generated and stored
         return self.encoding.get(name).get(value)
 
     def _get_encoding(self):
