@@ -19,13 +19,13 @@ if __version__ is None:
 
 setup(name='yahpo_gym',
       version=__version__,
-      author='Florian Pfisterer',
+      author='Florian Pfisterer, Lennart Schneider',
       description='Inference module for the yahpo gym',
       long_description=long_description,
       license='LGPLv3',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
       include_package_data=True,
-      install_requires=['ConfigSpace', 'onnxruntime', 'fastdownload', 'pyyaml', 'configspace'],
+      install_requires=['onnxruntime', 'fastdownload', 'pyyaml', 'configspace', 'pandas'],
       extras_require={
           "test": ["pytest>=4.6","mypy", "pre-commit", "pytest-cov"],
           "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc", 'pandas']

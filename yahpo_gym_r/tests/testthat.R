@@ -1,5 +1,5 @@
 library(testthat)
-library(yahpo_gym)
+library(yahpogym)
 library(bbotk)
 
-test_check("yahpo_gym")
+test_check("yahpogym")

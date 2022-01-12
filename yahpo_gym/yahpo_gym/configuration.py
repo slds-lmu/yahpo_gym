@@ -11,6 +11,7 @@ _yahpo_default_dict = {
     'config_id': '',
     'model': 'new_model.onnx',
     'dataset': 'data.csv',
+    'test_dataset': 'test_data.csv',
     'config_space': 'config_space.json',
     'param_set': 'param_set.R',
     'encoding': 'encoding.json',
@@ -19,7 +20,8 @@ _yahpo_default_dict = {
     'cat_names': [],
     'fidelity_params': [],
     'runtime_name': '',
-    'model_old': 'model.onnx'
+    'model_old': 'model.onnx',
+    'drop_predict': []
 }
 
 class Configuration():
@@ -50,6 +52,7 @@ class Configuration():
         self.fidelity_params = self.config['fidelity_params']
         self.instance_names = self.config['instance_names']
         self.runtime_name = self.config['runtime_name']
+        self.drop_predict = self.config['drop_predict']
         
     def get_path(self, key: str):
 

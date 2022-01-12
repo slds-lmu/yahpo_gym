@@ -1,6 +1,5 @@
 import pytest
 
-
 def test_config():
   from yahpo_gym.configuration import *
   _test_dict = {
