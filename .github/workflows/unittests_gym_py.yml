@@ -10,11 +10,16 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+    - name: Clone data
+      run: |
+        cd ~
+        git clone https://github.com/pfistfl/yahpo_data.git
     - name: Install dependencies
       run: |
-        cd yahpo_gym
+        cd yahpo_gym/yahpo_gym
         pip install -e .[test]
+    - name: Set up local config
+          printf "data_path: ~/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
     - name: Run yahpo_gym tests
       run: |
-        cd yahpo_gym
         pytest -sv tests/
