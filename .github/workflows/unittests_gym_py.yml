@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: r-lib/actions/setup-r@v2
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
@@ -21,6 +22,12 @@ jobs:
     - name: Set up local config
       run: |
         printf "data_path: ~/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
-    - name: Run yahpo_gym tests
+    - name: Run yahpo_gym tests [python]
       run: |
         pytest -sv tests/
+    - name: Run yahpo_gym tests [R]
+      run: |
+        Rscript -e "install.packages('devtools')"
+        Rscript -e "remotes::install_github('rstudio/reticulate')"
+        echo "RETICULATE_PYTHON = $(which python)" >> .Renviron
+        Rscript -e "devtools::test()"
