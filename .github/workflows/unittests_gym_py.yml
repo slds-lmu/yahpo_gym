@@ -17,7 +17,7 @@ jobs:
         git clone https://github.com/pfistfl/yahpo_data.git
     - name: Install dependencies
       run: |
-        cd ~/work/yahpo_gym/yahpo_gym
+        cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym
         pip install -e .[test]
     - name: Set up local config
       run: |
