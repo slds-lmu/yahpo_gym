@@ -21,10 +21,10 @@ jobs:
         pip install -e .[test]
     - name: Set up local config
       run: |
-        printf "data_path: ~/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
+        printf "data_path: ~/work/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
     - name: Run yahpo_gym tests [python]
       run: |
-        pytest -sv tests/
+        pytest -sv yahpo_gym/tests/
     - name: Run yahpo_gym tests [R]
       run: |
         Rscript -e "install.packages('devtools')"
