@@ -30,6 +30,7 @@ jobs:
         Rscript -e "if (getRversion() < '3.2' && !requireNamespace('curl')) install.packages('curl', type = 'source')"
         Rscript -e "install.packages('devtools')"
         Rscript -e "install.packages('reticulate')"
+        Rscript -e "remotes::install_local("~/work/yahpo_gym/yahpo_gym/yahpo_gym_r")"
     - name: Run yahpo_gym tests [R]
       run: |
         cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym_r
