@@ -1,4 +1,4 @@
-name: UnitTests [python]
+name: Unittests [python, R]
 on: [pull_request, push]
 
 jobs:
@@ -25,7 +25,6 @@ jobs:
         pytest -sv yahpo_gym/tests/
     - name: "Prepare [R]"
       run: |
-        cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym_r
         sudo apt install libcurl4-openssl-dev libgit2-dev
         Rscript -e "if (!requireNamespace('remotes')) install.packages('remotes', type = 'source')"
         Rscript -e "if (getRversion() < '3.2' && !requireNamespace('curl')) install.packages('curl', type = 'source')"
@@ -33,5 +32,6 @@ jobs:
         Rscript -e "install.packages('reticulate')"
     - name: Run yahpo_gym tests [R]
       run: |
+        cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym_r
         echo "RETICULATE_PYTHON = $(which python)" >> ~/.Renviron
         Rscript -e "devtools::test()"
