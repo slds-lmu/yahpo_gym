@@ -11,23 +11,26 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
-    - name: Clone data
+    - name: Clone required data
       run: |
         cd ~/work
         git clone https://github.com/pfistfl/yahpo_data.git
-    - name: Install dependencies
+    - name: Prepare [python]
       run: |
         cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym
         pip install -e .[test]
-    - name: Set up local config
-      run: |
         printf "data_path: ~/work/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
     - name: Run yahpo_gym tests [python]
       run: |
         pytest -sv yahpo_gym/tests/
-    - name: Run yahpo_gym tests [R]
+    - name: "Prepare [R]"
       run: |
+        sudo apt install libcurl4-openssl-dev libgit2-dev
+        Rscript -e "if (!requireNamespace('remotes')) install.packages('remotes', type = 'source')"
+        Rscript -e "if (getRversion() < '3.2' && !requireNamespace('curl')) install.packages('curl', type = 'source')"
         Rscript -e "install.packages('devtools')"
         Rscript -e "remotes::install_github('rstudio/reticulate')"
+    - name: Run yahpo_gym tests [R]
+      run: |
         echo "RETICULATE_PYTHON = $(which python)" >> ~/.Renviron
         Rscript -e "devtools::test()"
