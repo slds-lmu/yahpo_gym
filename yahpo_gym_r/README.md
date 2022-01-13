@@ -1,7 +1,10 @@
-# YAHPO GYM (R Package)
+# YAHPO GYM (R)
+[![Unittests](https://github.com/pfistfl/yahpo_gym/workflows/unittests_gym_py/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
+[![Docs](https://github.com/pfistfl/yahpo_gym/workflows/docs/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
+[[Module Handbook]](https://pfistfl.github.io/yahpo_gym/) [[Paper]](https://arxiv.org/abs/2109.03670)
+[[Software (Python)]](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 
 R Interface for the YAHPO GYM python module.
-
 
 ## Installation
 
