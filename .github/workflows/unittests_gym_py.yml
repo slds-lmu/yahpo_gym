@@ -25,12 +25,13 @@ jobs:
         pytest -sv yahpo_gym/tests/
     - name: "Prepare [R]"
       run: |
+        cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym_r
         sudo apt install libcurl4-openssl-dev libgit2-dev
         Rscript -e "if (!requireNamespace('remotes')) install.packages('remotes', type = 'source')"
         Rscript -e "if (getRversion() < '3.2' && !requireNamespace('curl')) install.packages('curl', type = 'source')"
         Rscript -e "install.packages('devtools')"
         Rscript -e "install.packages('reticulate')"
-        Rscript -e "remotes::install_local("~/work/yahpo_gym/yahpo_gym/yahpo_gym_r")"
+        Rscript -e "remotes::install_local()"
     - name: Run yahpo_gym tests [R]
       run: |
         cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym_r

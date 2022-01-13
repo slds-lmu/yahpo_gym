@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, config_id: str = None, download: bool = True, active_session: bool = False,
+    def __init__(self, config_id: str = None, download: bool = False, active_session: bool = False,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True):
         """
         Interface for a benchmark scenario. 
@@ -23,6 +23,8 @@ class BenchmarkSet():
         ----------
         config_id: str
             (Required) A key for `ConfigDict` pertaining to a valid benchmark scenario (e.g. `lcbench`).
+        download: bool
+            Should required data be downloaded (if not available)? Initialized to `False`.
         active_session: bool
             Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
         session: onnx.Session
@@ -91,7 +93,8 @@ class BenchmarkSet():
 
     def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
         """
-        Evaluate the surrogate for (a) given configuration(s) and sleep for quant * predicted runtime(s).
+        Evaluate the surrogate for (a) given configuration(s) and sleep for 'self.quant' * predicted runtime(s).
+        The quantity 'self.quant' is automatically inferred if it is not set manually.
         If configuration is a list of dicts, sleep is done after all evaluations.
         Note, that this assumes that the predicted runtime is in seconds.
 
