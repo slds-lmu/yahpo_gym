@@ -1,3 +1,4 @@
+from mimetypes import suffix_map
 import random
 import pandas as pd
 from fastai.tabular.all import *
@@ -114,8 +115,8 @@ class SurrogateTabularLearner(Learner):
     def _end_cleanup(self): 
         self.dl,self.xb,self.yb,self.pred,self.loss, self.tfpred, self.tfyb = None,(None,),(None,),None,None,None,None
 
-    def export_onnx(self, config, device):
-        return self.model.export_onnx(config, device)
+    def export_onnx(self, config, device, suffix=''):
+        return self.model.export_onnx(config, device, suffix)
     
     def __repr__(self): 
         return f"{self.wide} \n {self.deep}  \n {self.deeper}"
@@ -129,9 +130,24 @@ if __name__ == '__main__':
     from yahpo_train.models import FFSurrogateModel, ResNet, Transformer
     cfg = cfg("lcbench")
     dls = dl_from_config(cfg, nrows=None)
-    # f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
-    # f = ResNet(dls)
+
+    print('Resnet:')
+    f = ResNet(dls)
+    l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
+    l.add_cb(MixHandler)
+    l.fit_one_cycle(5, 1e-4)
+    l.export_onnx(cfg, 'cuda:0', suffix='resnet')
+
+    print('Feed Forward:')
+    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
+    l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
+    l.add_cb(MixHandler)
+    l.fit_one_cycle(5, 1e-4)
+    l.export_onnx(cfg, 'cuda:0', suffix='ff')
+
+    print('Transformer:')
     f = Transformer(dls)
     l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
     l.add_cb(MixHandler)
     l.fit_one_cycle(5, 1e-4)
+    l.export_onnx(cfg, 'cuda:0', suffix='transformer')

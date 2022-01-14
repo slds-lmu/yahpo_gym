@@ -66,14 +66,14 @@ class AbstractSurrogate(nn.Module):
     def forward(self):
         raise NotImplementedError
 
-    def export_onnx(self, config_dict, device='cuda:0'):
+    def export_onnx(self, config_dict, device='cuda:0', suffix=''):
         """
         Export model to an ONNX file. We can safely ignore tracing errors with respect to lambda since lambda will be constant during inference.
         """
         self.eval()
         torch.onnx.export(self,
             (torch.ones(1, len(config_dict.cat_names), dtype=torch.int, device=device), {'x_cont': torch.randn(1, len(config_dict.cont_names), device=device)}),
-            config_dict.get_path("model"),
+            config_dict.get_path("model") + suffix,
             do_constant_folding=True,
             export_params=True,
             input_names=['x_cat', 'x_cont'],
