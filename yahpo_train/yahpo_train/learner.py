@@ -11,7 +11,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, sa
     # All relevant info is obtained from the 'config'
     dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
     dtypes.update(dict(zip(config.cont_names+config.y_names, ["float32"] * len(config.cont_names+config.y_names))))
-    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes).sample(frac=frac).reset_index()
+    df = pd.read_csv(config.get_path("dataset"), skipinitialspace=skipinitialspace,dtype=dtypes, nrows=nrows).sample(frac=frac).reset_index()
     df.reindex(columns=config.cat_names+config.cont_names+config.y_names)
     # Get rid of irrelevant columns
     df = df[config.cat_names+config.cont_names+config.y_names]
@@ -93,6 +93,7 @@ class SurrogateTabularLearner(Learner):
         if not self.training: 
             self.tfpred = self.model(*self.xb, invert_ytrafo = True)
             self.tfyb = self.yb
+
         # For the training loss we train on untransformed scale.
         self.pred = self.model(*self.xb, invert_ytrafo = False)
         self.yb = [self.model.trafo_ys(*self.yb)]
@@ -120,19 +121,17 @@ class SurrogateTabularLearner(Learner):
         return f"{self.wide} \n {self.deep}  \n {self.deeper}"
 
 
+
 if __name__ == '__main__':
     import torch.nn as nn
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
-    from yahpo_train.models import FFSurrogateModel
+    from yahpo_train.models import FFSurrogateModel, ResNet, Transformer
     cfg = cfg("lcbench")
-    dls = dl_from_config(cfg)
-    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
+    dls = dl_from_config(cfg, nrows=None)
+    # f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
+    # f = ResNet(dls)
+    f = Transformer(dls)
     l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
     l.add_cb(MixHandler)
     l.fit_one_cycle(5, 1e-4)
-    for p in l.model.wide.parameters():
-        p.requires_grad = False
-    l.fit_flat_cos(5, 1e-4)
-    l.export_onnx(cfg)
-
