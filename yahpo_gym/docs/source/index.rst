@@ -12,6 +12,10 @@ YAHPO GYM
 
    modules
 
+   :caption: Benchmark instances:
+
+   scenarios
+
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in here: <https://arxiv.org/abs/2109.03670>.
 
 YAHPO GYM consists of several `scenarios`, e.g. the collection of all benchmark instances in `lcbench` is a `scenario`.
