@@ -1,4 +1,4 @@
-yahpo\_gym module
+YAHPO GYM Module
 ==================
 
 Subpackages
