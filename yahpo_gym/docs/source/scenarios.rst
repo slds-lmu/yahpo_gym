@@ -12,5 +12,5 @@ The following table provides an overview over **Scenarios** included in **YAHPO 
 
 .. csv-table:: Scenario Overview
    :file: _static/scenario_stats.csv
-   :widths: 30, 70
+   :widths: 70, 70, 70, 70, 70, 70, 70, 70, 70, 70
    :header-rows: 1
