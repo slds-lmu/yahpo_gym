@@ -23,6 +23,7 @@ Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to
 
 ![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/results.png?raw=true)
 
+
 **Overview over problems**
 
 |     | scenario     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
@@ -43,6 +44,8 @@ where for **n\_targets** (\#number):
 -   ms = model\_size
 -   rt = runtime
 -   pt = predicttime
+
+The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
 
 ---
 

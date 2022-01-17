@@ -82,6 +82,8 @@ p$optimize(ois)
 
 ### Available Problems
 
+The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
+
 We can list all available benchmark problems
 
 ```r
@@ -93,7 +95,7 @@ and available instances in a `Benchmark`:
 ```r
 b$instances
 ```
-
+  
 
 ## Technical Questions:
 
