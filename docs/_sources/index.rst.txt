@@ -6,20 +6,25 @@
 YAHPO GYM
 =========
 
+
+Module Documentation
+***********************
 .. toctree::
    :maxdepth: 1
-   :caption: Module Documentation:
 
-   modules
+   yahpo_gym
 
-   :caption: Benchmark instances:
+Scenarios & Instances
+***********************
+.. toctree::
+   :maxdepth: 1
 
    scenarios
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in here: <https://arxiv.org/abs/2109.03670>.
 
 YAHPO GYM consists of several `scenarios`, e.g. the collection of all benchmark instances in `lcbench` is a `scenario`.
-Here, an `instance` is the concrete task of optimizing hyperparameters of a neural network on a given dataset from OpenML.
+Here, an ``instance`` is the concrete task of optimizing hyperparameters of a neural network on a given dataset from OpenML.
 
 **Why should I use it?**
 
