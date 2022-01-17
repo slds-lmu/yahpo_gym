@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YAHPO GYM &mdash; yahpo_gym 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="yahpo_gym.benchmarks package" href="yahpo_gym.benchmarks.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> yahpo_gym
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Module Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">yahpo_gym</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">YAHPO GYM</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">yahpo_gym</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>YAHPO GYM</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scenarios.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="yahpo-gym">
+<h1>YAHPO GYM<a class="headerlink" href="#yahpo-gym" title="Permalink to this headline"></a></h1>
+<p>The following table provides an overview over <strong>Scenarios</strong> included in <strong>YAHPO GYM</strong> and included instances.:
+* <cite>scenario</cite>: The name of the scenario.
+* <cite>n_targets</cite>: Numer of objectives (if multi-objective)
+* <cite>n_categorical</cite>,`n_numeric`: Number of categorical and continuous hyperparameters.
+* <cite>fidelity</cite>: Available fidelity parameters
+* <cite>n_instances</cite> : Number of instances (global).
+* <cite>min_per_task</cite>, <cite>median_per_task</cite>, <cite>max_per_task</cite> describe the number of samples used to fit surrogate models.</p>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">Scenario Overview</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>scenario</p></th>
+<th class="head"><p>n_targets</p></th>
+<th class="head"><p>n_categorical</p></th>
+<th class="head"><p>n_numeric</p></th>
+<th class="head"><p>fidelity</p></th>
+<th class="head"><p>n_instances</p></th>
+<th class="head"><p>min_per_task</p></th>
+<th class="head"><p>median_per_task</p></th>
+<th class="head"><p>max_per_task</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>lcbench</p></td>
+<td><p>6</p></td>
+<td><p>0</p></td>
+<td><p>8</p></td>
+<td><p>epoch</p></td>
+<td><p>35</p></td>
+<td><p>104000</p></td>
+<td><p>104000</p></td>
+<td><p>104000</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>nb301</p></td>
+<td><p>2</p></td>
+<td><p>34</p></td>
+<td><p>1</p></td>
+<td><p>epoch</p></td>
+<td><p>1</p></td>
+<td><p>5578142</p></td>
+<td><p>5578142</p></td>
+<td><p>5578142</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>rbv2_svm</p></td>
+<td><p>6</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>trainsize,repl</p></td>
+<td><p>96</p></td>
+<td><p>1470</p></td>
+<td><p>156135</p></td>
+<td><p>402150</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>rbv2_ranger</p></td>
+<td><p>6</p></td>
+<td><p>3</p></td>
+<td><p>7</p></td>
+<td><p>trainsize,repl</p></td>
+<td><p>114</p></td>
+<td><p>3570</p></td>
+<td><p>66465</p></td>
+<td><p>138918</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>rbv2_rpart</p></td>
+<td><p>6</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>trainsize,repl</p></td>
+<td><p>101</p></td>
+<td><p>3570</p></td>
+<td><p>21000</p></td>
+<td><p>38430</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>rbv2_glmnet</p></td>
+<td><p>6</p></td>
+<td><p>1</p></td>
+<td><p>4</p></td>
+<td><p>trainsize,repl</p></td>
+<td><p>98</p></td>
+<td><p>1680</p></td>
+<td><p>28914</p></td>
+<td><p>47250</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>rbv2_xgboost</p></td>
+<td><p>6</p></td>
+<td><p>2</p></td>
+<td><p>14</p></td>
+<td><p>trainsize,repl</p></td>
+<td><p>109</p></td>
+<td><p>14760</p></td>
+<td><p>100000</p></td>
+<td><p>100000</p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p>rbv2_aknn</p></td>
+<td><p>6</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>trainsize,repl</p></td>
+<td><p>99</p></td>
+<td><p>1680</p></td>
+<td><p>22436</p></td>
+<td><p>85451</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>rbv2_super</p></td>
+<td><p>6</p></td>
+<td><p>7</p></td>
+<td><p>33</p></td>
+<td><p>trainsize,repl</p></td>
+<td><p>89</p></td>
+<td><p>126880</p></td>
+<td><p>309213</p></td>
+<td><p>431204</p></td>
+</tr>
+<tr class="row-odd"><td><p>9</p></td>
+<td><p>iaml_ranger</p></td>
+<td><p>12</p></td>
+<td><p>3</p></td>
+<td><p>6</p></td>
+<td><p>trainsize</p></td>
+<td><p>4</p></td>
+<td><p>402417</p></td>
+<td><p>418943</p></td>
+<td><p>419790</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>iaml_rpart</p></td>
+<td><p>12</p></td>
+<td><p>0</p></td>
+<td><p>5</p></td>
+<td><p>trainsize</p></td>
+<td><p>4</p></td>
+<td><p>52146</p></td>
+<td><p>107754</p></td>
+<td><p>137248</p></td>
+</tr>
+<tr class="row-odd"><td><p>11</p></td>
+<td><p>iaml_glmnet</p></td>
+<td><p>12</p></td>
+<td><p>0</p></td>
+<td><p>3</p></td>
+<td><p>trainsize</p></td>
+<td><p>4</p></td>
+<td><p>7000</p></td>
+<td><p>7000</p></td>
+<td><p>7000</p></td>
+</tr>
+<tr class="row-even"><td><p>12</p></td>
+<td><p>iaml_xgboost</p></td>
+<td><p>12</p></td>
+<td><p>1</p></td>
+<td><p>13</p></td>
+<td><p>trainsize</p></td>
+<td><p>4</p></td>
+<td><p>839055</p></td>
+<td><p>839910</p></td>
+<td><p>840000</p></td>
+</tr>
+<tr class="row-odd"><td><p>13</p></td>
+<td><p>iaml_super</p></td>
+<td><p>12</p></td>
+<td><p>5</p></td>
+<td><p>24</p></td>
+<td><p>trainsize</p></td>
+<td><p>4</p></td>
+<td><p>1301405</p></td>
+<td><p>1373224</p></td>
+<td><p>1404019</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="yahpo_gym.benchmarks.html" class="btn btn-neutral float-left" title="yahpo_gym.benchmarks package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Florian Pfisterer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
