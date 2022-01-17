@@ -1,6 +1,6 @@
 
 Scenarios \& Instances
-=======================
+************************
 
 The following table provides an overview over **Scenarios** included in **YAHPO GYM** and included instances:
 
@@ -14,3 +14,12 @@ The following table provides an overview over **Scenarios** included in **YAHPO 
 .. csv-table:: Scenario Overview
    :file: _static/scenario_stats.csv
    :header-rows: 1
+
+
+Instances
+=======================
+
+.. csv-table:: Scenario Overview
+   :file: _static/instances.csv
+   :header-rows: 1
+   :stub-columns: 0
