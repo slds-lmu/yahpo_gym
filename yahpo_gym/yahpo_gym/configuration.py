@@ -130,12 +130,12 @@ class ConfigDict():
         return f"Configuration Dictionary ({len(self.configs)} benchmarks)"
     
     def __str__(self):
-        out = "{:<15} {:<10} {:<10} {:<10} {:<10}".format("Key", "Instances", "Cat. HP", "Cont. HP", "Targets")
+        out = "{:<15} {:<10} {:<10} {:<10} {:<10} {:<10}".format("Key", "Instances", "Cat. HP", "Cont. HP", "Fidelity HP", "Targets")
         if len(self.configs) == 0:
             out += "\n< No configs loaded >"
         for k in self.configs.keys():
             v = self.get_item(k)
-            out += "\n{:<15} {:<15} {:<10} {:<10} {:<10}".format(k, v.instance_names, len(v.cat_names), len(v.cont_names), len(v.y_names))
+            out += "\n{:<15} {:<15} {:<10} {:<10} {:<10} {:<10}".format(k, v.instance_names, len(v.cat_names)-1, len(v.cont_names)-len(v.fidelity_params), len(v.fidelity_params), len(v.y_names))
         return out
 
 

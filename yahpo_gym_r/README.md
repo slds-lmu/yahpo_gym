@@ -12,7 +12,7 @@ The package can be installed from GitHub via
 
 
 ```r
-remotes::install_github("pfistfl/yahpo_gym/yahpo_gym_r").
+remotes::install_github("pfistfl/yahpo_gym/yahpo_gym_r")
 ```
 
 ### Setup
@@ -94,7 +94,10 @@ and available instances in a `Benchmark`:
 b$instances
 ```
 
-## Using yahpogym with `future`:
+
+## Technical Questions:
+
+### Using yahpogym with `future`:
 
 Parallelization with `future` and `reticulate` does not always work out of the box.
 The following configurations allow to use `yahpogym` together with `future`.
@@ -117,3 +120,8 @@ The following configurations allow to use `yahpogym` together with `future`.
     promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
     future::value(promise)
   ```
+
+  ### Radian
+
+Since `yahpogym` relies on `reticulate`, interoperability with e.g. radian does sometimes not work. 
+See [here](https://github.com/randy3k/radian#i-cant-specify-python-runtime-in-reticulate) for more information.
