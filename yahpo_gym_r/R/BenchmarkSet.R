@@ -173,8 +173,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     },
 
     #' @description
-    #' Subset the codomain
-    #'
+    #' Subset the codomain. Sets a new domain.
+    #' 
     #' @param keep (`character`) \cr
     #'   Vector of co-domain target names to keep.
     #' @return

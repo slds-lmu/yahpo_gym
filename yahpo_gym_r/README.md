@@ -99,6 +99,16 @@ b$instances
 
 ## Technical Questions:
 
+### Single-Crit Optimization
+
+We can use `subset_codomain` to obtain a single-crit optimization instance by
+specifying the target to keep:
+
+```r
+b$subset_codomain("auc")
+obj = b$get_objective("40981", multifidelity = FALSE)
+```
+
 ### Using yahpogym with `future`:
 
 Parallelization with `future` and `reticulate` does not always work out of the box.
@@ -123,7 +133,7 @@ The following configurations allow to use `yahpogym` together with `future`.
     future::value(promise)
   ```
 
-  ### Radian
+### Radian
 
 Since `yahpogym` relies on `reticulate`, interoperability with e.g. radian does sometimes not work. 
 See [here](https://github.com/randy3k/radian#i-cant-specify-python-runtime-in-reticulate) for more information.
