@@ -234,6 +234,14 @@ if __name__ == '__main__':
     parser.add_argument('--walltime', type=int, default=0, help='Walltime for optuna timeout in seconds') # by default we run until terminated externally
     args = parser.parse_args()
 
+    cuda_available = torch.cuda.is_available()
+    if cuda_available:
+        current_device = torch.cuda.current_device()
+        device_name = torch.cuda.get_device_name()
+        print("Using cuda device: " + device_name + " " + str(current_device))
+    else:
+        raise ValueError("No cuda device available. You probably do not want to tune on CPUs.")
+
     tune_config_resnet(args.key, name=args.name, tfms_fixed=tfms_list.get(args.key), trials=args.trials, walltime=args.walltime)
 
 #if __name__ == '__main__':
