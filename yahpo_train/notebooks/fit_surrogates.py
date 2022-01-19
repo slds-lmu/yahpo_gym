@@ -1,4 +1,5 @@
-from yahpo_train.model import *
+from yahpo_train.models import *
+from yahpo_train.learner import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
 from yahpo_gym import benchmark_set
@@ -10,7 +11,7 @@ import wandb
 
 def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
     """
-    Fit function with hyperparameters.
+    Fit function with hyperparameters for ff.
     """
     cc = cfg(key)
 
@@ -62,7 +63,7 @@ def get_testset_metrics(key):
     x = df[bench.config.hp_names]
     truth = df[bench.config.y_names]
     # note that the following is somewhat unsafe: we assume that dtypes are correctly represented as expected by the ConfigSpace
-    response = x.apply(lambda point: bench.objective_function(point[~point.isna()].to_dict()), axis=1, result_type="expand")
+    response = x.apply(lambda point: bench.objective_function(point[~point.isna()].to_dict())[0], axis=1, result_type="expand")
     truth_tensor = torch.tensor(truth.values)
     response_tensor = torch.tensor(response.values)
 
@@ -337,8 +338,7 @@ def fit_iaml_rpart(key='iaml_rpart', **kwargs):
 def fit_iaml_glmnet(key='iaml_glmnet', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:tfms_chain([ContTransformerInt, ContTransformerRange])}) for k key, best_params, tfms_fixed={}, log_wandb=False, **kwargs):
-in ["nf"]]
+    [tfms.update({k:tfms_chain([ContTransformerInt, ContTransformerRange])}) for k in ["nf"]]
     [tfms.update({k:partial(ContTransformerRange)}) for k in ["auc", "ias", "mec", "mmce", "rammodel", "ramtrain", "timepredict"]]
     [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["alpha", "rampredict", "timetrain", "logloss", "s", "trainsize"]]
     [tfms.update({k:partial(ContTransformerNegExpRange)}) for k in ["f1"]]
