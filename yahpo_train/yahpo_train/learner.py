@@ -113,7 +113,7 @@ class SurrogateTabularLearner(Learner):
         self.opt.zero_grad()
     
     def _end_cleanup(self): 
-        self.dl,self.xb,self.yb,self.pred,self.loss, self.tfpred, self.tfyb = None,(None,),(None,),None,None,None,None
+        self.dl,self.xb,self.yb,self.pred,self.loss,self.tfpred,self.tfyb = None,(None,),(None,),None,None,None,None
 
     def export_onnx(self, config, device, suffix=''):
         return self.model.export_onnx(config, device, suffix)

@@ -108,7 +108,7 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
 
         d = trial.suggest_int("d", 64, 1024, step = 64)  # layer size
         d_hidden_factor = trial.suggest_float("d_hidden_factor", 1., 4.)  # hidden factor
-        n_layers = trial.suggest_int("n_layers", 1, 16)  # number of layers
+        n_layers = trial.suggest_int("n_layers", 1, 8)  # number of layers
         hidden_dropout = trial.suggest_float("hidden_dropout", 0., 0.5)  # hidden dropout
         use_residual_dropout = trial.suggest_categorical("use_residual_dropout", [True, False])
         if use_residual_dropout:
@@ -120,7 +120,8 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
         cbs = [FastAIPruningCallback(trial=trial, monitor='valid_loss')]
         
         l = fit_config_resnet(key=key, dls_train=dls_train, tfms=tfms, lr=lr, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout, mixup=mixup, log_wandb=False, cbs=cbs, **kwargs)
-        return l.recorder.losses[-1]
+        loss = l.recorder.final_record.items[1]  # [1] is validation loss
+        return loss
     
     study.optimize(objective, n_trials=trials, timeout=walltime)
     # plot_optimization_history(study)

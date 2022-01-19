@@ -158,7 +158,8 @@ def tune_config(key, name, tfms_fixed={}, **kwargs):
         cbs = [FastAIPruningCallback(trial=trial, monitor='valid_loss')]
         
         l = fit_config(key=key, dls_train=dls_train, tfms=tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=False, cbs=cbs, **kwargs)
-        return l.recorder.losses[-1]
+        loss = l.recorder.final_record.items[1]  # [1] is validation loss
+        return loss
     
     study.optimize(objective, n_trials=1000, timeout=86400)
     # plot_optimization_history(study)
