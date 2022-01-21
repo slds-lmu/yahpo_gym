@@ -72,12 +72,16 @@ class AbstractSurrogate(nn.Module):
         """
         self.eval()
         torch.onnx.export(self,
-            (torch.ones(1, len(config_dict.cat_names), dtype=torch.int, device=device), {'x_cont': torch.randn(1, len(config_dict.cont_names), device=device)}),
+            # touple of x_cat followed by x_cont
+            (torch.ones(1, len(config_dict.cat_names), dtype=torch.int, device=device), torch.randn(1, len(config_dict.cont_names), device=device)),
             config_dict.get_path("model") + suffix,
             do_constant_folding=True,
             export_params=True,
             input_names=['x_cat', 'x_cont'],
-            opset_version=12
+            output_names=['output'],
+            opset_version=12,
+            # dynamic axes allow us to do batch prediction
+            dynamic_axes={'x_cat':{0:'batch_size'}, 'x_cont':{0:'batch_size'}, 'output':{0:'batch_size'}}
         )
 
 

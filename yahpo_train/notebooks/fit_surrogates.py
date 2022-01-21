@@ -54,6 +54,7 @@ def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, 
 
 
 def get_testset_metrics(key):
+    # note that this is extremely slow because we use the actual objective for prediction and batch prediction is simply a loop
     bench = benchmark_set.BenchmarkSet(key)
     bench.check = False  # see note below
     dtypes = dict(zip(bench.config.cat_names, ["object"] * len(bench.config.cat_names)))
