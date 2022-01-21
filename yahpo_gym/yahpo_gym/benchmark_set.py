@@ -77,10 +77,14 @@ class BenchmarkSet():
         output_name = self.session.get_outputs()[0].name
 
         results_list = [None]*len(configuration)
-        for i in range(len(configuration)):
-            x_cont, x_cat = self._config_to_xs(configuration[i])
-            results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0][0]
-            results_dict = {k:v for k,v in zip(self.config.y_names, results)}
+        x_cont, x_cat = self._config_to_xs(configuration[0])
+        for i in range(1, len(configuration)):
+            x_cont_, x_cat_ = self._config_to_xs(configuration[i])
+            x_cont = np.vstack((x_cont, x_cont_))
+            x_cat = np.vstack((x_cat, x_cat_))
+        results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0]  # batch predict
+        for i in range(len(results)):
+            results_dict = {k:v for k,v in zip(self.config.y_names, results[i])}
             if logging:
                 timedate = time.strftime("%D|%H:%M:%S", time.localtime())
                 self.archive.append({'time':timedate, 'x':configuration[i], 'y':results_dict})
@@ -215,7 +219,7 @@ class BenchmarkSet():
         elif (self.session is None):
             model_path = self.config.get_path("model")
             if not Path(model_path).is_file():
-                raise Exception(f("ONNX file {model_path} not found!"))
+                raise Exception(f"ONNX file {model_path} not found!")
             options = rt.SessionOptions()
             if not multithread:
               options.inter_op_num_threads = 1
