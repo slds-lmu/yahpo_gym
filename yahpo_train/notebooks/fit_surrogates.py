@@ -53,30 +53,6 @@ def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, 
     return l
 
 
-def get_testset_metrics(key):
-    # note that this is extremely slow because we use the actual objective for prediction and batch prediction is simply a loop
-    bench = benchmark_set.BenchmarkSet(key)
-    bench.check = False  # see note below
-    dtypes = dict(zip(bench.config.cat_names, ["object"] * len(bench.config.cat_names)))
-    dtypes.update(dict(zip(bench.config.cont_names+bench.config.y_names, ["float32"] * len(bench.config.cont_names+bench.config.y_names))))
-    df = pd.read_csv(bench.config.get_path("test_dataset"), dtype=dtypes)
-
-    x = df[bench.config.hp_names]
-    truth = df[bench.config.y_names]
-    # note that the following is somewhat unsafe: we assume that dtypes are correctly represented as expected by the ConfigSpace
-    response = x.apply(lambda point: bench.objective_function(point[~point.isna()].to_dict())[0], axis=1, result_type="expand")
-    truth_tensor = torch.tensor(truth.values)
-    response_tensor = torch.tensor(response.values)
-
-    metrics_dict = {}
-    metrics = {"mae":mae, "r2":r2, "spearman":spearman}
-    for metric_name,metric in zip(metrics.keys(), metrics.values()):
-        values = metric(truth_tensor, response_tensor)
-        metrics_dict.update({metric_name:dict(zip([y + "_" + metric_name for y in bench.config.y_names], [*values]))})
-
-    return metrics_dict
-
-
 def get_arch(max_units, n, shape):
     if max_units == 0:
         return []
