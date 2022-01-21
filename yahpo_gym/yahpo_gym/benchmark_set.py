@@ -219,7 +219,7 @@ class BenchmarkSet():
         elif (self.session is None):
             model_path = self.config.get_path("model")
             if not Path(model_path).is_file():
-                raise Exception(f("ONNX file {model_path} not found!"))
+                raise Exception(f"ONNX file {model_path} not found!")
             options = rt.SessionOptions()
             if not multithread:
               options.inter_op_num_threads = 1
