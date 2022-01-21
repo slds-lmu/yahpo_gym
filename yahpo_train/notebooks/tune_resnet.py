@@ -17,7 +17,7 @@ def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl
     cc = cfg(key)
 
     if dls_train is None:
-        dls_train = dl_from_config(cc, bs=bs, frac=frac, save_df_test=save_df_test_encoding, save_encoding=save_df_test_encoding)  # train_frac is set to 0.9, so for frac = 1 we have 0.72 train, 0.18 valid and 0.1 test
+        dls_train = dl_from_config(cc, bs=bs, frac=frac, save_df_test=save_df_test_encoding, save_encoding=save_df_test_encoding)  # train_frac is set to 0.8, and valid frac within train frac to 0.2, so for frac = 1 we have 0.6 train, 0.2 valid and 0.2 test
 
     # Construct embds from transforms
     # tfms overwrites emdbs_dbl, embds_tgt
