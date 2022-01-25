@@ -4,7 +4,7 @@ import pandas as pd
 from fastai.tabular.all import *
 
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=True, nrows=None, frac=1., train_frac=.9, **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=True, nrows=None, frac=1., train_frac=.8 **kwargs):
     """
     Instantiate a pytorch dataloader from a YAHPO config
     """
@@ -19,7 +19,8 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, sa
     # Fill missing target with 0
     df[config.y_names] = df[config.y_names].fillna(0.)
 
-    train_ids = _get_valid_idx(df, config, frac = train_frac)
+    # If train_frac = 0.8 and validation frac is 0.25, we get 0.6/0.2/0.2 train/valid/test
+    train_ids = _get_idx(df, config, frac = train_frac)  # training ids of size train_frac used for df_train; df_test is complimentary
     df_train = df[df.index.isin(train_ids)].reset_index()
     df_test = df[~df.index.isin(train_ids)].reset_index()
 
@@ -33,7 +34,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, sa
         cont_names = config.cont_names,
         cat_names = config.cat_names,
         procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=False, fill_vals=dict((k, 0.) for k in config.cat_names+config.cont_names))],
-        valid_idx = _get_valid_idx(df_train, config),
+        valid_idx = _get_idx(df_train, config=config, frac=.25),  # validation ids of size 0.25 taken from training ids
         bs = bs,
         shuffle=True,
         **kwargs
@@ -48,7 +49,7 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, sa
 
     return dls
 
-def _get_valid_idx(df, config, frac=.2, rng_seed=10):
+def _get_idx(df, config, frac=.2, rng_seed=10):
     """
     Include or exclude blocks of hyperparameters with differing fidelity
     The goal here is to not sample from the dataframe randomly, but instead either keep a hyperparameter group
@@ -113,13 +114,13 @@ class SurrogateTabularLearner(Learner):
         self.opt.zero_grad()
     
     def _end_cleanup(self): 
-        self.dl,self.xb,self.yb,self.pred,self.loss, self.tfpred, self.tfyb = None,(None,),(None,),None,None,None,None
+        self.dl,self.xb,self.yb,self.pred,self.loss,self.tfpred,self.tfyb = None,(None,),(None,),None,None,None,None
 
     def export_onnx(self, config, device, suffix=''):
         return self.model.export_onnx(config, device, suffix)
     
-    def __repr__(self): 
-        return f"{self.wide} \n {self.deep}  \n {self.deeper}"
+    #def __repr__(self): 
+    #    return f"{self.wide} \n {self.deep}  \n {self.deeper}"
 
 
 

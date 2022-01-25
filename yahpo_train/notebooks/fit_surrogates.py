@@ -1,4 +1,5 @@
-from yahpo_train.model import *
+from yahpo_train.models import *
+from yahpo_train.learner import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
 from yahpo_gym import benchmark_set
@@ -10,12 +11,12 @@ import wandb
 
 def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
     """
-    Fit function with hyperparameters.
+    Fit function with hyperparameters for ff.
     """
     cc = cfg(key)
 
     if dls_train is None:
-        dls_train = dl_from_config(cc, bs=bs, frac=frac, save_df_test=save_df_test_encoding, save_encoding=save_df_test_encoding)  # train_frac is set to 0.9, so for frac = 1 we have 0.72 train, 0.18 valid and 0.1 test
+        dls_train = dl_from_config(cc, bs=bs, frac=frac, save_df_test=save_df_test_encoding, save_encoding=save_df_test_encoding)  # train_frac is set to 0.8, and valid frac within train frac to 0.2, so for frac = 1 we have 0.6 train, 0.2 valid and 0.2 test
 
     # Construct embds from transforms
     # tfms overwrites emdbs_dbl, embds_tgt
@@ -50,29 +51,6 @@ def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, 
         l.export_onnx(cc, device=device)
 
     return l
-
-
-def get_testset_metrics(key):
-    bench = benchmark_set.BenchmarkSet(key)
-    bench.check = False  # see note below
-    dtypes = dict(zip(bench.config.cat_names, ["object"] * len(bench.config.cat_names)))
-    dtypes.update(dict(zip(bench.config.cont_names+bench.config.y_names, ["float32"] * len(bench.config.cont_names+bench.config.y_names))))
-    df = pd.read_csv(bench.config.get_path("test_dataset"), dtype=dtypes)
-
-    x = df[bench.config.hp_names]
-    truth = df[bench.config.y_names]
-    # note that the following is somewhat unsafe: we assume that dtypes are correctly represented as expected by the ConfigSpace
-    response = x.apply(lambda point: bench.objective_function(point[~point.isna()].to_dict()), axis=1, result_type="expand")
-    truth_tensor = torch.tensor(truth.values)
-    response_tensor = torch.tensor(response.values)
-
-    metrics_dict = {}
-    metrics = {"mae":mae, "r2":r2, "spearman":spearman}
-    for metric_name,metric in zip(metrics.keys(), metrics.values()):
-        values = metric(truth_tensor, response_tensor)
-        metrics_dict.update({metric_name:dict(zip([y + "_" + metric_name for y in bench.config.y_names], [*values]))})
-
-    return metrics_dict
 
 
 def get_arch(max_units, n, shape):
@@ -157,7 +135,8 @@ def tune_config(key, name, tfms_fixed={}, **kwargs):
         cbs = [FastAIPruningCallback(trial=trial, monitor='valid_loss')]
         
         l = fit_config(key=key, dls_train=dls_train, tfms=tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=False, cbs=cbs, **kwargs)
-        return l.recorder.losses[-1]
+        loss = l.recorder.final_record.items[1]  # [1] is validation loss
+        return loss
     
     study.optimize(objective, n_trials=1000, timeout=86400)
     # plot_optimization_history(study)
@@ -337,8 +316,7 @@ def fit_iaml_rpart(key='iaml_rpart', **kwargs):
 def fit_iaml_glmnet(key='iaml_glmnet', **kwargs):
     # Transforms
     tfms = {}
-    [tfms.update({k:tfms_chain([ContTransformerInt, ContTransformerRange])}) for k key, best_params, tfms_fixed={}, log_wandb=False, **kwargs):
-in ["nf"]]
+    [tfms.update({k:tfms_chain([ContTransformerInt, ContTransformerRange])}) for k in ["nf"]]
     [tfms.update({k:partial(ContTransformerRange)}) for k in ["auc", "ias", "mec", "mmce", "rammodel", "ramtrain", "timepredict"]]
     [tfms.update({k:partial(ContTransformerLogRange)}) for k in ["alpha", "rampredict", "timetrain", "logloss", "s", "trainsize"]]
     [tfms.update({k:partial(ContTransformerNegExpRange)}) for k in ["f1"]]
