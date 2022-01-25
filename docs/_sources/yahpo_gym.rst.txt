@@ -1,4 +1,4 @@
-YAHPO GYM Module
+YAHPO Gym Module Handbook
 ==================
 
 Subpackages
