@@ -4,7 +4,7 @@ import pandas as pd
 from fastai.tabular.all import *
 
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=True, nrows=None, frac=1., train_frac=.8 **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=True, nrows=None, frac=1., train_frac=.8, **kwargs):
     """
     Instantiate a pytorch dataloader from a YAHPO config
     """
