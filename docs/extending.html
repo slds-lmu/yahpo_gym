@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extending YAHPO Gym &mdash; yahpo_gym 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Scenarios &amp; Instances" href="scenarios.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> yahpo_gym
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="yahpo_gym.html">YAHPO GYM Module</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scenarios.html">Scenarios &amp; Instances</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Extending YAHPO Gym</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#include-your-bencmark-in-yahpo-gym">Include your bencmark in <cite>yahpo_gym</cite></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">yahpo_gym</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Extending YAHPO Gym</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/extending.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="extending-yahpo-gym">
+<h1>Extending YAHPO Gym<a class="headerlink" href="#extending-yahpo-gym" title="Permalink to this headline"></a></h1>
+<p>This document describes how to extend yahpo gym with new configurations and scenarios.
+PR’s with new problems are welcome! See below on how to add new problem sets.</p>
+<p>There are two main steps that need to be added for a new <cite>scenario</cite> locally.</p>
+<ol class="arabic simple">
+<li><p><strong>Add new configuration</strong>:</p></li>
+</ol>
+<p>The <cite>yahpo_gym.configuration</cite> module contains the relevant meta-data required to fit and predict surrogates.
+This includes a <cite>config_id</cite> (an id variable); <cite>y_names</cite>, <cite>cont_names</cite> and <cite>cat_names</cite> describing names of the target,
+numeric and categorical variables respectively and so on.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym.configuration</span> <span class="kn">import</span> <span class="n">config_dict</span><span class="p">,</span> <span class="n">cfg</span>
+<span class="n">_new_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;config_id&#39;</span> <span class="p">:</span> <span class="s1">&#39;&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="c1"># Add some Id</span>
+    <span class="s1">&#39;y_names&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;valid_loss&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="c1"># names of target variables</span>
+    <span class="s1">&#39;y_minimize&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="c1"># whether target variables should be minimized</span>
+    <span class="s1">&#39;cont_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="s1">&#39;learning_rate&#39;</span><span class="p">],</span> <span class="c1"># numeric variables</span>
+    <span class="s1">&#39;cat_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">,</span> <span class="s1">&#39;activation_fn_1&#39;</span><span class="p">],</span> <span class="c1"># categorical variables</span>
+    <span class="s1">&#39;instance_names&#39;</span><span class="p">:</span> <span class="s1">&#39;task&#39;</span><span class="p">,</span> <span class="c1"># which column describes the instance.</span>
+    <span class="s1">&#39;fidelity_params&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="s1">&#39;replication&#39;</span><span class="p">],</span> <span class="c1"># which columns are fidelity parameters</span>
+    <span class="s1">&#39;runtime_name&#39;</span><span class="p">:</span> <span class="s1">&#39;runtime&#39;</span><span class="p">,</span> <span class="c1"># which columns predict runtime (if available)s</span>
+    <span class="s1">&#39;citation&#39;</span><span class="p">:</span> <span class="s1">&#39;CITE&#39;</span> <span class="c1"># Reference if available</span>
+<span class="p">}</span>
+<span class="n">config_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;&lt;ID&gt;&#39;</span> <span class="p">:</span> <span class="n">_new_dict</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Users can now instantiate a <cite>Benchmark</cite> or <cite>config</cite> with this <cite>&lt;ID&gt;</cite>, e.g. using <cite>cfg(“&lt;ID&gt;”)</cite>.</p>
+<p>2. <strong>Add the required metadata</strong>:
+This includes fitted surrogates and parameter spaces that we’ll add to our <code class="docutils literal notranslate"><span class="pre">data_path</span></code>.
+For an example on how the final data looks like implemented models
+and hyperparameters see <a class="reference external" href="https://github.com/pfistfl/yahpo_data">https://github.com/pfistfl/yahpo_data</a>.</p>
+<ul class="simple">
+<li><p>Add a folder using the benchmark’s <cite>&lt;ID&gt;</cite> to your <code class="docutils literal notranslate"><span class="pre">data_path</span></code>.</p></li>
+<li><p>Add the data required to train the surrogate model as <cite>data.csv</cite>.</p></li>
+<li><p>Add the <cite>ConfigSpace.ConfigSpace</cite> in the <cite>.json</cite> format as <cite>config_space.json</cite>.
+This defines all hyperparameters and instances used throughout the optimization.</p></li>
+<li><p>The <cite>yahpo_train</cite> module can now be used to train a new surrogate. See the <cite>notebooks</cite> folder
+for training code. This produces the <cite>encoding.json</cite> and <cite>model.onnx</cite> files required for prediction.</p></li>
+<li><p>For compability with the <cite>R</cite> package, a <cite>paradox::ParamSet</cite> similar to the <cite>ConfigSpace</cite> is requried.
+Create a file <cite>param_set.R</cite> containing the <cite>ParamSet</cite>.</p></li>
+</ul>
+<section id="include-your-bencmark-in-yahpo-gym">
+<h2>Include your bencmark in <cite>yahpo_gym</cite><a class="headerlink" href="#include-your-bencmark-in-yahpo-gym" title="Permalink to this headline"></a></h2>
+<p>Once you have tested your benchmark, you can create a <cite>PR</cite> to the <cite>yahpo_gym</cite> and <cite>yahpo_data</cite>
+repositories.
+Note that the <cite>yahpo_data</cite> PR should not include the data, but instead only the model (<cite>.onnx</cite>) and parameter
+spaces. Please include information on the problem, the surrogate’s performance and other relevant info in
+the PR.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scenarios.html" class="btn btn-neutral float-left" title="Scenarios &amp; Instances" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Florian Pfisterer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
