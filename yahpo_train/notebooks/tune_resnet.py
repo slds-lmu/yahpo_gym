@@ -10,7 +10,7 @@ from functools import partial
 import wandb
 import argparse
 
-def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=25, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
+def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
     """
     Fit function with hyperparameters for resnet.
     """
@@ -207,22 +207,37 @@ if __name__ == '__main__':
     tfms_list.update({"rbv2_aknn":tfms_rbv2_aknn})
 
     tfms_iaml_super = {}  # FIXME:
+    [tfms_iaml_super.update({k:ContTransformerLogRange}) for k in ["mmce", "ramtrain", "rampredict", "timepredict", "ias"]]
+    [tfms_iaml_super.update({k:ContTransformerRange}) for k in ["f1", "auc"]]
+    [tfms_iaml_super.update({k:ContTransformerNegExpRange}) for k in ["logloss", "rammodel", "timetrain", "mec"]]
     [tfms_iaml_super.update({k:ContTransformerInt}) for k in ["nf"]]
     tfms_list.update({"iaml_super":tfms_iaml_super})
 
     tfms_iaml_xgboost = {}  # FIXME:
+    [tfms_iaml_xgboost.update({k:ContTransformerLogRange}) for k in ["auc", "logloss", "ramtrain", "rammodel", "timepredict", "ias"]]
+    [tfms_iaml_xgboost.update({k:ContTransformerRange}) for k in ["f1"]]
+    [tfms_iaml_xgboost.update({k:ContTransformerNegExpRange}) for k in ["mmce", "rampredict", "timetrain", "mec"]]
     [tfms_iaml_xgboost.update({k:ContTransformerInt}) for k in ["nf"]]
     tfms_list.update({"iaml_xgboost":tfms_iaml_xgboost})
 
     tfms_iaml_ranger = {}  # FIXME:
+    [tfms_iaml_ranger.update({k:ContTransformerLogRange}) for k in ["mmce", "ramtrain", "rammodel"]]
+    [tfms_iaml_ranger.update({k:ContTransformerRange}) for k in ["f1", "auc", "rampredict", "mec"]]
+    [tfms_iaml_ranger.update({k:ContTransformerNegExpRange}) for k in ["logloss", "timetrain", "timepredict", "ias"]]
     [tfms_iaml_ranger.update({k:ContTransformerInt}) for k in ["nf"]]
     tfms_list.update({"iaml_ranger":tfms_iaml_ranger})
 
     tfms_iaml_rpart = {}  # FIXME:
+    [tfms_iaml_rpart.update({k:ContTransformerLogRange}) for k in ["mmce", "ramtrain", "rammodel", "timetrain", "timepredict", "ias"]]
+    [tfms_iaml_rpart.update({k:ContTransformerRange}) for k in ["f1", "auc", "rampredict"]]
+    [tfms_iaml_rpart.update({k:ContTransformerNegExpRange}) for k in ["logloss", "mec"]]
     [tfms_iaml_rpart.update({k:ContTransformerInt}) for k in ["nf"]]
     tfms_list.update({"iaml_rpart":tfms_iaml_rpart})
 
     tfms_iaml_glmnet = {}  # FIXME:
+    [tfms_iaml_glmnet.update({k:ContTransformerLogRange}) for k in ["mmce", "logloss", "ramtrain", "rampredict", "timetrain", "timepredict", "mec", "ias"]]
+    [tfms_iaml_glmnet.update({k:ContTransformerRange}) for k in ["f1", "auc"]]
+    [tfms_iaml_glmnet.update({k:ContTransformerNegExpRange}) for k in ["rammodel"]]
     [tfms_iaml_glmnet.update({k:ContTransformerInt}) for k in ["nf"]]
     tfms_list.update({"iaml_glmnet":tfms_iaml_glmnet})
 
