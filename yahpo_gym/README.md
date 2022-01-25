@@ -1,9 +1,9 @@
 # YAHPO Gym (python)
 [![Unittests](https://github.com/pfistfl/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[![Docs](https://github.com/pfistfl/yahpo_gym/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[[Module Handbook]](https://pfistfl.github.io/yahpo_gym/) [[Paper]](https://arxiv.org/abs/2109.03670)
-[[Software (R)]](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
-Python module
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://pfistfl.github.io/yahpo_gym/) 
+[![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
+[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
+
 
 ### What is YAHPO GYM? 
 

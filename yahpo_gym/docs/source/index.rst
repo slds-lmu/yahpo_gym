@@ -40,6 +40,13 @@ Scenarios & Instances
 
    scenarios
 
+Extending YAHO Gym
+***********************
+.. toctree::
+   :maxdepth: 1
+
+   extending
+
 Data
 ***********************
 The relevant surrogate models and meta-data can be obtained from yahpo_data (https://github.com/pfistfl/yahpo_data).
