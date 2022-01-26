@@ -118,10 +118,6 @@ class SurrogateTabularLearner(Learner):
 
     def export_onnx(self, config, device, suffix=''):
         return self.model.export_onnx(config, device, suffix)
-    
-    #def __repr__(self): 
-    #    return f"{self.wide} \n {self.deep}  \n {self.deeper}"
-
 
 
 if __name__ == '__main__':
