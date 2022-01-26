@@ -73,7 +73,8 @@ class Configuration():
             'fidelity_params': [],
             'runtime_name': '',
             'model_old': 'model.onnx',
-            'drop_predict': []
+            'drop_predict': [], 
+            'instances': []
         }
 
     @property

@@ -141,10 +141,11 @@ class BenchmarkSet():
         value: int | str | any
             A valid value for the parameter `param`.
         """
-        hpar = self.config_space.get_hyperparameter(param)
-        if not hpar.is_legal(value):
-            raise Exception(f"Value {value} not allowed for parameter {param}!")
-        self.constants[param] = value
+        if param is not None:
+            hpar = self.config_space.get_hyperparameter(param)
+            if not hpar.is_legal(value):
+                raise Exception(f"Value {value} not allowed for parameter {param}!")
+            self.constants[param] = value
     
     def set_instance(self, value):
         """
@@ -172,8 +173,9 @@ class BenchmarkSet():
         # FIXME: assert instance is a valid choice
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
-        instance_names_idx = csn.get_hyperparameter_names().index(self.config.instance_names)
-        hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
+        if self.config.instance_names is not None:
+            instance_names_idx = csn.get_hyperparameter_names().index(self.config.instance_names)
+            hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
         if drop_fidelity_params:
             fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
             for idx in fidelity_params_idx:
@@ -232,7 +234,7 @@ class BenchmarkSet():
         A list of valid instances for the scenario.
         """
         if self.config.instance_names is None:
-            return []
+            return self.config.config['instances']
         return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]
 
 
