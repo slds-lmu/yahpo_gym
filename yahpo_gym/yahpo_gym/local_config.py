@@ -18,6 +18,7 @@ class LocalConfiguration():
             The default is "~/.config/yahpo_gym".
         """
         self.settings_path = Path(settings_path).expanduser().absolute()
+        self._config = None
     
     def init_config(self, data_path: str = "", download_url: str ="https://syncandshare.lrz.de/dl/fiCMkzqj1bv1LfCUyvZKmLvd"):
         """
@@ -64,15 +65,17 @@ class LocalConfiguration():
         except yaml.parser.ParserError:
             raise yaml.parser.ParserError("Could not load config! (Invalid YAML?)")
         except:
-            print("Could not load config! (Did you run LocalConfiguration.init_config()?)")
+            raise Exception("Could not load local_config! Please run LocalConfiguration.init_config() and restart.")
         return config
 
     @property
     def config(self):
         """
-        The stored settings dictionary.
+        The stored settings dictionary (cached).
         """
-        return self._load_config()
+        if self._config is None:
+            self._config = self._load_config()
+        return(self._config)
 
     @property
     def data_path(self):

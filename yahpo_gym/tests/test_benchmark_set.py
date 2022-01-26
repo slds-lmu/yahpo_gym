@@ -31,7 +31,8 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
 
   # Setters
   b.set_constant(b.config.instance_names, test_instance)
-  assert b.constants == {b.config.instance_names : test_instance}
+  if b.config.instance_names is not None:
+    assert b.constants == {b.config.instance_names : test_instance}
   with pytest.raises(Exception) as info:
     b.set_constant("foo", "bar")
 

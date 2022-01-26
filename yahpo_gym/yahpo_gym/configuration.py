@@ -5,25 +5,6 @@ from fastdownload import FastDownload
 from pathlib import Path
 from typing import Dict
 
-_yahpo_default_dict = {
-    'basedir': local_config.data_path,
-    'download_url': local_config.download_url,
-    'config_id': '',
-    'model': 'new_model.onnx',
-    'dataset': 'data.csv',
-    'test_dataset': 'test_data.csv',
-    'config_space': 'config_space.json',
-    'param_set': 'param_set.R',
-    'encoding': 'encoding.json',
-    'y_names' : [],
-    'cont_names': [],
-    'cat_names': [],
-    'fidelity_params': [],
-    'runtime_name': '',
-    'model_old': 'model.onnx',
-    'drop_predict': []
-}
-
 class Configuration():
     def __init__(self, config_dict: Dict, download: bool = False):
         """
@@ -36,7 +17,7 @@ class Configuration():
         config_dict: dict
             A dictionary of settings required for a given configuration.
         """
-        config = _yahpo_default_dict.copy()
+        config = self._get_default_dict().copy()
         config.update(config_dict)
         self.config = config
 
@@ -55,7 +36,6 @@ class Configuration():
         self.drop_predict = self.config['drop_predict']
         
     def get_path(self, key: str):
-
         return f'{self.config_path}/{self.config[key]}'
 
     def download_files(self, data: bool = False, update: bool = False, files: list = []):
@@ -75,6 +55,27 @@ class Configuration():
             if update:
                 d.update(fullurl + file)
             d.download(fullurl + file)
+    
+    def _get_default_dict(self):
+        return {
+            'basedir': local_config.data_path,
+            'download_url': local_config.download_url,
+            'config_id': '',
+            'model': 'new_model.onnx',
+            'dataset': 'data.csv',
+            'test_dataset': 'test_data.csv',
+            'config_space': 'config_space.json',
+            'param_set': 'param_set.R',
+            'encoding': 'encoding.json',
+            'y_names' : [],
+            'cont_names': [],
+            'cat_names': [],
+            'fidelity_params': [],
+            'runtime_name': '',
+            'model_old': 'model.onnx',
+            'drop_predict': [], 
+            'instances': []
+        }
 
     @property
     def config_path(self):

@@ -1,10 +1,9 @@
-from mimetypes import suffix_map
 import random
 import pandas as pd
 from fastai.tabular.all import *
 
 
-def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=True, nrows=None, frac=1., train_frac=.8, **kwargs):
+def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, save_encoding=False, nrows=None, frac=1., train_frac=.8, **kwargs):
     """
     Instantiate a pytorch dataloader from a YAHPO config
     """
@@ -36,7 +35,8 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, sa
         procs = [Categorify, FillMissing(fill_strategy=FillStrategy.constant, add_col=False, fill_vals=dict((k, 0.) for k in config.cat_names+config.cont_names))],
         valid_idx = _get_idx(df_train, config=config, frac=.25),  # validation ids of size 0.25 taken from training ids
         bs = bs,
-        shuffle=True,
+        shuffle=
+        True,
         **kwargs
     )
 
@@ -128,9 +128,9 @@ if __name__ == '__main__':
     import torch.nn as nn
     from yahpo_gym.configuration import cfg
     from yahpo_gym.benchmarks import lcbench
-    from yahpo_train.models import FFSurrogateModel, ResNet, Transformer
-    cfg = cfg("lcbench")
-    dls = dl_from_config(cfg, nrows=None)
+    from yahpo_train.models import FFSurrogateModel, ResNet
+    cfg = cfg("nb301")
+    dls = dl_from_config(cfg, nrows=10000)
 
     print('Resnet:')
     f = ResNet(dls)
@@ -145,10 +145,3 @@ if __name__ == '__main__':
     l.add_cb(MixHandler)
     l.fit_one_cycle(5, 1e-4)
     l.export_onnx(cfg, 'cuda:0', suffix='ff')
-
-    print('Transformer:')
-    f = Transformer(dls)
-    l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
-    l.add_cb(MixHandler)
-    l.fit_one_cycle(5, 1e-4)
-    l.export_onnx(cfg, 'cuda:0', suffix='transformer')
