@@ -10,9 +10,9 @@ from functools import partial
 import wandb
 import argparse
 
-def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
+def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
     """
-    Fit function with hyperparameters for resnet.
+    Fit function with hyperparameters for ff.
     """
     cc = cfg(key)
 
@@ -26,7 +26,7 @@ def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl
         embds_tgt = [tfms.get(name) if tfms.get(name) is not None else ContTransformerRange for name, cont in dls_train.ys.iteritems()]
 
     # Instantiate learner
-    f = ResNet(dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
+    f = FFSurrogateModel(dls_train, layers=deep, deeper=deeper, ps=dropout, use_bn=use_bn, wide=wide, embds_dbl=embds_dbl, embds_tgt=embds_tgt)
     l = SurrogateTabularLearner(dls_train, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
     l.metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
     if mixup:
@@ -53,8 +53,20 @@ def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl
 
     return l
 
+def get_arch(max_units, n, shape):
+    if max_units == 0:
+        return []
+    if n == 0:
+       n = 4
+    if shape == "square":
+        return [2**max_units for x in range(n)]
+    if shape == "cone":
+        units = [2**max_units]
+        for x in range(n):
+            units += [int(units[-1]/2)]
+        return units
 
-def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **kwargs):
+def tune_config(key, name, tfms_fixed={}, trials=1000, walltime=86400, **kwargs):
     import optuna
     from optuna.integration import FastAIPruningCallback
     from optuna.visualization import plot_optimization_history
@@ -83,8 +95,6 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
     tclamp = ContTransformerClamp01Range
     trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp, "tclamp":tclamp}
 
-    # for the search space see https://arxiv.org/pdf/2106.11959.pdf
-
     def objective(trial):
         tfms = copy(tfms_fixed)
         for y in cc.y_names:
@@ -106,20 +116,30 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
                     tf = "trange"
                 tfms.update({x:trafos.get(tf)})
 
-        d = trial.suggest_int("d", 64, 1024, step = 64)  # layer size
-        d_hidden_factor = trial.suggest_float("d_hidden_factor", 1., 4.)  # hidden factor
-        n_layers = trial.suggest_int("n_layers", 1, 8)  # number of layers
-        hidden_dropout = trial.suggest_float("hidden_dropout", 0., 0.5)  # hidden dropout
-        use_residual_dropout = trial.suggest_categorical("use_residual_dropout", [True, False])
-        if use_residual_dropout:
-            residual_dropout = trial.suggest_float("residual_dropout", 1e-2, 0.5)
+        opt_deep_arch = trial.suggest_categorical("opt_deep_arch", [True, False])
+        if opt_deep_arch:
+            deep_u = trial.suggest_categorical("deep_u", [7, 8, 9, 10])
+            deep_n = trial.suggest_categorical("deep_n", [0, 1, 2, 3])
+            deep_s = trial.suggest_categorical("deep_s", ["square", "cone"])
+            deep = get_arch(deep_u, deep_n, deep_s)
+            use_deeper = trial.suggest_categorical("use_deeper", [True, False])
+            if use_deeper:
+                deeper_u = trial.suggest_categorical("deeper_u", [7, 8, 9, 10])
+                deeper = get_arch(deeper_u, deep_n + 2, deep_s)
+            else:
+                deeper = []
         else:
-            residual_dropout = 0.
-        lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
+            deep = [1024,512,256]
+            deeper = []
+
+        lr = trial.suggest_float("lr", 1e-5, 1e-3, log=True)
+        wide = trial.suggest_categorical("wide", [True, False])
         mixup = trial.suggest_categorical("mixup", [True, False])
+        use_bn = trial.suggest_categorical("use_bn", [True, False])
+        dropout = trial.suggest_categorical("dropout", [0., 0.25, 0.5])
         cbs = [FastAIPruningCallback(trial=trial, monitor='valid_loss')]
         
-        l = fit_config_resnet(key=key, dls_train=dls_train, tfms=tfms, lr=lr, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout, mixup=mixup, log_wandb=False, cbs=cbs, **kwargs)
+        l = fit_config(key=key, dls_train=dls_train, tfms=tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=False, cbs=cbs, **kwargs)
         loss = l.recorder.final_record.items[1]  # [1] is validation loss
         return loss
     
@@ -128,7 +148,7 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
     return study
 
 
-def fit_from_best_params_resnet(key, best_params, tfms_fixed={}, log_wandb=False, **kwargs):
+def fit_from_best_params(key, best_params, tfms_fixed={}, log_wandb=False, **kwargs):
     cc = cfg(key)
     tfms = copy(tfms_fixed)
 
@@ -158,20 +178,26 @@ def fit_from_best_params_resnet(key, best_params, tfms_fixed={}, log_wandb=False
                 tf = "trange"
             tfms.update({x:trafos.get(tf)})
 
-    d = best_params.get("d")
-    d_hidden_factor = best_params.get("d_hidden_factor")
-    n_layers = best_params.get("n_layers")
-    hidden_dropout = best_params.get("hidden_dropout")
-    if best_params.get("use_residual_dropout"):
-        residual_dropout = best_params.get("residual_dropout")
+    if best_params.get("opt_deep_arch"):
+        deep = get_arch(best_params.get("deep_u"), best_params.get("deep_n"), best_params.get("deep_s"))
+        use_deeper = best_params.get("use_deeper")
+        if use_deeper:
+            deeper = get_arch(best_params.get("deeper_u"), best_params.get("deep_n") + 2, best_params.get("deep_s"))
+        else:
+            deeper = []
     else:
-        residual_dropout = 0.
-    lr = best_params.get("lr")
-    mixup = best_params.get("mixup")
-    
-    l = fit_config_resnet(key=key, tfms=tfms, lr=lr, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout, mixup=mixup, log_wandb=log_wandb, **kwargs)
+        deep = [1024,512,256]
+        deeper = []
 
+    lr = best_params.get("lr")
+    wide = best_params.get("wide")
+    mixup = best_params.get("mixup")
+    use_bn = best_params.get("use_bn")
+    dropout = best_params.get("dropout")
+    
+    l = fit_config(key=key, tfms=tfms, lr=lr, deep=deep, deeper=deeper, wide=wide, mixup=mixup, use_bn=use_bn, dropout=dropout, log_wandb=log_wandb, **kwargs)
     return l
+
 
 if __name__ == '__main__':
 
@@ -243,9 +269,9 @@ if __name__ == '__main__':
 
     # FIXME: fcnet, taskset
 
-    parser = argparse.ArgumentParser(description='Args for resnet tuning')
+    parser = argparse.ArgumentParser(description='Args for feed forward tuning')
     parser.add_argument('--key', type=str, default="iaml_glmnet", help='Key of benchmark scenario, e.g., "iaml_glmnet"')    
-    parser.add_argument('--name', type=str, default="tune_iaml_glmnet_resnet", help='Name of the optuna study, e.g., "tune_iaml_glmnet_resnet"')
+    parser.add_argument('--name', type=str, default="tune_iaml_glmnet_ff", help='Name of the optuna study, e.g., "tune_iaml_glmnet_ff"')
     parser.add_argument('--trials', type=int, default=0, help='Number of optuna trials')  # by default we run until terminated externally
     parser.add_argument('--walltime', type=int, default=0, help='Walltime for optuna timeout in seconds') # by default we run until terminated externally
     args = parser.parse_args()
@@ -258,7 +284,7 @@ if __name__ == '__main__':
     else:
         raise ValueError("No cuda device available. You probably do not want to tune on CPUs.")
 
-    tune_config_resnet(args.key, name=args.name, tfms_fixed=tfms_list.get(args.key), trials=args.trials, walltime=args.walltime)
+    tune_config(args.key, name=args.name, tfms_fixed=tfms_list.get(args.key), trials=args.trials, walltime=args.walltime)
 
 #if __name__ == '__main__':
 #    wandb.login()
@@ -269,11 +295,11 @@ if __name__ == '__main__':
 #    tfms_xgboost = {}
 #    tfms_xgboost.update({"nf":tfms_chain([ContTransformerInt, ContTransformerRange])})
 #    # 2. tune by providing the fixed transformers (if any)
-#    study_xgboost = tune_config_resnet("iaml_xgboost", name="tune_iaml_xgboost_new", tfms_fixed=tfms_xgboost)
+#    study_xgboost = tune_config("iaml_xgboost", name="tune_iaml_xgboost_new", tfms_fixed=tfms_xgboost)
 #    # 3. extract the best params and refit the model (FIXME: could refit on whole train + valid data?)
 #    #    set export = True so that the onnx model is exported
 #    #    caveat: this overwrites the exiting model! # FIXME: should versionize this automatically
-#    l = fit_from_best_params_resnet("iaml_xgboost", best_params=study_xgboost.best_params, tfms_fixed=tfms_xgboost, export=True, device=device, epochs=100)
+#    l = fit_from_best_params("iaml_xgboost", best_params=study_xgboost.best_params, tfms_fixed=tfms_xgboost, export=True, device=device, epochs=100)
 #    # 4. get the performance metrics on the test set relying on the newly exported onnx model
 #    get_testset_metrics("iaml_xgboost")
 #
@@ -286,5 +312,5 @@ if __name__ == '__main__':
 #    tfms_super.update({"timepredict":ContTransformerLogRange})
 #    tfms_super.update({"rammodel":ContTransformerLogRange})
 #    tfms_super.update({"ias":ContTransformerLogRange})
-#    fit_from_best_params_resnet("iaml_super", study_super.best_params, tfms_fixed=tfms_super, log_wandb=True, export=True, epochs=100)
+#    fit_from_best_params("iaml_super", study_super.best_params, tfms_fixed=tfms_super, log_wandb=True, export=True, epochs=100)
 
