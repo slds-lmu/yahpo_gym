@@ -2,8 +2,8 @@ import typing as ty
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.init as nn_init
+import torch.distributions as dist
+
 
 from fastai.tabular.all import *
 
@@ -11,6 +11,17 @@ from yahpo_train.cont_scalers import *
 from yahpo_train.models_utils import *
 from yahpo_train.models import AbstractSurrogate
 from yahpo_train.learner import SurrogateTabularLearner
+
+def sample_from_simplex(n):
+    """
+    Sample from a simplex.
+    Following https://cs.stackexchange.com/questions/3227/uniform-sampling-from-a-simplex
+    """
+    alpha = torch.rand(n+1)
+    alpha[0] = 0.0
+    alpha[-1] = 1.0
+    alpha = torch.sort(alpha).values
+    return alpha[1:] - alpha[:-1]
 
 class Ensemble(AbstractSurrogate):
     def __init__(self, base_model: nn.Module, n_models: int, **kwargs):
@@ -21,8 +32,8 @@ class Ensemble(AbstractSurrogate):
     def forward(self, x_cat, x_cont=None, invert_ytrafo=True) -> Tensor:
         ys = torch.stack([model(x_cat, x_cont, invert_ytrafo) for model in self.models], dim=0)
         # Draw ensemble weights
-        alpha = torch.rand(3).to(ys.device)
-        alpha = alpha / alpha.sum()
+        alpha = sample_from_simplex(self.n_models).to(ys.device)
+        
         # Compute weighted average
         ys = ys * alpha[:,None, None]
         return torch.sum(ys, dim=0)
@@ -56,7 +67,7 @@ if __name__ == '__main__':
     f = Ensemble(ResNet, n_models=3, dls=dls)
     l = SurrogateEnsembleLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
     l.add_cb(MixHandler)
-    l.fit_one_cycle(10, 1e-4)
+    l.fit_one_cycle(1, 1e-4)
     l.export_onnx(cfg, 'cuda:0', suffix='noisy')
 
 
