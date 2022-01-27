@@ -82,6 +82,9 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       } else {
         private$.fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[[1]][self$codomain$ids()]}
       }
+    },
+    .eval_many = function(xs) {
+      invoke(private$.fun, xs, .args = self$constants$values)
     }
   ),
 
