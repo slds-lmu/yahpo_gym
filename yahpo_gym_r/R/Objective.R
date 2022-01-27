@@ -4,13 +4,15 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     timed = NULL,
     logging = NULL,
     multithread = NULL,
+    seed = NULL,
 
-    initialize = function(instance, multifidelity = TRUE, py_instance_args, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE) {
+    initialize = function(instance, multifidelity = TRUE, py_instance_args, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = 0L) {
       assert_flag(multifidelity)
       assert_flag(check_values)
       self$timed = assert_flag(timed)
       self$logging = assert_flag(logging)
       self$multithread = assert_flag(multithread)
+      self$seed = assert_int(seed)
       if (is.null(codomain)) {
         codomain = ps(y = p_dbl(tags = "minimize"))
       }
@@ -50,14 +52,14 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         constants = cst,
         check_values = assert_flag(check_values)
       )
-
     },
     eval = function(xs) {
       if (self$check_values) self$domain$assert(xs)
       if (is.null(private$.fun)) {
         private$.set_fun()
       }
-      res = invoke(private$.fun, xs, .args = self$constants$values)
+      res = invoke(private$.fun, list(xs), .args = self$constants$values)
+      res = res[[1]][self$codomain$ids()]
       if (self$check_values) self$codomain$assert(as.list(res)[self$codomain$ids()])
       return(res)
     },
@@ -78,13 +80,27 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     },
     .set_fun = function() {
       if (self$timed) {
-        private$.fun = function(xs, ...) {self$py_instance$objective_function_timed(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[[1]][self$codomain$ids()]}
+        private$.fun = function(xs, ...) {
+          self$py_instance$objective_function_timed(
+            preproc_xs(xs, ...), seed = self$seed,
+            logging = self$logging, multithread = self$multithread
+          )
+        }
       } else {
-        private$.fun = function(xs, ...) {self$py_instance$objective_function(preproc_xs(xs, ...), logging = self$logging, multithread = self$multithread)[[1]][self$codomain$ids()]}
+        private$.fun = function(xs, ...) {
+          self$py_instance$objective_function(
+            preproc_xs(xs, ...), seed = self$seed,
+            logging = self$logging, multithread = self$multithread
+          )  
+        }
       }
     },
-    .eval_many = function(xs) {
-      invoke(private$.fun, xs, .args = self$constants$values)
+    .eval_many = function(xs, ...) {
+      if (is.null(private$.fun)) {
+        private$.set_fun()
+      }
+      res = invoke(private$.fun, xs = xs, .args = self$constants$values)
+      data.table::rbindlist(res)[self$codomain$ids()]
     }
   ),
 
@@ -113,19 +129,21 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
 )
 
 #' @title Preprocess r object for use with python's YAHPO GYM
-#' @param xs `list` \cr
+#' @param xs `list` of `list` \cr
 #'   List of hyperparams
 #' @param ... `any` \cr
 #'   Named params, appended to `xs`.
 #' @export
-preproc_xs = function(xs, ...) {
+preproc_xs = function(xss, ...) {
   csts = list(...)
-  xs = map(as.list(xs), function(x) {
-    if (is.logical(x)) {
-      as.character(x)  # NOTE: logical parameters are represented as categoricals in ConfigSpace and we fix this here
-    } else {
-      x
-    }
+  map(xss, function(xs) {
+    xs = map(as.list(xs), function(x) {
+      if (is.logical(x)) {
+        as.character(x)  # NOTE: logical parameters are represented as categoricals in ConfigSpace and we fix this here
+      } else {
+        x
+      }
+    })
+    keep(c(xs, csts), Negate(is.na))
   })
-  keep(c(xs, csts), Negate(is.na))
 }

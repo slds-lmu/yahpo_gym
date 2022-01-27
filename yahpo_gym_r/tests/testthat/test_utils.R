@@ -16,8 +16,8 @@ test_that("local config", {
 })
 
 test_that("preproc_xs", {
-  l = list(a = 1, b = NA)
-  expect_identical(preproc_xs(l), list(a = 1))
-  expect_identical(preproc_xs(l, c = 3), list(a = 1, c = 3))
-  expect_identical(preproc_xs(l, c = 3, d = NA), list(a = 1, c = 3))
+  l = list(list(a = 1, b = NA))
+  expect_identical(preproc_xs(l), list(list(a = 1)))
+  expect_identical(preproc_xs(l, c = 3), list(list(a = 1, c = 3)))
+  expect_identical(preproc_xs(l, c = 3, d = NA), list(list(a = 1, c = 3)))
 })
