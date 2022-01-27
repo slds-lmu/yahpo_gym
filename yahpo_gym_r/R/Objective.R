@@ -12,11 +12,11 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       self$timed = assert_flag(timed)
       self$logging = assert_flag(logging)
       self$multithread = assert_flag(multithread)
-      self$seed = assert_int(seed)
+      self$seed = assert_int(seed, null.ok = TRUE)
       if (is.null(codomain)) {
         codomain = ps(y = p_dbl(tags = "minimize"))
       }
-      private$.py_instance_args = assert_list(py_instance_args)
+      private$.py_instance_args = assert_list(py_instance_args, names = "named")
 
       # set constant instance / fidelities and define domain over all other values
       instance_param = self$py_instance$config$instance_names
@@ -43,12 +43,13 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         }
       }
 
+      noise = ifelse(py_instance_args$noisy, "noisy", "deterministic")
       # asserts id, domain, codomain, properties
       super$initialize(
         id = paste0("YAHPO_", py_instance_args$config_id),
         domain = domain_new,
         codomain = codomain,
-        properties = character(),
+        properties = noise,
         constants = cst,
         check_values = assert_flag(check_values)
       )
@@ -100,7 +101,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         private$.set_fun()
       }
       res = invoke(private$.fun, xs = xs, .args = self$constants$values)
-      data.table::rbindlist(res)[self$codomain$ids()]
+      data.table::rbindlist(res)[, self$codomain$ids(), with = FALSE]
     }
   ),
 
@@ -114,7 +115,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         args = private$.py_instance_args
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
           args$config_id, session=args$onnx_session, active_session = args$active_session,
-          download = args$download, check = args$check
+          download = args$download, check = args$check, noisy = args$noisy, multithread = args$multithread
         )
       }
       return(private$.py_instance)

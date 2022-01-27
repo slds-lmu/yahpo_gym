@@ -169,7 +169,7 @@ Get the objective function
   timed = FALSE,
   logging = FALSE,
   multithread = FALSE,
-  seed = 0L
+  seed = NULL
 )}\if{html}{\out{</div>}}
 }
 

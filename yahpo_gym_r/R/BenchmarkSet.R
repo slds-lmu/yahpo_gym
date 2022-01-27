@@ -112,20 +112,20 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @param multithread `logical` \cr
     #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @param seed `integer` \cr
-    #'   Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `0L`.
+    #'   Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `NULL` (no seed).
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = 0L) {
+    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = NULL) {
       assert_choice(instance, self$instances)
       assert_flag(check_values)
-      assert_int(seed)
+      assert_int(seed, null.ok = TRUE)
       ObjectiveYAHPO$new(
         instance,
         multifidelity,
         list(
           config_id = self$id, session = self$onnx_session, active_session = self$active_session, 
-          download = self$download, check = self$check, seed = seed
+          download = self$download, check = self$check, mulltithread = self$multithread, noisy = self$noisy
         ),
         self$domain,
         self$codomain,
@@ -248,7 +248,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
           config_id = self$id, session = self$onnx_session, active_session = self$active_session,
-          download = self$download, multithread = self$multithread#, check = self$check
+          download = self$download, multithread = self$multithread, noisy = self$noisy
         )
       }
       return(private$.py_instance)

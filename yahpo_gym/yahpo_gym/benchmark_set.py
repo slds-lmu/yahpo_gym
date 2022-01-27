@@ -53,7 +53,7 @@ class BenchmarkSet():
         if self.active_session or (session is not None):
             self.set_session(session, multithread=multithread)
 
-    def objective_function(self, configuration: Union[Dict, List[Dict]], seed:int = 1, logging: bool = False, multithread: bool = True):
+    def objective_function(self, configuration: Union[Dict, List[Dict]], seed:int = None, logging: bool = False, multithread: bool = True):
         """
         Evaluate the surrogate for (a) given configuration(s).
 
@@ -85,8 +85,10 @@ class BenchmarkSet():
             x_cont_, x_cat_ = self._config_to_xs(configuration[i])
             x_cont = np.vstack((x_cont, x_cont_))
             x_cat = np.vstack((x_cat, x_cat_))
+            
         # Set seed and run inference
-        rt.set_seed(seed)
+        if seed is not None:
+            rt.set_seed(seed)
         results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0]  # batch predict
         for i in range(len(results)):
             results_dict = {k:v for k,v in zip(self.config.y_names, results[i])}
@@ -100,7 +102,7 @@ class BenchmarkSet():
 
         return results_list
 
-    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], seed:int = 1, logging: bool = False, multithread: bool = True):
+    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], seed:int = None, logging: bool = False, multithread: bool = True):
         """
         Evaluate the surrogate for (a) given configuration(s) and sleep for 'self.quant' * predicted runtime(s).
         The quantity 'self.quant' is automatically inferred if it is not set manually.
