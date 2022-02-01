@@ -80,8 +80,7 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
     tlog = ContTransformerLogRange
     tlog2 = ContTransformerLog2Range
     tnexp = ContTransformerNegExpRange
-    tclamp = ContTransformerClamp01Range
-    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp, "tclamp":tclamp}
+    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp}
 
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
 
@@ -92,7 +91,7 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
                 # if opt_tfms_y is False use ContTransformerRange
                 opt_tfms_y = trial.suggest_categorical("opt_tfms_" + y, [True, False])
                 if opt_tfms_y:
-                    tf = trial.suggest_categorical("tfms_" + y, ["tlog", "tnexp", "tclamp"])
+                    tf = trial.suggest_categorical("tfms_" + y, ["tlog", "tlog2", "tnexp"])
                 else:
                     tf = "trange"
                 tfms.update({y:trafos.get(tf)})
@@ -136,8 +135,7 @@ def fit_from_best_params_resnet(key, best_params, tfms_fixed={}, log_wandb=False
     tlog = ContTransformerLogRange
     tlog2 = ContTransformerLog2Range
     tnexp = ContTransformerNegExpRange
-    tclamp = ContTransformerClamp01Range
-    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp, "tclamp":tclamp}
+    trafos = {"trange":trange, "tlog":tlog, "tlog2":tlog2, "tnexp":tnexp}
 
     for y in cc.y_names:
         if y not in tfms.keys():  # exclude variables provided in tfms_fixed
@@ -244,6 +242,24 @@ if __name__ == '__main__':
         raise ValueError("No cuda device available. You probably do not want to tune on CPUs.")
 
     tune_config_resnet(args.key, name=args.name, tfms_fixed=tfms_list.get(args.key), trials=args.trials, walltime=args.walltime)
+
+#key = "lcbench"
+#bench = benchmark_set.BenchmarkSet(key)
+#cuda_available = torch.cuda.is_available()
+#
+#storage_name = "sqlite:///{}.db".format("tune_" + key + "_resnet_test")
+#study = optuna.load_study("tune_" + key + "_resnet_test", storage_name)
+#best_params = study.best_params
+#with open(bench.config.config_path + "/best_params_resnet.pkl", "wb") as f:
+#    pickle.dump(best_params, f)
+#
+## tfms see tfms_list in tune_resnet.py
+#l = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), export=False, device="cuda:0")
+#l.export_onnx(cfg(key), device="cuda:0", suffix="resnet")
+#
+#from yahpo_train.helpers import generate_all_test_set_metrics
+#
+#generate_all_test_set_metrics(key, model="new_model.onnxresnet", save_to_csv=True)
 
 #if __name__ == '__main__':
 #    wandb.login()
