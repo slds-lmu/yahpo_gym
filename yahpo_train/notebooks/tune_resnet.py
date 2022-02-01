@@ -177,10 +177,13 @@ if __name__ == '__main__':
 
     tfms_list = {}
 
-    tfms_lcbench = {}  # FIXME:
+    tfms_lcbench = {}
     tfms_list.update({"lcbench":tfms_lcbench})
 
-    tfms_nb301 = {}  # FIXME:
+    tfms_nb301 = {}
+    tfms_nb301.update({"epoch":partial(ContTransformerMultScalar, m=1/98)})
+    tfms_nb301.update({"val_accuracy":partial(ContTransformerMultScalar, m=1/100)})
+    tfms_nb301.update({"runtime":ContTransformerRange})
     tfms_list.update({"nb301":tfms_nb301})
 
     tfms_rbv2_super = {}  # FIXME:
