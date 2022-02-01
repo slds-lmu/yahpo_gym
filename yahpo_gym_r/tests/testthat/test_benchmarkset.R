@@ -64,7 +64,6 @@ test_that("Parallel", {
   xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
   objective$eval_many(xss_trafoed)
   
-
   future::plan("multisession")
   pss = replicate(2, {
     xdt = generate_design_random(b$get_search_space(), 1)$data

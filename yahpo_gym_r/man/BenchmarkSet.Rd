@@ -54,6 +54,9 @@ Should the ONNX session be allowed to leverage multithreading capabilities?}
 
 \item{\code{check}}{`logical` \cr
 Check whether values coincide with `domain`.}
+
+\item{\code{noisy}}{`logical` \cr
+Whether noisy surrogates should be used.}
 }
 \if{html}{\out{</div>}}
 }
@@ -110,7 +113,8 @@ Initialize a new object
   active_session = FALSE,
   download = FALSE,
   multithread = FALSE,
-  check = FALSE
+  check = FALSE,
+  noisy = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -135,6 +139,9 @@ Should the ONNX session be allowed to leverage multithreading capabilities? Defa
 
 \item{\code{check}}{`logical` \cr
 Check inputs for validity before passing to surrogate model? Default `FALSE`.}
+
+\item{\code{noisy}}{`logical` \cr
+Should noisy surrogates be used instead of deterministic ones?}
 }
 \if{html}{\out{</div>}}
 }
@@ -143,7 +150,7 @@ Check inputs for validity before passing to surrogate model? Default `FALSE`.}
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
-Printer
+Printer with some additional information.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$print()}\if{html}{\out{</div>}}
 }
@@ -161,7 +168,8 @@ Get the objective function
   check_values = TRUE,
   timed = FALSE,
   logging = FALSE,
-  multithread = FALSE
+  multithread = FALSE,
+  seed = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -186,6 +194,9 @@ Should function evaluationd be logged? Initialized to `FALSE`.}
 
 \item{\code{multithread}}{`logical` \cr
 Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.}
+
+\item{\code{seed}}{`integer` \cr
+Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `0L`.}
 }
 \if{html}{\out{</div>}}
 }
@@ -254,7 +265,7 @@ A configspace containing the search space to optimize over.
 \if{html}{\out{<a id="method-subset_codomain"></a>}}
 \if{latex}{\out{\hypertarget{method-subset_codomain}{}}}
 \subsection{Method \code{subset_codomain()}}{
-Subset the codomain
+Subset the codomain. Sets a new domain.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$subset_codomain(keep)}\if{html}{\out{</div>}}
 }

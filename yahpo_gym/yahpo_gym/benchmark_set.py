@@ -14,7 +14,8 @@ import ConfigSpace.hyperparameters as CSH
 class BenchmarkSet():
 
     def __init__(self, config_id: str = None, download: bool = False, active_session: bool = False,
-        session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True):
+        session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
+        noisy: bool = False):
         """
         Interface for a benchmark scenario. 
         Initialized with a valid key for a valid scenario and optinally an `onnxruntime.InferenceSession`.
@@ -41,16 +42,18 @@ class BenchmarkSet():
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
+        self.noisy = noisy
         self.check = check
         self.quant = None
         self.constants = {}
         self.session = None
         self.archive = []
 
+
         if self.active_session or (session is not None):
             self.set_session(session, multithread=multithread)
 
-    def objective_function(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
+    def objective_function(self, configuration: Union[Dict, List[Dict]], seed:int = None, logging: bool = False, multithread: bool = True):
         """
         Evaluate the surrogate for (a) given configuration(s).
 
@@ -82,6 +85,10 @@ class BenchmarkSet():
             x_cont_, x_cat_ = self._config_to_xs(configuration[i])
             x_cont = np.vstack((x_cont, x_cont_))
             x_cat = np.vstack((x_cat, x_cat_))
+            
+        # Set seed and run inference
+        if seed is not None:
+            rt.set_seed(seed)
         results = self.session.run([output_name], {input_names[0]: x_cat, input_names[1]: x_cont})[0]  # batch predict
         for i in range(len(results)):
             results_dict = {k:v for k,v in zip(self.config.y_names, results[i])}
@@ -95,7 +102,7 @@ class BenchmarkSet():
 
         return results_list
 
-    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], logging: bool = False, multithread: bool = True):
+    def objective_function_timed(self, configuration: Union[Dict, List[Dict]], seed:int = None, logging: bool = False, multithread: bool = True):
         """
         Evaluate the surrogate for (a) given configuration(s) and sleep for 'self.quant' * predicted runtime(s).
         The quantity 'self.quant' is automatically inferred if it is not set manually.
@@ -120,13 +127,13 @@ class BenchmarkSet():
         start_time = time.time()
 
         # Always work with a list of results
-        results = self.objective_function(configuration, logging = logging, multithread = multithread)
+        results = self.objective_function(configuration, seed = seed, logging = logging, multithread = multithread)
         if isinstance(results, dict):
             results = [results]
 
-        rt = sum([result.get(self.config.runtime_name) for result in results])
+        runt = sum([result.get(self.config.runtime_name) for result in results])
         offset = time.time() - start_time
-        sleepit = max(rt - offset, 0) * self.quant
+        sleepit = max(runt - offset, 0) * self.quant
         time.sleep(sleepit)
         return results
 
@@ -219,7 +226,7 @@ class BenchmarkSet():
         if (session is not None):
             self.session = session
         elif (self.session is None):
-            model_path = self.config.get_path("model")
+            model_path = self._get_model_path()
             if not Path(model_path).is_file():
                 raise Exception(f"ONNX file {model_path} not found!")
             options = rt.SessionOptions()
@@ -305,3 +312,9 @@ class BenchmarkSet():
         # Set the quantization factor as X offsets
         quant = np.minimum(20 * np.max(np.array(offsets)) / rt, 1.)
         return(quant)
+
+    def _get_model_path(self):
+        path = self.config.get_path("model")
+        if self.noisy:
+            path.replace('.onnx', '_noisy.onnx')
+        return path
