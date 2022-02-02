@@ -1,4 +1,5 @@
 from yahpo_train.models import *
+from yahpo_train.models_ensemble import *
 from yahpo_train.learner import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
@@ -10,7 +11,7 @@ from functools import partial
 import wandb
 import argparse
 
-def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity="mfsurrogates", cbs=[], device="cuda:0"):
+def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity="mfsurrogates", cbs=[], device="cuda:0"):
     """
     Fit function with hyperparameters for resnet.
     """
@@ -26,7 +27,10 @@ def fit_config_resnet(key, dls_train=None, save_df_test_encoding=True, embds_dbl
         embds_tgt = [tfms.get(name) if tfms.get(name) is not None else ContTransformerRange for name, cont in dls_train.ys.iteritems()]
 
     # Instantiate learner
-    f = ResNet(dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
+    if noisy:
+        f = Ensemble(ResNet, n_models=3, dls=dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
+    else :
+        f = ResNet(dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
     l = SurrogateTabularLearner(dls_train, f, loss_func=nn.MSELoss(reduction="mean"), metrics=nn.MSELoss)
     l.metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
     if mixup:
