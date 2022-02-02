@@ -80,7 +80,7 @@ class AbstractSurrogate(nn.Module):
             export_params=True,
             input_names=['x_cat', 'x_cont'],
             output_names=['output'],
-            opset_version=12,
+            opset_version=13,
             # dynamic axes allow us to do batch prediction
             dynamic_axes={'x_cat':{0:'batch_size'}, 'x_cont':{0:'batch_size'}, 'output':{0:'batch_size'}}
         )
