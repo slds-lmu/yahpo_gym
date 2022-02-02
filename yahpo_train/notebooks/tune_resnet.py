@@ -11,7 +11,7 @@ from functools import partial
 import wandb
 import argparse
 
-def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity="mfsurrogates", cbs=[], device="cuda:0"):
+def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, cbs=[], device="cuda:0"):
     """
     Fit function with hyperparameters for resnet.
     """
@@ -29,9 +29,10 @@ def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=Tr
     # Instantiate learner
     if noisy:
         f = Ensemble(ResNet, n_models=3, dls=dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
+        l = SurrogateEnsembleLearner(dls_train, f, loss_func=nn.MSELoss(reduction="mean"), metrics=nn.MSELoss)
     else :
         f = ResNet(dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
-    l = SurrogateTabularLearner(dls_train, f, loss_func=nn.MSELoss(reduction="mean"), metrics=nn.MSELoss)
+        l = SurrogateTabularLearner(dls_train, f, loss_func=nn.MSELoss(reduction="mean"), metrics=nn.MSELoss)
     l.metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
     if mixup:
         l.add_cb(MixHandler)
@@ -39,18 +40,8 @@ def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=Tr
     if len(cbs):
         [l.add_cb(cb) for cb in cbs]
 
-    # Log results to wandb
-    if log_wandb:
-        wandb.init(project=key, entity=wandb_entity)
-        l.add_cb(WandbMetricsTableCallback())
-        wandb.config.update({"cont_tf": l.embds_dbl, "tgt_tf": l.embds_tgt, "fraction": frac,}, allow_val_change=True)
-        wandb.config.update({"deep": deep, "deeper": deeper, "dropout":dropout, "wide":wide, "use_bn":use_bn}, allow_val_change=True)
-
     # Fit
     l.fit_flat_cos(epochs, lr)
-
-    if log_wandb: 
-        wandb.finish()
 
     if export:
         l.export_onnx(cc, device=device)
@@ -121,7 +112,7 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
         mixup = trial.suggest_categorical("mixup", [True, False])
         cbs = [FastAIPruningCallback(trial=trial, monitor="valid_loss")]
         
-        l = fit_config_resnet(key=key, dls_train=dls_train, tfms=tfms, lr=lr, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout, mixup=mixup, log_wandb=False, cbs=cbs, **kwargs)
+        l = fit_config_resnet(key=key, dls_train=dls_train, tfms=tfms, lr=lr, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout, mixup=mixup, cbs=cbs, **kwargs)
         loss = l.recorder.final_record.items[1]  # [1] is validation loss
         return loss
     
@@ -130,7 +121,7 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
     return study
 
 
-def fit_from_best_params_resnet(key, best_params, tfms_fixed={}, log_wandb=False, **kwargs):
+def fit_from_best_params_resnet(key, best_params, tfms_fixed={}, **kwargs):
     cc = cfg(key)
     tfms = copy(tfms_fixed)
 
@@ -169,7 +160,7 @@ def fit_from_best_params_resnet(key, best_params, tfms_fixed={}, log_wandb=False
     lr = best_params.get("lr")
     mixup = best_params.get("mixup")
     
-    l = fit_config_resnet(key=key, tfms=tfms, lr=lr, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout, mixup=mixup, log_wandb=log_wandb, **kwargs)
+    l = fit_config_resnet(key=key, tfms=tfms, lr=lr, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout, mixup=mixup, **kwargs)
 
     return l
 
@@ -230,7 +221,7 @@ if __name__ == "__main__":
     tfms_list.update({"iaml_glmnet":tfms_iaml_glmnet})
 
     parser = argparse.ArgumentParser(description="Args for resnet tuning")
-    parser.add_argument("--key", type=str, default="iaml_glmnet", help='Key of benchmark scenario, e.g., "iaml_glmnet"')    
+    parser.add_argument("--key", type=str, default="iaml_glmnet", help='Key of benchmark scenario, e.g., "iaml_glmnet"')
     parser.add_argument("--name", type=str, default="tune_iaml_glmnet_resnet", help='Name of the optuna study, e.g., "tune_iaml_glmnet_resnet"')
     parser.add_argument("--trials", type=int, default=0, help='Number of optuna trials')  # by default we run until terminated externally
     parser.add_argument("--walltime", type=int, default=0, help='Walltime for optuna timeout in seconds') # by default we run until terminated externally
