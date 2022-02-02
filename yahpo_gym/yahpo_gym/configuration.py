@@ -136,7 +136,8 @@ class ConfigDict():
             out += "\n< No configs loaded >"
         for k in self.configs.keys():
             v = self.get_item(k)
-            out += "\n{:<15} {:<15} {:<10} {:<10} {:<10} {:<10}".format(k, v.instance_names, len(v.cat_names)-1, len(v.cont_names)-len(v.fidelity_params), len(v.fidelity_params), len(v.y_names))
+            name = v.instance_names if v.instance_names is not None else "Task"
+            out += "\n{:<15} {:<15} {:<10} {:<10} {:<10} {:<10}".format(k, name, len(v.cat_names)-1, len(v.cont_names)-len(v.fidelity_params), len(v.fidelity_params), len(v.y_names))
         return out
 
 
