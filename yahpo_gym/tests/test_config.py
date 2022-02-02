@@ -28,5 +28,5 @@ def test_config():
   
   
 def test_print_cfg_table():
-  import yahpo_gym.configuration as cfg
+  from yahpo_gym.configuration import cfg
   print(cfg())
