@@ -240,6 +240,12 @@
 </tr>
 </tbody>
 </table>
+<p>In <cite>yahpo_gym</cite>, there is a <cite>Configuration</cite> object for each <strong>scenario</strong>.
+A list of all available scenarios can be obtained as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym.configuration</span> <span class="kn">import</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">cfgs</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cfg</span><span class="p">())</span>
+</pre></div>
+</div>
 <section id="instances">
 <h2>Instances<a class="headerlink" href="#instances" title="Permalink to this headline"></a></h2>
 <p>YAHPO GYM <strong>instances</strong> are evaluations of an ML algorithm (<strong>scenario</strong>) with a given set of hyperparameters on a specific task.
@@ -301,6 +307,12 @@ To provide an example, instance <cite>168868</cite> defines the <cite>Task</cite
 </tr>
 </tbody>
 </table>
+<p>A list of available instances can be obtained from the <cite>instances</cite> slot after instantiating the <cite>BenchmarkSet</cite>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym</span> <span class="kn">import</span> <span class="n">BenchmarkSet</span>
+<span class="n">BenchmarkSet</span><span class="p">(</span><span class="s2">&quot;lcbench&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">instances</span>
+</pre></div>
+</div>
+<p>Users can now instantiate a <cite>Benchmark</cite> or <cite>config</cite> with this <cite>&lt;ID&gt;</cite>, e.g. using <cite>cfg(“&lt;ID&gt;”)</cite>.</p>
 </section>
 </section>
 

@@ -16,6 +16,13 @@ The following table provides an overview over **Scenarios** included in **YAHPO 
    :header-rows: 1
    :stub-columns: 1
 
+In `yahpo_gym`, there is a `Configuration` object for each **scenario**. 
+A list of all available scenarios can be obtained as follows:
+
+.. code-block:: python
+
+   from yahpo_gym.configuration import cfg, cfgs()
+   print(cfg())
 
 
 Instances
@@ -29,3 +36,12 @@ To provide an example, instance `168868` defines the `Task` a supervised classif
    :file: _static/instances.csv
    :header-rows: 1
    :stub-columns: 1
+
+A list of available instances can be obtained from the `instances` slot after instantiating the `BenchmarkSet`.
+
+.. code-block:: python
+
+   from yahpo_gym import BenchmarkSet
+   BenchmarkSet("lcbench").instances
+
+Users can now instantiate a `Benchmark` or `config` with this `<ID>`, e.g. using `cfg("<ID>")`.
