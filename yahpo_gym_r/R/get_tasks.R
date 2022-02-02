@@ -8,7 +8,8 @@
 #'   Version of the task set to get. Default is 0.
 #' @return
 #'  A data.frame containing a list of tasks.
-get_tasks = function(type, version = 0) {
+get_tasks = function(type, version = 0L) {
+    version = as.integer(version)
     gym = reticulate::import("yahpo_gym")
     gym$get_tasks$get_tasks(type, version)
 }
