@@ -81,8 +81,6 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
 
   return b
 
-
-
 def test_benchmarkset_lcbench():
   fidelity_config = {"epoch" : 50}
   test_instance = "3945"
