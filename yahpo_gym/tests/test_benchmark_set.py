@@ -88,10 +88,10 @@ def test_benchmarkset_lcbench():
   test_instance = "3945"
   b = test_benchmarkset_abstract("lcbench", test_instance, fidelity_config)
 
-# def test_benchmarkset_fcnet():
-#   fidelity_config = {"epoch" : 50}
-#   test_instance = "3945"
-#   b = test_benchmarkset_abstract("fcnet", test_instance, fidelity_config)
+def test_benchmarkset_fcnet():
+  fidelity_config = {"epoch" : 100}
+  test_instance = "fcnet_naval_propulsion"
+  b = test_benchmarkset_abstract("fcnet", test_instance, fidelity_config)
 
 def test_benchmarkset_nb301():
   fidelity_config = {"epoch" : 50}
