@@ -225,6 +225,9 @@ if __name__ == "__main__":
     [tfms_iaml_glmnet.update({k:tfms_chain([ContTransformerInt, ContTransformerRange])}) for k in ["nf"]]
     tfms_list.update({"iaml_glmnet":tfms_iaml_glmnet})
 
+    tfms_fcnet = {}  # FIXME:
+    tfms_list.update({"fcnet":tfms_fcnet})
+
     parser = argparse.ArgumentParser(description="Args for resnet tuning")
     parser.add_argument("--key", type=str, default="iaml_glmnet", help='Key of benchmark scenario, e.g., "iaml_glmnet"')
     parser.add_argument("--name", type=str, default="tune_iaml_glmnet_resnet", help='Name of the optuna study, e.g., "tune_iaml_glmnet_resnet"')
