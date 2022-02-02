@@ -46,11 +46,21 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
         self.n_models = ensemble.n_models
 
     def fit_one_cycle(self, n_epoch, lr_max=None, div=25., div_final=1e5, pct_start=0.25, wd=None, moms=None, cbs=None, reset_opt=False):
+        lr_maxes = np.linspace(0.5, 1.5, num = self.n_models) * lr_max  # for 3 models this is 0.5, 1, 1.5
         for i in range(self.n_models):
-            lr_max = [0.5, 1., 2.][i] * lr_max
-            print(f"Training ensemble model {i+1}/{self.n_models} with lr {lr_max.tolist()[0]}")
+            lr_max = float(lr_maxes[i])
+            print(f"Training ensemble model {i+1}/{self.n_models} with fit_one_cycle with lr {lr_max}")
             self.learners[i].fit_one_cycle(n_epoch, lr_max, div, div_final, pct_start, wd, moms, cbs, reset_opt)
 
+    def fit_flat_cos(self, n_epoch, lr=None, div_final=1e-5, pct_start=0.75, wd=None, cbs=None, reset_opt=False):
+        lrs = np.linspace(0.5, 1.5, num = self.n_models) * lr  # for 3 models this is 0.5, 1, 1.5
+        for i in range(self.n_models):
+            lr = float(lrs[i])
+            print(f"Training ensemble model {i+1}/{self.n_models} with fit_flat_cos with lr {lr}")
+            self.learners[i].fit_flat_cos(n_epoch, lr, div_final, pct_start, wd, cbs, reset_opt)
+
+    def fit_sgdr(self, n_cycles, cycle_len, lr_max=None, cycle_mult=2, cbs=None, reset_opt=False, wd=None):
+        raise NotImplementedError
 
 if __name__ == '__main__':
     import torch.nn as nn
