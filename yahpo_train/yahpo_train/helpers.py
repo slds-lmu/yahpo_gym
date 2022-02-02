@@ -2,10 +2,26 @@ from yahpo_gym import benchmark_set
 from yahpo_gym.benchmarks import lcbench, rbv2, nasbench_301, fcnet, taskset, iaml
 from yahpo_gym.configuration import cfg
 from yahpo_train.metrics import *
+import numpy as np
 import pandas as pd
 import torch
 
-def get_set_metrics(key, set="test", model=None, instance=None):
+def chunk(n, size):
+    m = n // size
+    result = []
+    lower = 0
+    upper = 0
+    for i in range(0, m - 1):
+        lower = upper
+        upper = lower + size
+        result.append([lower, upper])
+    lower = upper
+    upper = n
+    result.append([lower, upper])
+    return result
+
+def get_set_metrics(key, set="test", model=None, instance=None, chunk_size=10000):
+    # NOTE: this is somewhat slow because we first map the points to the right format for the onnx model and then use the onnx model for prediction
     bench = benchmark_set.BenchmarkSet(key)
     if model is not None:
         bench.config.config.update({"model":model})
@@ -24,10 +40,17 @@ def get_set_metrics(key, set="test", model=None, instance=None):
         x = df[bench.config.hp_names]
         truth = df[bench.config.y_names]
 
-    points = x.apply(lambda point: point[~point.isna()].to_dict(), axis=1, result_type=None).tolist()
-    response = pd.DataFrame(bench.objective_function(points))
+    n = x.shape[0]
+    chunks = chunk(n, chunk_size)
+    response = np.zeros(shape=(n, len(bench.config.y_names)))  # create response array in memory and fill rows by chunk results
+    for i in range(0, len(chunks)):
+        indices = chunks[i]
+        points = x[indices[0]:indices[1]].apply(lambda point: point[~point.isna()].to_dict(), axis=1, result_type=None).tolist()
+        result = pd.DataFrame(bench.objective_function(points)).values
+        response[indices[0]:indices[1]] = result
+
     truth_tensor = torch.tensor(truth.values)
-    response_tensor = torch.tensor(response.values)
+    response_tensor = torch.tensor(response)
 
     metrics_dict = {}
     metrics = {"mae":mae, "r2":r2, "spearman":spearman}
