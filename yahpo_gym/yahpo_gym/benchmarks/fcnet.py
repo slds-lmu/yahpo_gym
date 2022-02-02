@@ -7,7 +7,7 @@ _fcnet_dict = {
     'cont_names': ['epoch', 'replication','batch_size','dropout_1','dropout_2','init_lr', 'n_units_1','n_units_2'],
     'cat_names': ['task', 'activation_fn_1' , 'activation_fn_2', 'lr_schedule'],
     'instance_names': 'task',
-    'fidelity_params': ['epoch', 'replication'],
+    'fidelity_params': ['epoch'],
     'runtime_name': 'runtime',
     'citation': 'S. Falkner, A. Klein, and F. Hutter, “BOHB: Robust and Efficient Hyperparameter Optimization at Scale,” in International Conference on Machine Learning, pp. 1437–1446, PMLR, July 2018.'
 }

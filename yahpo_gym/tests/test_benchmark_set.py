@@ -41,11 +41,11 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
 
   optspace =  b.get_opt_space(instance = test_instance, drop_fidelity_params = False)
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
-  assert len(optspace)  == len(b.config.hp_names)
+  assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names)
 
   optspace =  b.get_opt_space(instance = test_instance)
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
-  assert len(optspace)  == len(b.config.hp_names) - len(b.get_fidelity_space())
+  assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names) - len(b.get_fidelity_space().get_hyperparameter_names())
 
   xs = optspace.sample_configuration()
   with pytest.raises(Exception) as info:
@@ -87,7 +87,7 @@ def test_benchmarkset_lcbench():
   b = test_benchmarkset_abstract("lcbench", test_instance, fidelity_config)
 
 def test_benchmarkset_fcnet():
-  fidelity_config = {"epoch" : 100}
+  fidelity_config = {"epoch" : 100, "replication": 1}
   test_instance = "fcnet_naval_propulsion"
   b = test_benchmarkset_abstract("fcnet", test_instance, fidelity_config)
 
