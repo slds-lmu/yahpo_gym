@@ -30,10 +30,15 @@ def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=Tr
     if noisy:
         f = Ensemble(ResNet, n_models=3, dls=dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
         l = SurrogateEnsembleLearner(dls_train, f, loss_func=nn.MSELoss(reduction="mean"), metrics=nn.MSELoss)
+        # FIXME: this is ugly, we probably should overload the metric setter and getter for the SurrogateEnsembleLearner
+        l.metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
+        for i in range(len(l.learners)):
+            l.learners[i].metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
     else :
         f = ResNet(dls_train, embds_dbl=embds_dbl, embds_tgt=embds_tgt, d=d, d_hidden_factor=d_hidden_factor, n_layers=n_layers, hidden_dropout=hidden_dropout, residual_dropout=residual_dropout)
         l = SurrogateTabularLearner(dls_train, f, loss_func=nn.MSELoss(reduction="mean"), metrics=nn.MSELoss)
-    l.metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
+        l.metrics = [AvgTfedMetric(mae), AvgTfedMetric(r2), AvgTfedMetric(spearman), AvgTfedMetric(napct)]
+
     if mixup:
         l.add_cb(MixHandler)
     l.add_cb(EarlyStoppingCallback(patience=10))

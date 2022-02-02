@@ -1,4 +1,5 @@
 import typing as ty
+import copy
 
 import torch
 import torch.nn as nn
@@ -41,26 +42,47 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
     "`Ensemble Learner` for tabular data"
 
     def __init__(self, dls, ensemble: ty.List[nn.Module], **kwargs):
-        super().__init__(dls, ensemble, **kwargs)
         self.learners = [SurrogateTabularLearner(dls, model, **kwargs) for model in ensemble.models]
+        # remove all cbs because they are added and removed if needed during fits from the super class, see below
+        for i in range(0, len(self.learners)):
+            self.learners[i].remove_cbs(self.learners[i].cbs)
         self.n_models = ensemble.n_models
+        super().__init__(dls, ensemble, **kwargs)
 
-    def fit_one_cycle(self, n_epoch, lr_max=None, div=25., div_final=1e5, pct_start=0.25, wd=None, moms=None, cbs=None, reset_opt=False):
-        lr_maxes = np.linspace(0.5, 1.5, num = self.n_models) * lr_max  # for 3 models this is 0.5, 1, 1.5
+    def fit_one_cycle(self, n_epoch, lr_max=None, div=25., div_final=1e5, pct_start=0.25, wd=None, moms=None, cbs=None, reset_opt=False, lr_alpha=0.1):
+        lr_maxes = np.linspace(1 - lr_alpha, 1 + lr_alpha, num = self.n_models) * lr  # for 3 models this is 0.9, 1, 1.1
         for i in range(self.n_models):
             lr_max = float(lr_maxes[i])
+            self.learners[i].add_cbs(self.cbs)
             print(f"Training ensemble model {i+1}/{self.n_models} with fit_one_cycle with lr {lr_max}")
             self.learners[i].fit_one_cycle(n_epoch, lr_max, div, div_final, pct_start, wd, moms, cbs, reset_opt)
+            self.learners[i].remove_cbs(self.cbs)
 
-    def fit_flat_cos(self, n_epoch, lr=None, div_final=1e-5, pct_start=0.75, wd=None, cbs=None, reset_opt=False):
-        lrs = np.linspace(0.5, 1.5, num = self.n_models) * lr  # for 3 models this is 0.5, 1, 1.5
+    def fit_flat_cos(self, n_epoch, lr=None, div_final=1e-5, pct_start=0.75, wd=None, cbs=None, reset_opt=False, lr_alpha=0.1):
+        lrs = np.linspace(1 - lr_alpha, 1 + lr_alpha, num = self.n_models) * lr  # for 3 models this is 0.9, 1, 1.1
         for i in range(self.n_models):
             lr = float(lrs[i])
+            self.learners[i].add_cbs(self.cbs)
             print(f"Training ensemble model {i+1}/{self.n_models} with fit_flat_cos with lr {lr}")
             self.learners[i].fit_flat_cos(n_epoch, lr, div_final, pct_start, wd, cbs, reset_opt)
+            self.learners[i].remove_cbs(self.cbs)
 
     def fit_sgdr(self, n_cycles, cycle_len, lr_max=None, cycle_mult=2, cbs=None, reset_opt=False, wd=None):
         raise NotImplementedError
+
+    # the following add_cb and remove_cb do not work because cb points to the learner itself
+    # instead we handle cbs in the fitting calls, see above
+    # add a cb by adding it to each learner
+    #def add_cb(self, cb):
+    #    for i in range(len(self.learners)):
+    #        self.learners[i].add_cb(cb)
+    #    return self
+
+    ## remove a cb by removing it from each learner
+    #def remove_cb(self, cb):
+    #    for i in range(len(self.learners)):
+    #        self.learners[i].remove_cb(cb)
+    #    return self
 
 if __name__ == '__main__':
     import torch.nn as nn
@@ -79,6 +101,4 @@ if __name__ == '__main__':
     l.add_cb(MixHandler(alpha=.1))
     l.fit_one_cycle(10, 1e-4)
     l.export_onnx(cfg, 'cuda:0', suffix='noisy')
-
-
 
