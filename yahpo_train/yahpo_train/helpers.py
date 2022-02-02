@@ -1,5 +1,5 @@
 from yahpo_gym import benchmark_set
-from yahpo_gym.benchmarks import lcbench, rbv2, nasbench_301, fcnet, taskset, iaml
+from yahpo_gym.benchmarks import lcbench, nb301, rbv2, fcnet, taskset, iaml
 from yahpo_gym.configuration import cfg
 from yahpo_train.metrics import *
 import numpy as np

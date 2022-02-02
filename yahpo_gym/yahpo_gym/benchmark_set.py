@@ -185,6 +185,8 @@ class BenchmarkSet():
             hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
         if drop_fidelity_params:
             fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
+            fidelity_params_idx.sort()
+            fidelity_params_idx.reverse()
             for idx in fidelity_params_idx:
                 del hps[idx]
         cnds = csn.get_conditions()

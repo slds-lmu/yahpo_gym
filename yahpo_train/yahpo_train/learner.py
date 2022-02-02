@@ -123,10 +123,10 @@ class SurrogateTabularLearner(Learner):
 if __name__ == '__main__':
     import torch.nn as nn
     from yahpo_gym.configuration import cfg
-    from yahpo_gym.benchmarks import lcbench
+    from yahpo_gym.benchmarks import fcnet
     from yahpo_train.models import FFSurrogateModel, ResNet
-    cfg = cfg("nb301")
-    dls = dl_from_config(cfg, nrows=10000)
+    cfg = cfg("fcnet")
+    dls = dl_from_config(cfg)
 
     print('Resnet:')
     f = ResNet(dls)
@@ -135,9 +135,9 @@ if __name__ == '__main__':
     l.fit_one_cycle(5, 1e-4)
     l.export_onnx(cfg, 'cuda:0', suffix='resnet')
 
-    print('Feed Forward:')
-    f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
-    l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
-    l.add_cb(MixHandler)
-    l.fit_one_cycle(5, 1e-4)
-    l.export_onnx(cfg, 'cuda:0', suffix='ff')
+    # print('Feed Forward:')
+    # f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
+    # l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
+    # l.add_cb(MixHandler)
+    # l.fit_one_cycle(5, 1e-4)
+    # l.export_onnx(cfg, 'cuda:0', suffix='ff')
