@@ -8,6 +8,8 @@ if __name__ == "__main__":
     from yahpo_train.helpers import generate_all_test_set_metrics
     from functools import partial
 
+    study_path = "/home/ru84tad2/"  # FIXME: needs adaption
+
     # tfms_list holds for each benchmark scenario (key) optional transformers that should be fixed and not tuned
     # taken from tune_resnet.py
 
@@ -70,7 +72,7 @@ if __name__ == "__main__":
         if !cuda_available:
             raise ValueError("No cuda device available. You probably do not want to fit on CPUs."
         
-        storage_name = "sqlite:///{}.db".format("tune_" + key + "_resnet_test")
+        storage_name = "sqlite:///{}.db".format(study_path + "tune_" + key + "_resnet_test")
         study = optuna.load_study("tune_" + key + "_resnet_test", storage_name)
         best_params = study.best_params
         with open(bench.config.config_path + "/best_params_resnet.json", "w") as f:
@@ -78,7 +80,11 @@ if __name__ == "__main__":
         
         # tfms see tfms_list above
         l = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), export=False, device="cuda:0")
-        l.export_onnx(cfg(key), device=torch, suffix="resnet")
+        l.export_onnx(cfg(key), device="cuda0", suffix="resnet")
+
+        l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0")
+        l_noisy.export_onnx(cfg(key), device="cuda0"), suffix="resnet_noisy")
+
         
         generate_all_test_set_metrics(key, model="new_model_resnet.onnx", save_to_csv=True)
 
