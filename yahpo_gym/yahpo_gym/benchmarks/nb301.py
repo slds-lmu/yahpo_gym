@@ -1,6 +1,6 @@
 from yahpo_gym.configuration import config_dict, cfg
 
-_nasbench_301_dict = {
+_nb301_dict = {
     'config_id' : 'nb301',
     'y_names' : ['val_accuracy', 'runtime'],
     'y_minimize' : [False, True],
@@ -18,4 +18,4 @@ _nasbench_301_dict = {
     'drop_predict': 'dataset',
     'citation' : 'J. Siems, L. Zimmer, A. Zela, J. Lukasik, M. Keuper, and F. Hutter, “NAS-Bench-301 and the Case for Surrogate Benchmarks for Neural Architecture Search.” arXiv:2008.09777, 2020.'
 }
-config_dict.update({'nb301': _nasbench_301_dict})
+config_dict.update({'nb301': _nb301_dict})
