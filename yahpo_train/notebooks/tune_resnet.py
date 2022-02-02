@@ -226,10 +226,10 @@ if __name__ == "__main__":
     tfms_list.update({"iaml_glmnet":tfms_iaml_glmnet})
 
     parser = argparse.ArgumentParser(description="Args for resnet tuning")
-    parser.add_argument("--key", type=str, default="iaml_glmnet", help="Key of benchmark scenario, e.g., "iaml_glmnet"")    
-    parser.add_argument("--name", type=str, default="tune_iaml_glmnet_resnet", help="Name of the optuna study, e.g., "tune_iaml_glmnet_resnet"")
-    parser.add_argument("--trials", type=int, default=0, help="Number of optuna trials")  # by default we run until terminated externally
-    parser.add_argument("--walltime", type=int, default=0, help="Walltime for optuna timeout in seconds") # by default we run until terminated externally
+    parser.add_argument("--key", type=str, default="iaml_glmnet", help='Key of benchmark scenario, e.g., "iaml_glmnet"')    
+    parser.add_argument("--name", type=str, default="tune_iaml_glmnet_resnet", help='Name of the optuna study, e.g., "tune_iaml_glmnet_resnet"')
+    parser.add_argument("--trials", type=int, default=0, help='Number of optuna trials')  # by default we run until terminated externally
+    parser.add_argument("--walltime", type=int, default=0, help='Walltime for optuna timeout in seconds') # by default we run until terminated externally
     args = parser.parse_args()
 
     cuda_available = torch.cuda.is_available()
