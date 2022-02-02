@@ -86,7 +86,7 @@ if __name__ == "__main__":
         l.export_onnx(cfg(key), device="cuda:0", suffix="resnet")
 
         l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0")
-        l_noisy.export_onnx(cfg(key), device="cuda:0"), suffix="resnet_noisy")
+        l_noisy.export_onnx(cfg(key), device="cuda:0", suffix="resnet_noisy")
         
         generate_all_test_set_metrics(key, model="new_model_resnet.onnx", save_to_csv=True)
 
