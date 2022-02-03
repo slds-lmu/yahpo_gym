@@ -50,18 +50,18 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
         super().__init__(dls, ensemble, **kwargs)
 
     def fit_one_cycle(self, n_epoch, lr_max=None, div=25., div_final=1e5, pct_start=0.25, wd=None, moms=None, cbs=None, reset_opt=False, lr_alpha=0.1):
-        lr_maxes = np.linspace(1 - lr_alpha, 1 + lr_alpha, num = self.n_models) * lr  # for 3 models this is 0.9, 1, 1.1
+        #lr_maxes = np.linspace(1 - lr_alpha, 1 + lr_alpha, num = self.n_models) * lr  # for 3 models this is 0.9, 1, 1.1
         for i in range(self.n_models):
-            lr_max = float(lr_maxes[i])
+            #lr_max = float(lr_maxes[i])
             self.learners[i].add_cbs(self.cbs)
             print(f"Training ensemble model {i+1}/{self.n_models} with fit_one_cycle with lr {lr_max}")
             self.learners[i].fit_one_cycle(n_epoch, lr_max, div, div_final, pct_start, wd, moms, cbs, reset_opt)
             self.learners[i].remove_cbs(self.cbs)
 
     def fit_flat_cos(self, n_epoch, lr=None, div_final=1e-5, pct_start=0.75, wd=None, cbs=None, reset_opt=False, lr_alpha=0.1):
-        lrs = np.linspace(1 - lr_alpha, 1 + lr_alpha, num = self.n_models) * lr  # for 3 models this is 0.9, 1, 1.1
+        #lrs = np.linspace(1 - lr_alpha, 1 + lr_alpha, num = self.n_models) * lr  # for 3 models this is 0.9, 1, 1.1
         for i in range(self.n_models):
-            lr = float(lrs[i])
+            #lr = float(lrs[i])
             self.learners[i].add_cbs(self.cbs)
             print(f"Training ensemble model {i+1}/{self.n_models} with fit_flat_cos with lr {lr}")
             self.learners[i].fit_flat_cos(n_epoch, lr, div_final, pct_start, wd, cbs, reset_opt)
