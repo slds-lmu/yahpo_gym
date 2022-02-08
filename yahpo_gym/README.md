@@ -26,24 +26,28 @@ Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to
 
 **Overview over problems**
 
-|     | scenario     | space   | n_dims | n_targets        | fidelity       | n_problems | status |
-|:----|:-------------|:--------|-------:|:-----------------|:---------------|-----------:|:-------|
-| 1   | rbv2_super   | Mix+Dep |     38 | 6:perf(4)+rt+pt  | trainsize+repl |         89 |        |
-| 2   | rbv2_svm     | Mix+Dep |      6 | 6:perf(4)+rt+pt  | trainsize+repl |         96 |        |
-| 3   | rbv2_rpart   | Mix     |      5 | 6:perf(4)+rt+pt  | trainsize+repl |        101 |        |
-| 4   | rbv2_aknn    | Mix     |      6 | 6:perf(4)+rt+pt  | trainsize+repl |         99 |        |
-| 5   | rbv2_glmnet  | Mix     |      3 | 6:perf(4)+rt+pt  | trainsize+repl |         98 |        |
-| 6   | rbv2_ranger  | Mix+Dep |      8 | 6:perf(4)+rt+pt  | trainsize+repl |        114 |        |
-| 7   | rbv2_xgboost | Mix+Dep |     14 | 6:perf(4)+rt+pt  | trainsize+repl |        109 |        |
-| 8   | lcbench      | Numeric |      7 | 6:perf(5)+rt     | epoch          |         35 |        |
-| 9   | nb301        | Cat+Dep |     34 | 2:perf(1)+rt     | epoch          |          1 |        |
+|Scenario     | #HPs| #Targets| #Instances|Space      |Fidelity |
+|:------------|----:|--------:|----------:|:----------|:--------|
+|lcbench      |    9|        6|         35|Numeric    |epoch    |
+|fcnet        |   12|        4|          4|Mixed      |epoch    |
+|nb301        |   35|        2|          1|Mixed+Deps |epoch    |
+|rbv2_svm     |    9|        6|         96|Mixed+Deps |frac     |
+|rbv2_ranger  |   11|        6|        114|Mixed+Deps |frac     |
+|rbv2_rpart   |    8|        6|        101|Mixed      |frac     |
+|rbv2_glmnet  |    6|        6|         98|Mixed      |frac     |
+|rbv2_xgboost |   17|        6|        109|Mixed+Deps |frac     |
+|rbv2_aknn    |    9|        6|         99|Mixed      |frac     |
+|rbv2_super   |   41|        6|         89|Mixed+Deps |frac     |
+|iaml_ranger  |   10|       12|          4|Mixed+Deps |frac     |
+|iaml_rpart   |    6|       12|          4|Numeric    |frac     |
+|iaml_glmnet  |    4|       12|          4|Numeric    |frac     |
+|iaml_xgboost |   15|       12|          4|Mixed+Deps |frac     |
+|iaml_super   |   30|       12|          4|Mixed+Deps |frac     |
 
-where for **n\_targets** (\#number):
+with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
+The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
+Search spaces can be continuous, mixed and have dependencies (Deps). 
 
--   perf = performance measure
--   ms = model\_size
--   rt = runtime
--   pt = predicttime
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
 

@@ -34,6 +34,7 @@ class Configuration():
         self.instance_names = self.config['instance_names']
         self.runtime_name = self.config['runtime_name']
         self.drop_predict = self.config['drop_predict']
+        self.hierarchical = self.config['hierarchical']
         
     def get_path(self, key: str):
         return f'{self.config_path}/{self.config[key]}'
@@ -74,7 +75,8 @@ class Configuration():
             'runtime_name': '',
             'model_old': 'model.onnx',
             'drop_predict': [], 
-            'instances': []
+            'instances': [],
+            'hierarchical': False
         }
 
     @property
