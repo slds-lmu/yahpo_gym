@@ -2,6 +2,9 @@ if __name__ == "__main__":
 
     import optuna
     import json
+    import torch
+    import random
+    import numpy as np
     from tune_resnet import *
     from yahpo_gym import benchmark_set
     from yahpo_train.cont_scalers import *
@@ -70,9 +73,12 @@ if __name__ == "__main__":
     
     keys = ["lcbench", "nb301", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet"]
     for key in keys:
+        torch.manual_seed(0)
+        random.seed(0)
+        np.random.seed(0)
         bs = 10240
         if key == "iaml_glmnet":
-            bs = 100
+            bs = 128
         bench = benchmark_set.BenchmarkSet(key)
         cuda_available = torch.cuda.is_available()
         if not cuda_available:
