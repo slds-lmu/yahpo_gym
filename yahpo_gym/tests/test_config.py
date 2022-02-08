@@ -1,7 +1,7 @@
 import pytest
 
 def test_config():
-  from yahpo_gym.configuration import *
+  import yahpo_gym.configuration as cfg
   _test_dict = {
       'config_id' : 'TEST_BENCHMARK',
       'y_names' : ['valid_loss', 'runtime','n_params'],
@@ -13,7 +13,7 @@ def test_config():
       'runtime_name': 'runtime'
   }
 
-  cc = Configuration(_test_dict)
+  cc = cfg.Configuration(_test_dict)
 
   assert cc.config_id == 'TEST_BENCHMARK'
   assert cc.y_names == ['valid_loss', 'runtime','n_params']
@@ -24,4 +24,9 @@ def test_config():
   assert cc.runtime_name == 'runtime'
 
   # properties
-  assert cc.hp_names == (['epoch', 'batch_size', 'dropout_1'] + ['task', 'lr_schedule'])
+  assert cc.hp_names == (['task', 'lr_schedule'] + ['epoch', 'batch_size', 'dropout_1'])
+  
+  
+def test_print_cfg_table():
+  from yahpo_gym.configuration import cfg
+  print(cfg())

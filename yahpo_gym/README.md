@@ -1,3 +1,10 @@
+# YAHPO Gym (python)
+[![Unittests](https://github.com/pfistfl/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://pfistfl.github.io/yahpo_gym/) 
+[![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
+[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
+
+
 ### What is YAHPO GYM? 
 
 ---
@@ -15,6 +22,7 @@ across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g. [HpBandSter](https://github.com/automl/HpBandSter).
 
 ![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/results.png?raw=true)
+
 
 **Overview over problems**
 
@@ -36,6 +44,8 @@ where for **n\_targets** (\#number):
 -   ms = model\_size
 -   rt = runtime
 -   pt = predicttime
+
+The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
 
 ---
 
@@ -134,7 +144,7 @@ class lcbench(Worker):
         """
 
         config.update({"epoch": int(np.round(budget))})  # update epoch
-        result = bench.objective_function(config)  # evaluate
+        result = bench.objective_function(config)[0]  # evaluate
 
         time.sleep(self.sleep_interval)
 

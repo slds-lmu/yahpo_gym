@@ -37,11 +37,26 @@ b$instances
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{py_instance}}{[`BenchmarkSet`] \cr
-A python `yahpo_gym.BenchmarkSet`.}
-
 \item{\code{id}}{`character` \cr
 The scenario identifier.}
+
+\item{\code{onnx_session}}{`onnxruntime.InferenceSession` \cr
+A session to use for the predict. If `NULL` a new session is initialized.}
+
+\item{\code{active_session}}{`logical` \cr
+Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.}
+
+\item{\code{download}}{`logical` \cr
+Download data in case it is not available?}
+
+\item{\code{multithread}}{`logical` \cr
+Should the ONNX session be allowed to leverage multithreading capabilities?}
+
+\item{\code{check}}{`logical` \cr
+Check whether values coincide with `domain`.}
+
+\item{\code{noisy}}{`logical` \cr
+Whether noisy surrogates should be used.}
 }
 \if{html}{\out{</div>}}
 }
@@ -68,6 +83,9 @@ A [`paradox::ParamSet`] describing the output domain.}
 
 \item{\code{quant}}{`numeric` \cr
 Multiply runtime by this factor. Defaults to 0.01.}
+
+\item{\code{py_instance}}{[`BenchmarkSet`] \cr
+A python `yahpo_gym.BenchmarkSet`.}
 }
 \if{html}{\out{</div>}}
 }
@@ -75,7 +93,9 @@ Multiply runtime by this factor. Defaults to 0.01.}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{BenchmarkSet$new()}}
+\item \href{#method-print}{\code{BenchmarkSet$print()}}
 \item \href{#method-get_objective}{\code{BenchmarkSet$get_objective()}}
+\item \href{#method-get_search_space}{\code{BenchmarkSet$get_search_space()}}
 \item \href{#method-get_opt_space_py}{\code{BenchmarkSet$get_opt_space_py()}}
 \item \href{#method-subset_codomain}{\code{BenchmarkSet$subset_codomain()}}
 \item \href{#method-clone}{\code{BenchmarkSet$clone()}}
@@ -92,7 +112,9 @@ Initialize a new object
   onnx_session = NULL,
   active_session = FALSE,
   download = FALSE,
-  check = FALSE
+  multithread = FALSE,
+  check = FALSE,
+  noisy = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -112,11 +134,27 @@ Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialize
 \item{\code{download}}{`logical` \cr
 Download the required data on instantiation? Default `FALSE`.}
 
+\item{\code{multithread}}{`logical` \cr
+Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.}
+
 \item{\code{check}}{`logical` \cr
 Check inputs for validity before passing to surrogate model? Default `FALSE`.}
+
+\item{\code{noisy}}{`logical` \cr
+Should noisy surrogates be used instead of deterministic ones?}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
+\subsection{Method \code{print()}}{
+Printer with some additional information.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$print()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_objective"></a>}}
@@ -124,20 +162,41 @@ Check inputs for validity before passing to surrogate model? Default `FALSE`.}
 \subsection{Method \code{get_objective()}}{
 Get the objective function
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(instance, check_values = FALSE, timed = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_objective(
+  instance,
+  multifidelity = TRUE,
+  check_values = TRUE,
+  timed = FALSE,
+  logging = FALSE,
+  multithread = FALSE,
+  seed = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{instance}}{[`instance`] \cr
+\item{\code{instance}}{[`character`] \cr
 A valid instance. See `instances`.}
 
+\item{\code{multifidelity}}{(`logical`) \cr
+Should the objective function respect multifidelity?
+If `FALSE`, fidelity params are set as constants with their max fidelity in the domain.}
+
 \item{\code{check_values}}{(`logical`) \cr
-Should values be checked by bbotk? Initialized to `FALSE`.}
+Should values be checked by bbotk? Initialized to `TRUE`.}
 
 \item{\code{timed}}{(`logical`) \cr
 Should function evaluation simulate runtime? Initialized to `FALSE`.}
+
+\item{\code{logging}}{(`logical`) \cr
+Should function evaluationd be logged? Initialized to `FALSE`.}
+
+\item{\code{multithread}}{`logical` \cr
+Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.}
+
+\item{\code{seed}}{`integer` \cr
+Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `NULL` (no seed).}
 }
 \if{html}{\out{</div>}}
 }
@@ -147,19 +206,27 @@ A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_opt_space_py"></a>}}
-\if{latex}{\out{\hypertarget{method-get_opt_space_py}{}}}
-\subsection{Method \code{get_opt_space_py()}}{
-Get Optimization ConfigSpace
+\if{html}{\out{<a id="method-get_search_space"></a>}}
+\if{latex}{\out{\hypertarget{method-get_search_space}{}}}
+\subsection{Method \code{get_search_space()}}{
+Get Optimization Search Space
+
+A [`paradox::ParamSet`] describing the search_space used during optimization.
+Typically, this is the same as the domain but, e.g., with some parameters on log scale.
+This is the same space as the one returned by `get_opt_space_py` (with the instance param dropped).
+Typically this search_space should be provided when creating an [bbotk::OptimInstance].
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance, drop_fidelity_params = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_search_space(
+  drop_instance_param = TRUE,
+  drop_fidelity_params = FALSE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{instance}}{[`instance`] \cr
-A valid instance. See `instances`.}
+\item{\code{drop_instance_param}}{[`logical`] \cr
+Should the instance param (e.g., task id) be dropped? Defaults to `TRUE`.}
 
 \item{\code{drop_fidelity_params}}{[`logical`] \cr
 Should fidelity params be dropped? Defaults to `FALSE`.}
@@ -171,10 +238,34 @@ A [`paradox::ParamSet`] containing the search space to optimize over.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_opt_space_py"></a>}}
+\if{latex}{\out{\hypertarget{method-get_opt_space_py}{}}}
+\subsection{Method \code{get_opt_space_py()}}{
+Get Optimization ConfigSpace
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance, drop_fidelity_params = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{instance}}{[`character`] \cr
+A valid instance. See `instances`.}
+
+\item{\code{drop_fidelity_params}}{[`logical`] \cr
+Should fidelity params be dropped? Defaults to `TRUE`.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A configspace containing the search space to optimize over.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset_codomain"></a>}}
 \if{latex}{\out{\hypertarget{method-subset_codomain}{}}}
 \subsection{Method \code{subset_codomain()}}{
-Subset the codomain
+Subset the codomain. Sets a new domain.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$subset_codomain(keep)}\if{html}{\out{</div>}}
 }

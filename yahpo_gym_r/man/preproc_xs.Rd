@@ -4,7 +4,14 @@
 \alias{preproc_xs}
 \title{Preprocess r object for use with python's YAHPO GYM}
 \usage{
-preproc_xs(xs, ...)
+preproc_xs(xss, ...)
+}
+\arguments{
+\item{...}{`any` \cr
+Named params, appended to `xs`.}
+
+\item{xs}{`list` of `list` \cr
+List of hyperparams}
 }
 \description{
 Preprocess r object for use with python's YAHPO GYM
