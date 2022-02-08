@@ -70,6 +70,9 @@ if __name__ == "__main__":
     
     keys = ["lcbench", "nb301", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet"]
     for key in keys:
+        bs = 10240
+        if key == "iaml_glmnet":
+            bs = 100
         bench = benchmark_set.BenchmarkSet(key)
         cuda_available = torch.cuda.is_available()
         if not cuda_available:
@@ -82,13 +85,14 @@ if __name__ == "__main__":
             json.dump(best_params, f)
         
         # tfms see tfms_list above
-        l = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), export=False, device="cuda:0")
+        l = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), export=False, device="cuda:0", bs=bs)
         l.export_onnx(cfg(key), device="cuda:0", suffix="resnet")
 
-        l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0")
+        l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0", bs = bs)
         l_noisy.export_onnx(cfg(key), device="cuda:0", suffix="resnet_noisy")
 
     #keys = ["lcbench", "nb301", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet"]
     #for key in keys:
+    #    dl_from_config(cfg(key), bs=10240, frac=1., save_df_test=True, save_encoding=True)
     #    generate_all_test_set_metrics(key, model="new_model_resnet.onnx", save_to_csv=True)
         
