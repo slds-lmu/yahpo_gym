@@ -24,15 +24,14 @@ class lcbench(Worker):
     def compute(self, config, budget, **kwargs):
         fidelity_param_id = self.fidelity_param_id
         bench = self.bench
-        # FIXME: rounding of budget?
-        config.update({fidelity_param_id: budget})
-        y = bench.objective_function(config)
+        config.update({fidelity_param_id: int(round(budget))})
+        y = bench.objective_function(config, logging=True)[0]
 
         result = {
-            "loss": - float(y.get("val_accuracy")), # FIXME: should be changed, see #21, #20
+            "loss": - float(y.get("val_accuracy")),
             "info": {
                 "cost": float(y.get("time")),
-                "budget": budget
+                "budget": int(round(budget))
             }
         }
         
@@ -75,5 +74,6 @@ hb = HyperBand(
 results_hb = hb.run()
 hb.shutdown()
 
+w.shutdown()
 NS.shutdown()
 

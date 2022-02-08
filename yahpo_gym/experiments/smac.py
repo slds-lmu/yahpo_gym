@@ -17,17 +17,17 @@ max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
 
 def tae_runner(configuration, budget):
     X = configuration.get_dictionary()
-    # FIXME: rounding of budget?
-    X.update({fidelity_param_id: budget})
-    y = bench.objective_function(X)
+    X.update({fidelity_param_id: int(round(budget))})
+    y = bench.objective_function(X, logging=True)[0]
 
-    return - float(y.get("val_accuracy"))  # FIXME: should be changed, see #21, #20
+    return - float(y.get("val_accuracy"))
 
 scenario = Scenario({
     'run_obj': 'quality',
-    'ta_run_limit': 100,
+    'ta_run_limit': 3 * 52,  # limit given in terms of times full fidelity
     'cs': opt_space,
     'deterministic': 'true',
+    'num_workers': 1
 })
 
 intensifier_kwargs = {'initial_budget': min_budget, 'max_budget': max_budget, 'eta': 3}
@@ -44,16 +44,17 @@ results_mf = smac4mf.get_trajectory()
 def tae_runner_max_budget(configuration):
     X = configuration.get_dictionary()
     # FIXME: rounding of budget?
-    X.update({fidelity_param_id: max_budget})
-    y = bench.objective_function(X)
+    X.update({fidelity_param_id: int(round(max_budget))})
+    y = bench.objective_function(X, logging=True)[0]
 
-    return - float(y.get("val_accuracy"))  # FIXME: should be changed, see #21, #20
+    return - float(y.get("val_accuracy"))
 
 scenario = Scenario({
     'run_obj': 'quality',
-    'ta_run_limit': 100,
+    'ta_run_limit': 10,  # limit given in terms of evals
     'cs': opt_space,
     'deterministic': 'true',
+    'num_workers': 1
 })
 
 smac4hpo = SMAC4HPO(

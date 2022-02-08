@@ -19,10 +19,10 @@ def dehb_target_function(configuration, budget, **kwargs):
     X = configuration.get_dictionary()
     # FIXME: rounding of budget?
     X.update({fidelity_param_id: budget})
-    y = bench.objective_function(X)
+    y = bench.objective_function(X)[0]
 
     result = {
-        "fitness": - float(y.get("val_accuracy")),  # FIXME: should be changed, see #21, #20
+        "fitness": - float(y.get("val_accuracy")),
         "cost": float(y.get("time")),
         "info": {
             "budget": budget
