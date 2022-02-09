@@ -16,6 +16,7 @@ _nb301_dict = {
     'instance_names': None,
     'instances' : ['CIFAR10'],
     'drop_predict': 'dataset',
-    'citation' : 'J. Siems, L. Zimmer, A. Zela, J. Lukasik, M. Keuper, and F. Hutter, “NAS-Bench-301 and the Case for Surrogate Benchmarks for Neural Architecture Search.” arXiv:2008.09777, 2020.'
+    'citation' : 'J. Siems, L. Zimmer, A. Zela, J. Lukasik, M. Keuper, and F. Hutter, “NAS-Bench-301 and the Case for Surrogate Benchmarks for Neural Architecture Search.” arXiv:2008.09777, 2020.',
+    'hierarchical': True
 }
 config_dict.update({'nb301': _nb301_dict})
