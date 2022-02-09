@@ -62,7 +62,7 @@ class Configuration():
             'basedir': local_config.data_path,
             'download_url': local_config.download_url,
             'config_id': '',
-            'model': 'new_model.onnx',
+            'model': 'new_model_resnet.onnx',
             'dataset': 'data.csv',
             'test_dataset': 'test_data.csv',
             'config_space': 'config_space.json',
