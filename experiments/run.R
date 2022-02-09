@@ -8,12 +8,12 @@ packages = c("data.table", "mlr3misc", "mlr3hyperband")
 # FIXME: actual track runtime of algo + predicted runtime as walltime?
 #        especially for smac difficult because the archive is logged post hoc
 
-#reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
-reg = makeExperimentRegistry(file.dir = NA)
+reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
+#reg = makeExperimentRegistry(file.dir = NA)
 saveRegistry(reg)
 
 hb_wrapper = function(job, data, instance, ...) {
-  reticulate::use_condaenv("yahpo_gym", required = TRUE)
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
@@ -27,7 +27,7 @@ hb_wrapper = function(job, data, instance, ...) {
   n_iterations = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * (max(schedule$bracket) + 3)
   minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
-  py_run_file("hb_bohb.py")
+  py_run_file("hb_bohb_wrapper.py")
   res = py$run_hb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_iterations = n_iterations, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
@@ -40,7 +40,7 @@ hb_wrapper = function(job, data, instance, ...) {
 }
 
 bohb_wrapper = function(job, data, instance, ...) {
-  reticulate::use_condaenv("yahpo_gym", required = TRUE)
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
@@ -54,7 +54,7 @@ bohb_wrapper = function(job, data, instance, ...) {
   n_iterations = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * (max(schedule$bracket) + 3)
   minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
-  py_run_file("hb_bohb.py")
+  py_run_file("hb_bohb_wrapper.py")
   res = py$run_bohb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_iterations = n_iterations, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
@@ -67,7 +67,7 @@ bohb_wrapper = function(job, data, instance, ...) {
 }
 
 optuna_wrapper = function(job, data, instance, ...) {
-  reticulate::use_condaenv("yahpo_gym", required = TRUE)
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
@@ -82,7 +82,7 @@ optuna_wrapper = function(job, data, instance, ...) {
   n_trials = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * sum(schedule[, .(n = max(n)), by = .(bracket)]$n)
   minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
-  py_run_file("optuna.py")
+  py_run_file("optuna_wrapper.py")
   res = py$run_optuna(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
@@ -95,7 +95,7 @@ optuna_wrapper = function(job, data, instance, ...) {
 }
 
 dehb_wrapper = function(job, data, instance, ...) {
-  reticulate::use_condaenv("yahpo_gym", required = TRUE)
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
@@ -109,8 +109,8 @@ dehb_wrapper = function(job, data, instance, ...) {
   n_trials = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * sum(schedule$n)
   minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
-  py_run_string('sys.path.append("/home/lps/Phd/DEHB")')  # FIXME:
-  py_run_file("dehb.py")
+  py_run_string('sys.path.append("/home/lschnei8/DEHB/")')  # FIXME:
+  py_run_file("dehb_wrapper.py")
   res = py$run_dehb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
@@ -123,7 +123,7 @@ dehb_wrapper = function(job, data, instance, ...) {
 }
 
 smac_mf_wrapper = function(job, data, instance, ...) {
-  reticulate::use_condaenv("yahpo_gym", required = TRUE)
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
@@ -137,7 +137,7 @@ smac_mf_wrapper = function(job, data, instance, ...) {
   n_trials = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * sum(schedule$n)
   minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
-  py_run_file("smac.py")
+  py_run_file("smac_wrapper.py")
   res = py$run_smac4mf(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
@@ -150,7 +150,7 @@ smac_mf_wrapper = function(job, data, instance, ...) {
 }
 
 smac_hpo_wrapper = function(job, data, instance, ...) {
-  reticulate::use_condaenv("yahpo_gym", required = TRUE)
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
@@ -164,7 +164,7 @@ smac_hpo_wrapper = function(job, data, instance, ...) {
   n_trials = as.integer(ceiling(instance$budget / max_budget))  # full budget
   minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
-  py_run_file("smac.py")
+  py_run_file("smac_wrapper.py")
   res = py$run_smac4hpo(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
@@ -177,7 +177,7 @@ smac_hpo_wrapper = function(job, data, instance, ...) {
 }
 
 random_wrapper = function(job, data, instance, ...) {
-  reticulate::use_condaenv("yahpo_gym", required = TRUE)
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
@@ -188,7 +188,7 @@ random_wrapper = function(job, data, instance, ...) {
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   n_trials = as.integer(ceiling(instance$budget / max_budget))  # full budget
 
-  py_run_file("random.py")
+  py_run_file("random_wrapper.py")
   res = py$run_random(scenario = instance$scenario, instance = instance$instance, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
@@ -238,8 +238,19 @@ for (i in seq_len(nrow(optimizers))) {
   ids = addExperiments(
     prob.designs = prob_designs,
     algo.designs = algo_designs,
-    repls = 1L
+    repls = 30L
   )
   addJobTags(ids, as.character(optimizers[i, ]$algorithm))
 }
+
+jobs = findJobs()
+resources.default = list(walltime = 1L, memory = 1024L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
+submitJobs(jobs, resources = resources.default)
+
+done = findDone()
+results = reduceResultsList(done, function(x, job) {
+  x 
+})
+results = rbindlist(results, fill = TRUE)
+saveRDS(results, "results.rds")
 
