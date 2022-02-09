@@ -29,7 +29,7 @@ class worker(Worker):
         target = self.target
         on_integer_scale = self.on_integer_scale
         config.update({fidelity_param_id: int(round(budget)) if self.on_integer_scale else budget})
-        y = bench.objective_function(config, logging=True)[0]
+        y = bench.objective_function(config, logging=True, multithread=False)[0]
 
         result = {
             "loss": self.factor * float(y.get(self.target)),
@@ -50,7 +50,7 @@ def run_bohb(scenario, instance, target, minimize, on_integer_scale, n_iteration
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario)
+    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
     bench.set_instance(instance)
     fidelity_space = bench.get_fidelity_space()
     fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
@@ -103,7 +103,7 @@ def run_hb(scenario, instance, target, minimize, on_integer_scale, n_iterations,
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario)
+    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
     bench.set_instance(instance)
     fidelity_space = bench.get_fidelity_space()
     fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]

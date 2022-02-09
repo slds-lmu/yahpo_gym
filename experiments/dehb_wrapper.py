@@ -20,7 +20,7 @@ def dehb_target_function(configuration, budget, **kwargs):
     X = configuration.get_dictionary()
     X.update({bench.config.instance_names: instance})
     X.update({fidelity_param_id: int(round(budget)) if on_integer_scale else budget})
-    y = bench.objective_function(X, logging=True)[0]
+    y = bench.objective_function(X, logging=True, multithread=False)[0]
 
     result = {
         "fitness": factor * float(y.get(target)),
@@ -36,7 +36,7 @@ def run_dehb(scenario, instance, target, minimize, on_integer_scale, n_trials, s
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario)
+    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
     bench.set_instance(instance)
     opt_space = bench.get_opt_space(instance)
     opt_space_fixed = CS.ConfigurationSpace(seed=seed)

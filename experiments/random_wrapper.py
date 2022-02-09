@@ -9,7 +9,7 @@ def run_random(scenario, instance, n_trials, seed):
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario)
+    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
     bench.set_instance(instance)
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
@@ -20,7 +20,7 @@ def run_random(scenario, instance, n_trials, seed):
     for i in range(n_trials):
         x = opt_space.sample_configuration(1).get_dictionary()
         x.update({fidelity_param_id: max_budget})
-        y = bench.objective_function(x, logging=True)[0]
+        y = bench.objective_function(x, logging=True, multithread=False)[0]
 
     time = pd.DataFrame.from_dict([x.get("time") for x in bench.archive])
     X = pd.DataFrame.from_dict([x.get("x") for x in bench.archive])

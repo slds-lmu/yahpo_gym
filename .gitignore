@@ -137,3 +137,6 @@ notes
 
 *.db
 *.toml
+*.rds
+
+experiments/mf_env/

@@ -52,7 +52,7 @@ def objective_mf(trial, bench, opt_space, fidelity_param_id, valid_budgets, targ
     # we could also evaluate all budgets in a seq from min_budget to max_budget 
     for budget in valid_budgets:
         X.update({fidelity_param_id: budget})
-        y = bench.objective_function(X, logging=True)[0]
+        y = bench.objective_function(X, logging=True, multithread=False)[0]
         trial.report(float(y.get(target)), step=budget)
 
         if trial.should_prune():
@@ -75,7 +75,7 @@ def run_optuna(scenario, instance, target, minimize, on_integer_scale, n_trials,
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario)
+    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
     bench.set_instance(instance)
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)

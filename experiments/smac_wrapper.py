@@ -16,14 +16,14 @@ from smac.intensification.hyperband import Hyperband
 def tae_runner(configuration, budget, bench, fidelity_param_id, target, factor, on_integer_scale):
     X = configuration.get_dictionary()
     X.update({fidelity_param_id: int(round(budget)) if on_integer_scale else budget})
-    y = bench.objective_function(X, logging=False)[0]
+    y = bench.objective_function(X, logging=False, multithread=False)[0]
 
     return factor * float(y.get(target))
 
 def tae_runner_max_budget(configuration, max_budget, bench, fidelity_param_id, target, factor, on_integer_scale):
     X = configuration.get_dictionary()
     X.update({fidelity_param_id: int(round(max_budget)) if on_integer_scale else max_budget})
-    y = bench.objective_function(X, logging=False)[0]
+    y = bench.objective_function(X, logging=False, multithread=False)[0]
 
     return factor * float(y.get(target))
 
@@ -31,7 +31,7 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario)
+    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
     bench.set_instance(instance)
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
@@ -65,7 +65,7 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     for index, row in values.iterrows():
         X = results.get_all_configs()[row["config_id"] - 1].get_dictionary()
         X.update({fidelity_param_id:row[fidelity_param_id]})
-        bench.objective_function(X, logging=True)
+        bench.objective_function(X, logging=True, multithread=False)
     
     time = pd.DataFrame.from_dict([x.get("time") for x in bench.archive])
     X = pd.DataFrame.from_dict([x.get("x") for x in bench.archive])
@@ -79,7 +79,7 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario)
+    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
     bench.set_instance(instance)
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
@@ -109,7 +109,7 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     for index, row in values.iterrows():
         X = results.get_all_configs()[row["config_id"] - 1].get_dictionary()
         X.update({fidelity_param_id:max_budget})
-        bench.objective_function(X, logging=True)
+        bench.objective_function(X, logging=True, multithread=False)
     
     time = pd.DataFrame.from_dict([x.get("time") for x in bench.archive])
     X = pd.DataFrame.from_dict([x.get("x") for x in bench.archive])
