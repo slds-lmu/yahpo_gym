@@ -1,5 +1,5 @@
 from yahpo_gym import benchmark_set
-import yahpo_gym.benchmarks.lcbench
+from yahpo_gym.benchmarks import *
 
 import ConfigSpace as CS
 import optuna
@@ -9,15 +9,9 @@ from optuna.samplers import TPESampler, RandomSampler
 from optuna.trial import Trial
 
 from functools import partial
+import random
+import pandas as pd
 import numpy as np
-
-bench = benchmark_set.BenchmarkSet("lcbench")
-bench.set_instance("3945")
-opt_space = bench.get_opt_space("3945")
-fidelity_space = bench.get_fidelity_space()
-fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
-min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
-max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
 
 def sample_config_from_optuna(trial, cs):
 
@@ -46,12 +40,12 @@ def sample_config_from_optuna(trial, cs):
             value = hp.value
 
         else:
-            raise ValueError(f'Please implement the support for hps of type {type(hp)}')
+            raise ValueError(f"Please implement the support for hps of type {type(hp)}")
 
         config[hp.name] = value
     return config
 
-def objective_mf(trial, bench, opt_space, fidelity_param_id, valid_budgets):
+def objective_mf(trial, bench, opt_space, fidelity_param_id, valid_budgets, target):
     X = sample_config_from_optuna(trial, opt_space)
 
     # FIXME: this follows sh brackets
@@ -59,12 +53,12 @@ def objective_mf(trial, bench, opt_space, fidelity_param_id, valid_budgets):
     for budget in valid_budgets:
         X.update({fidelity_param_id: budget})
         y = bench.objective_function(X, logging=True)[0]
-        trial.report(- float(y.get("val_accuracy")), step=budget)
+        trial.report(float(y.get(target)), step=budget)
 
         if trial.should_prune():
                 raise optuna.TrialPruned()
 
-    return - float(y.get("val_accuracy"))
+    return float(y.get(target))
 
 def precompute_sh_iters(min_budget, max_budget, eta):
     max_SH_iter = -int(np.log(min_budget / max_budget) / np.log(eta)) + 1
@@ -77,19 +71,41 @@ def precompute_budgets(max_budget, eta, max_SH_iter, on_integer_scale=False):
         budgets = budgets.round().astype(int)
     return budgets
 
-# TPEsampler with median pruning checked at sh brackets below
-study = optuna.create_study(direction='minimize', sampler=TPESampler(), pruner=MedianPruner())
-reduction_factor = 3
-sh_iters = precompute_sh_iters(min_budget, max_budget, reduction_factor)
-valid_budgets = precompute_budgets(max_budget, reduction_factor, sh_iters, on_integer_scale=True)
-study.optimize(
-    func=partial(
-        objective_mf,
-        bench=bench,
-        opt_space=opt_space,
-        fidelity_param_id=fidelity_param_id,
-        valid_budgets=valid_budgets
-    ),
-    n_trials=100
-)
+def run_optuna(scenario, instance, target, minimize, on_integer_scale, n_trials, seed):
+    random.seed(seed)
+    np.random.seed(seed)
+
+    bench = benchmark_set.BenchmarkSet(scenario)
+    bench.set_instance(instance)
+    opt_space = bench.get_opt_space(instance)
+    opt_space.seed(seed)
+    fidelity_space = bench.get_fidelity_space()
+    fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
+    min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
+    max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
+    direction = "minimize" if minimize else "maximize"
+
+    # TPEsampler with median pruning checked at sh brackets above
+    study = optuna.create_study(direction=direction, sampler=TPESampler(seed=seed), pruner=MedianPruner())
+    reduction_factor = 3  # eta
+    sh_iters = precompute_sh_iters(min_budget, max_budget, reduction_factor)
+    valid_budgets = precompute_budgets(max_budget, reduction_factor, sh_iters, on_integer_scale=True)
+    study.optimize(
+        func=partial(
+            objective_mf,
+            bench=bench,
+            opt_space=opt_space,
+            fidelity_param_id=fidelity_param_id,
+            valid_budgets=valid_budgets,
+            target=target
+        ),
+        n_trials=n_trials
+    )
+    del study
+    time = pd.DataFrame.from_dict([x.get("time") for x in bench.archive])
+    X = pd.DataFrame.from_dict([x.get("x") for x in bench.archive])
+    Y = pd.DataFrame.from_dict([x.get("y") for x in bench.archive])
+    data = pd.concat([time, X, Y], axis = 1)
+    bench.archive = []
+    return data
 
