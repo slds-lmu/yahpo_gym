@@ -56,6 +56,7 @@ def run_dehb(scenario, instance, target, minimize, on_integer_scale, n_trials, s
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1
+    path = "dehb_tmp_" + str(seed) + "_" + str(random.randrange(49152, 65535 + 1))
 
     dehb = DEHB(
         f=dehb_target_function,
@@ -64,7 +65,7 @@ def run_dehb(scenario, instance, target, minimize, on_integer_scale, n_trials, s
         min_budget=min_budget, 
         max_budget=max_budget,
         n_workers=1,
-        output_path="dehb_tmp"
+        output_path=path
     )
 
     trajectory, runtime, history = dehb.run(
@@ -86,6 +87,6 @@ def run_dehb(scenario, instance, target, minimize, on_integer_scale, n_trials, s
     data = pd.concat([time, X, Y], axis = 1)
     bench.archive = []
     dehb.reset()
-    shutil.rmtree("dehb_tmp")
+    shutil.rmtree(path)
     return data
 
