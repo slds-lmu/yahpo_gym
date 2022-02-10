@@ -40,12 +40,14 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1
+    path = "smac4mf_tmp_" + str(seed) + "_" + str(random.randrange(49152, 65535 + 1))
 
     sscenario = Scenario({
         "run_obj": "quality",
         "ta_run_limit": n_trials,  # limit given in terms of evaluations
         "cs": opt_space,
-        "deterministic": "true"
+        "deterministic": "true",
+        "output_dir": path
     })
     
     intensifier_kwargs = {"initial_budget": min_budget, "max_budget": max_budget, "eta": 3}
@@ -72,7 +74,7 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     Y = pd.DataFrame.from_dict([x.get("y") for x in bench.archive])
     data = pd.concat([time, X, Y], axis = 1)
     bench.archive = []
-    shutil.rmtree(smac4mf.output_dir)
+    shutil.rmtree(path)
     return data
 
 def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trials, seed):
@@ -88,12 +90,14 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1
+    path = "smac4mf_tmp_" + str(seed) + "_" + str(random.randrange(49152, 65535 + 1))
 
     sscenario = Scenario({
         "run_obj": "quality",
         "ta_run_limit": n_trials,  # limit given in terms of evaluations
         "cs": opt_space,
-        "deterministic": "true"
+        "deterministic": "true",
+        "output_dir": path
     })
 
     smac4hpo = SMAC4HPO(
@@ -116,6 +120,6 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     Y = pd.DataFrame.from_dict([x.get("y") for x in bench.archive])
     data = pd.concat([time, X, Y], axis = 1)
     bench.archive = []
-    shutil.rmtree(smac4hpo.output_dir)
+    shutil.rmtree(path)
     return data
 

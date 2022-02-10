@@ -212,7 +212,7 @@ addAlgorithm("random", fun = random_wrapper)
 
 # setup scenarios and instances
 scenarios = c("lcbench")
-instances = c("167152", "167185", "189873")
+instances = c("167185" "189873" "167152" "168910" "189908" "168329" "189906" "167149", "189865" "167168")
 targets = c("val_accuracy")
 budget = 7 * 52 * 20  # 7 hps, 52 max fidelity, 30 factor
 on_integer_scale = TRUE
@@ -238,13 +238,13 @@ for (i in seq_len(nrow(optimizers))) {
   ids = addExperiments(
     prob.designs = prob_designs,
     algo.designs = algo_designs,
-    repls = 30L
+    repls = 10L
   )
   addJobTags(ids, as.character(optimizers[i, ]$algorithm))
 }
 
 jobs = findJobs()
-resources.default = list(walltime = 1L, memory = 1024L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
+resources.default = list(walltime = 3600L, memory = 1024L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
 submitJobs(jobs, resources = resources.default)
 
 done = findDone()
