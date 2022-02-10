@@ -2,14 +2,15 @@ library(batchtools)
 library(data.table)
 library(mlr3misc)
 library(mlr3hyperband)
+reticulate::use_virtualenv("mf_env/", required = TRUE)
+#reticulate::use_virtualenv("/home/lps/.local/share/virtualenvs/yahpo_gym-4ygV7ggv/", required = TRUE)
+library(reticulate)
+yahpo_gym = import("yahpo_gym")
 
 packages = c("data.table", "mlr3misc", "mlr3hyperband")
 
-# FIXME: actual track runtime of algo + predicted runtime as walltime?
-#        especially for smac difficult because the archive is logged post hoc
-
 reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
-#reg = makeExperimentRegistry(file.dir = NA)
+#reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
 saveRegistry(reg)
 
 hb_wrapper = function(job, data, instance, ...) {
@@ -25,10 +26,9 @@ hb_wrapper = function(job, data, instance, ...) {
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
   n_iterations = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * (max(schedule$bracket) + 3)
-  minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
   py_run_file("hb_bohb_wrapper.py")
-  res = py$run_hb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_iterations = n_iterations, seed = job$seed)
+  res = py$run_hb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = instance$minimize, on_integer_scale = instance$on_integer_scale, n_iterations = n_iterations, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
   res[, method := "hb"]
@@ -52,10 +52,9 @@ bohb_wrapper = function(job, data, instance, ...) {
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
   n_iterations = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * (max(schedule$bracket) + 3)
-  minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
   py_run_file("hb_bohb_wrapper.py")
-  res = py$run_bohb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_iterations = n_iterations, seed = job$seed)
+  res = py$run_bohb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = instance$minimize, on_integer_scale = instance$on_integer_scale, n_iterations = n_iterations, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
   res[, method := "bohb"]
@@ -80,10 +79,9 @@ optuna_wrapper = function(job, data, instance, ...) {
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
   # n_trials is more like a heuristic because optuna prunes tirals on its own we just make sure that we evaluate enough cumulative budget
   n_trials = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * sum(schedule[, .(n = max(n)), by = .(bracket)]$n)
-  minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
   py_run_file("optuna_wrapper.py")
-  res = py$run_optuna(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
+  res = py$run_optuna(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = instance$minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
   res[, method := "optuna"]
@@ -107,11 +105,10 @@ dehb_wrapper = function(job, data, instance, ...) {
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
   n_trials = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * sum(schedule$n)
-  minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
   py_run_string('sys.path.append("/home/lschnei8/DEHB/")')  # FIXME:
   py_run_file("dehb_wrapper.py")
-  res = py$run_dehb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
+  res = py$run_dehb(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = instance$minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
   res[, method := "dehb"]
@@ -135,10 +132,9 @@ smac_mf_wrapper = function(job, data, instance, ...) {
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
   n_trials = ceiling(instance$budget / sum(schedule$budget * schedule$n)) * sum(schedule$n)
-  minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
   py_run_file("smac_wrapper.py")
-  res = py$run_smac4mf(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
+  res = py$run_smac4mf(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = instance$minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
   res[, method := "smac4mf"]
@@ -162,10 +158,9 @@ smac_hpo_wrapper = function(job, data, instance, ...) {
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
   n_trials = as.integer(ceiling(instance$budget / max_budget))  # full budget
-  minimize = bench$config$config$y_minimize[match(instance$target, bench$config$config$y_names)]
 
   py_run_file("smac_wrapper.py")
-  res = py$run_smac4hpo(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
+  res = py$run_smac4hpo(scenario = instance$scenario, instance = instance$instance, target = instance$target, minimize = instance$minimize, on_integer_scale = instance$on_integer_scale, n_trials = n_trials, seed = job$seed)
   res = as.data.table(res)
   res = res[cumsum(get(fidelity_param_id)) <= instance$budget, ]
   res[, method := "smac4hpo"]
@@ -211,18 +206,68 @@ addAlgorithm("smac_hpo", fun = smac_hpo_wrapper)
 addAlgorithm("random", fun = random_wrapper)
 
 # setup scenarios and instances
-scenarios = c("lcbench")
-instances = c("167185" "189873" "167152" "168910" "189908" "168329" "189906" "167149", "189865" "167168")
-targets = c("val_accuracy")
-budget = 7 * 52 * 20  # 7 hps, 52 max fidelity, 30 factor
-on_integer_scale = TRUE
-setup = setDT(expand.grid(scenario = scenarios, instance = instances, target = targets, budget = budget, on_integer_scale = on_integer_scale, stringsAsFactors = FALSE))
+get_nb301_setup = function(budget_factor = 30) {
+  scenario = "nb301"
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+  fidelity_space = bench$get_fidelity_space()
+  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
+  max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
+  ndim = length(bench$config_space$get_hyperparameter_names()) - 1L  # NOTE: instance is not part of
+
+  instances = "CIFAR10"
+  targets = "val_accuracy"
+  budget = ndim * max_budget * budget_factor
+  on_integer_scale = TRUE
+  minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
+  setup = setDT(expand.grid(scenario = scenario, instance = instances, target = targets, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
+  setup
+}
+
+get_lcbench_setup = function(budget_factor = 30) {
+  scenario = "lcbench"
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+  fidelity_space = bench$get_fidelity_space()
+  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
+  max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
+  ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
+
+  instances = c("167168", "189873", "189906")
+  targets = "val_accuracy"
+  budget = ndim * max_budget * budget_factor
+  on_integer_scale = TRUE
+  minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
+  setup = setDT(expand.grid(scenario = scenario, instance = instances, target = targets, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
+  setup
+}
+
+get_iaml_setup = function(budget_factor = 30) {
+  setup = map_dtr(c("iaml_glmnet", "iaml_rpart", "iaml_ranger", "iaml_xgboost", "iaml_super"), function(scenario) {
+    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+    fidelity_space = bench$get_fidelity_space()
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+    min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
+    max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
+    ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
+
+    instances = c("40981", "41146", "1489", "1067")
+    targets = "mmce"
+    budget = ndim * max_budget * budget_factor
+    on_integer_scale = FALSE
+    minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
+    setup = setDT(expand.grid(scenario = scenario, instance = instances, target = targets, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
+  })
+}
+
+setup = rbind(get_nb301_setup(), get_lcbench_setup(), get_iaml_setup())
+
 setup[, id := seq_len(.N)]
 
 # add problems
 prob_designs = map(seq_len(nrow(setup)), function(i) {
   prob_id = paste0(setup[i, ]$scenario, "_", setup[i, ]$instance, "_", setup[i, ]$target)
-  addProblem(prob_id, data = list(scenario = setup[i, ]$scenario, instance = setup[i, ]$instance, target = setup[i, ]$target, budget = setup[i, ]$budget, on_integer_scale = setup[i, ]$on_integer_scale))
+  addProblem(prob_id, data = list(scenario = setup[i, ]$scenario, instance = setup[i, ]$instance, target = setup[i, ]$target, ndim = setup[i, ]$ndim, max_budget = setup[i, ]$max_budget, budget = setup[i, ]$budget, on_integer_scale = setup[i, ]$on_integer_scale, minimize = setup[i, ]$minimize))
   setNames(list(setup[i, ]), nm = prob_id)
 })
 nn = sapply(prob_designs, names)
@@ -238,7 +283,7 @@ for (i in seq_len(nrow(optimizers))) {
   ids = addExperiments(
     prob.designs = prob_designs,
     algo.designs = algo_designs,
-    repls = 10L
+    repls = 1L
   )
   addJobTags(ids, as.character(optimizers[i, ]$algorithm))
 }
@@ -249,6 +294,7 @@ submitJobs(jobs, resources = resources.default)
 
 done = findDone()
 results = reduceResultsList(done, function(x, job) {
+  # FIXME: minimize direction of target
   x 
 })
 results = rbindlist(results, fill = TRUE)
