@@ -12,69 +12,56 @@ from functools import partial
 import random
 import pandas as pd
 import numpy as np
+from copy import copy
+
+def get_value(hp_name, cs, trial):
+    hp = cs.get_hyperparameter(hp_name)
+
+    if isinstance(hp, CS.UniformFloatHyperparameter):
+        value = float(trial.suggest_float(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
+
+    elif isinstance(hp, CS.UniformIntegerHyperparameter):
+        value = int(trial.suggest_int(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
+
+    elif isinstance(hp, CS.CategoricalHyperparameter):
+        hp_type = type(hp.default_value)
+        value = hp_type(trial.suggest_categorical(name=hp_name, choices=hp.choices))
+
+    elif isinstance(hp, CS.OrdinalHyperparameter):
+        num_vars = len(hp.sequence)
+        index = trial.suggest_int(hp_name, low=0, high=num_vars - 1, log=False)
+        hp_type = type(hp.default_value)
+        value = hp.sequence[index]
+        value = hp_type(value)
+
+    elif isinstance(hp, CS.Constant):
+        value = hp.value
+
+    else:
+        raise ValueError(f"Please implement the support for hps of type {type(hp)}")
+
+    return value
+
+
 
 def sample_config_from_optuna(trial, cs):
 
     config = {}
     for hp_name in cs.get_all_unconditional_hyperparameters():
-        hp = cs.get_hyperparameter(hp_name)
-
-        if isinstance(hp, CS.UniformFloatHyperparameter):
-            value = float(trial.suggest_float(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
-
-        elif isinstance(hp, CS.UniformIntegerHyperparameter):
-            value = int(trial.suggest_int(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
-
-        elif isinstance(hp, CS.CategoricalHyperparameter):
-            hp_type = type(hp.default_value)
-            value = hp_type(trial.suggest_categorical(name=hp_name, choices=hp.choices))
-
-        elif isinstance(hp, CS.OrdinalHyperparameter):
-            num_vars = len(hp.sequence)
-            index = trial.suggest_int(hp_name, low=0, high=num_vars - 1, log=False)
-            hp_type = type(hp.default_value)
-            value = hp.sequence[index]
-            value = hp_type(value)
-
-        elif isinstance(hp, CS.Constant):
-            value = hp.value
-
-        else:
-            raise ValueError(f"Please implement the support for hps of type {type(hp)}")
-
-        config[hp.name] = value
+        value = get_value(hp_name, cs, trial)
+        config.update({hp_name: value})
 
     conditions = cs.get_conditions()
-    for hp_name in cs.get_all_conditional_hyperparameters():
-        conditions_to_check = np.where([condition.child.name == hp_name for condition in conditions])[0]
-        checks = [conditions[to_check].evaluate({conditions[to_check].parent.name: config.get(conditions[to_check].parent.name)}) for to_check in conditions_to_check]
-        if all(checks):
-            hp = cs.get_hyperparameter(hp_name)
+    conditional_hps = list(cs.get_all_conditional_hyperparameters())
+    n_conditions = dict(zip(conditional_hps, [len(cs.get_parent_conditions_of(hp)) for hp in conditional_hps]))
+    conditional_hps_sorted = sorted(n_conditions, key=n_conditions.get)
+    for hp_name in conditional_hps_sorted:
+        conditions_to_check = np.where([hp_name in [child.name for child in condition.get_children()] if (isinstance(condition, CS.conditions.AndConjunction) | isinstance(condition, CS.conditions.OrConjunction)) else hp_name == condition.child.name for condition in conditions])[0]
+        checks = [conditions[to_check].evaluate(dict(zip([parent.name for parent in conditions[to_check].get_parents()], [config.get(parent.name) for parent in conditions[to_check].get_parents()])) if (isinstance(conditions[to_check], CS.conditions.AndConjunction) | isinstance(conditions[to_check], CS.conditions.OrConjunction)) else {conditions[to_check].parent.name: config.get(conditions[to_check].parent.name)}) for to_check in conditions_to_check]
 
-            if isinstance(hp, CS.UniformFloatHyperparameter):
-                value = float(trial.suggest_float(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
-
-            elif isinstance(hp, CS.UniformIntegerHyperparameter):
-                value = int(trial.suggest_int(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
-
-            elif isinstance(hp, CS.CategoricalHyperparameter):
-                hp_type = type(hp.default_value)
-                value = hp_type(trial.suggest_categorical(name=hp_name, choices=hp.choices))
-
-            elif isinstance(hp, CS.OrdinalHyperparameter):
-                num_vars = len(hp.sequence)
-                index = trial.suggest_int(hp_name, low=0, high=num_vars - 1, log=False)
-                hp_type = type(hp.default_value)
-                value = hp.sequence[index]
-                value = hp_type(value)
-
-            elif isinstance(hp, CS.Constant):
-                value = hp.value
-
-            else:
-                raise ValueError(f"Please implement the support for hps of type {type(hp)}")
-
-            config[hp.name] = value
+        if sum(checks) == len(checks):
+            value = get_value(hp_name, cs, trial)
+            config.update({hp_name: value})
 
     return config
 

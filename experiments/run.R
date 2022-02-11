@@ -13,9 +13,6 @@ reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", 
 #reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
 saveRegistry(reg)
 
-# FIXME: optuna and dependencies
-# FIXME: logging off
-
 hb_wrapper = function(job, data, instance, ...) {
   reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
