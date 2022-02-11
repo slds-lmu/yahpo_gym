@@ -16,7 +16,7 @@ import numpy as np
 def sample_config_from_optuna(trial, cs):
 
     config = {}
-    for hp_name in cs:
+    for hp_name in cs.get_all_unconditional_hyperparameters():
         hp = cs.get_hyperparameter(hp_name)
 
         if isinstance(hp, CS.UniformFloatHyperparameter):
@@ -43,6 +43,39 @@ def sample_config_from_optuna(trial, cs):
             raise ValueError(f"Please implement the support for hps of type {type(hp)}")
 
         config[hp.name] = value
+
+    conditions = cs.get_conditions()
+    for hp_name in cs.get_all_conditional_hyperparameters():
+        conditions_to_check = np.where([condition.child.name == hp_name for condition in conditions])[0]
+        checks = [conditions[to_check].evaluate({conditions[to_check].parent.name: config.get(conditions[to_check].parent.name)}) for to_check in conditions_to_check]
+        if all(checks):
+            hp = cs.get_hyperparameter(hp_name)
+
+            if isinstance(hp, CS.UniformFloatHyperparameter):
+                value = float(trial.suggest_float(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
+
+            elif isinstance(hp, CS.UniformIntegerHyperparameter):
+                value = int(trial.suggest_int(name=hp_name, low=hp.lower, high=hp.upper, log=hp.log))
+
+            elif isinstance(hp, CS.CategoricalHyperparameter):
+                hp_type = type(hp.default_value)
+                value = hp_type(trial.suggest_categorical(name=hp_name, choices=hp.choices))
+
+            elif isinstance(hp, CS.OrdinalHyperparameter):
+                num_vars = len(hp.sequence)
+                index = trial.suggest_int(hp_name, low=0, high=num_vars - 1, log=False)
+                hp_type = type(hp.default_value)
+                value = hp.sequence[index]
+                value = hp_type(value)
+
+            elif isinstance(hp, CS.Constant):
+                value = hp.value
+
+            else:
+                raise ValueError(f"Please implement the support for hps of type {type(hp)}")
+
+            config[hp.name] = value
+
     return config
 
 def objective_mf(trial, bench, opt_space, fidelity_param_id, valid_budgets, target):
@@ -89,7 +122,7 @@ def run_optuna(scenario, instance, target, minimize, on_integer_scale, n_trials,
     study = optuna.create_study(direction=direction, sampler=TPESampler(seed=seed), pruner=MedianPruner())
     reduction_factor = 3  # eta
     sh_iters = precompute_sh_iters(min_budget, max_budget, reduction_factor)
-    valid_budgets = precompute_budgets(max_budget, reduction_factor, sh_iters, on_integer_scale=True)
+    valid_budgets = precompute_budgets(max_budget, reduction_factor, sh_iters, on_integer_scale=on_integer_scale)
     study.optimize(
         func=partial(
             objective_mf,

@@ -13,6 +13,9 @@ reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", 
 #reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
 saveRegistry(reg)
 
+# FIXME: optuna and dependencies
+# FIXME: logging off
+
 hb_wrapper = function(job, data, instance, ...) {
   reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(reticulate)
@@ -216,11 +219,11 @@ get_nb301_setup = function(budget_factor = 30) {
   ndim = length(bench$config_space$get_hyperparameter_names()) - 1L  # NOTE: instance is not part of
 
   instances = "CIFAR10"
-  targets = "val_accuracy"
+  target = "val_accuracy"
   budget = ndim * max_budget * budget_factor
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
-  setup = setDT(expand.grid(scenario = scenario, instance = instances, target = targets, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
+  setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
   setup
 }
 
@@ -234,11 +237,11 @@ get_lcbench_setup = function(budget_factor = 30) {
   ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
 
   instances = c("167168", "189873", "189906")
-  targets = "val_accuracy"
+  target = "val_accuracy"
   budget = ndim * max_budget * budget_factor
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
-  setup = setDT(expand.grid(scenario = scenario, instance = instances, target = targets, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
+  setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
   setup
 }
 
@@ -252,11 +255,11 @@ get_iaml_setup = function(budget_factor = 30) {
     ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
 
     instances = c("40981", "41146", "1489", "1067")
-    targets = "mmce"
+    target = "mmce"
     budget = ndim * max_budget * budget_factor
     on_integer_scale = FALSE
     minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
-    setup = setDT(expand.grid(scenario = scenario, instance = instances, target = targets, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
+    setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
   })
 }
 
@@ -289,7 +292,7 @@ for (i in seq_len(nrow(optimizers))) {
 }
 
 jobs = findJobs()
-resources.default = list(walltime = 3600L, memory = 1024L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
+resources.default = list(walltime = 3600L, memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
 submitJobs(jobs, resources = resources.default)
 
 done = findDone()

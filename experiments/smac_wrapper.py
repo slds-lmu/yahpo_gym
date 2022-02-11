@@ -65,7 +65,7 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     values = pd.DataFrame.from_records([[int(round(k.budget)) if on_integer_scale else k.budget, k.config_id] for k, v in results.data.items()])
     values = values.rename(columns = {0: fidelity_param_id, 1: "config_id"})
     for index, row in values.iterrows():
-        X = results.get_all_configs()[row["config_id"] - 1].get_dictionary()
+        X = results.get_all_configs()[int(row["config_id"] - 1)].get_dictionary()
         X.update({fidelity_param_id:row[fidelity_param_id]})
         bench.objective_function(X, logging=True, multithread=False)
     
@@ -111,7 +111,7 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     values = pd.DataFrame.from_records([[int(round(k.budget)) if on_integer_scale else k.budget, k.config_id] for k, v in results.data.items()])
     values = values.rename(columns = {0: fidelity_param_id, 1: "config_id"})
     for index, row in values.iterrows():
-        X = results.get_all_configs()[row["config_id"] - 1].get_dictionary()
+        X = results.get_all_configs()[int(row["config_id"] - 1)].get_dictionary()
         X.update({fidelity_param_id:max_budget})
         bench.objective_function(X, logging=True, multithread=False)
     
