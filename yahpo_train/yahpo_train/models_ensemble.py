@@ -103,3 +103,4 @@ if __name__ == '__main__':
     l = SurrogateEnsembleLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
     l.fit_one_cycle(10, 1e-4)
     l.export_onnx(cfg, 'cuda:0', suffix='noisy')
+    
