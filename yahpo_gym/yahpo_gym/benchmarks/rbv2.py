@@ -2,8 +2,8 @@ from yahpo_gym.configuration import config_dict, cfg
 
 # Default dict, holds for all 'rbv2_' benchmarks
 _rbv2_dict = {
-    'y_names' : ['mmce', 'f1', 'auc', 'logloss', 'timetrain', 'timepredict'],
-    'y_minimize' : [True, False, False, True, True, True],
+    'y_names' : ['acc', 'bac', 'auc', 'brier', 'f1', 'logloss', 'timetrain', 'timepredict', 'memory'],
+    'y_minimize' : [False, False, False, True, True, True, True, True, True],
     'fidelity_params': ['trainsize', 'repl'],
     'instance_names': 'task_id',
     'runtime_name': 'timetrain',
