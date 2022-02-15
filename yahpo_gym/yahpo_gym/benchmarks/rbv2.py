@@ -2,8 +2,8 @@ from yahpo_gym.configuration import config_dict, cfg
 
 # Default dict, holds for all 'rbv2_' benchmarks
 _rbv2_dict = {
-    'y_names' : ['mmce', 'f1', 'auc', 'logloss', 'timetrain', 'timepredict'],
-    'y_minimize' : [True, False, False, True, True, True],
+    'y_names' : ['acc', 'bac', 'auc', 'brier', 'f1', 'logloss', 'timetrain', 'timepredict', 'memory'],
+    'y_minimize' : [False, False, False, True, True, True, True, True, True],
     'fidelity_params': ['trainsize', 'repl'],
     'instance_names': 'task_id',
     'runtime_name': 'timetrain',
@@ -16,8 +16,7 @@ _rbv2_svm = _rbv2_dict.copy()
 _rbv2_svm.update({
     'config_id' : 'rbv2_svm',
     'cont_names': ['cost', 'gamma', 'tolerance', 'degree', 'trainsize', 'repl'],
-    'cat_names': ['task_id', 'kernel', 'num.impute.selected.cpo'],
-    'hierarchical': True
+    'cat_names': ['task_id', 'kernel', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_svm' : _rbv2_svm})
 
@@ -26,8 +25,7 @@ _rbv2_ranger = _rbv2_dict.copy()
 _rbv2_ranger.update({
     'config_id' : 'rbv2_ranger',
     'cont_names': ['num.trees', 'sample.fraction', 'mtry.power', 'min.node.size', 'num.random.splits', 'trainsize', 'repl'],
-    'cat_names': ['task_id', 'respect.unordered.factors', 'splitrule', 'num.impute.selected.cpo'],
-    'hierarchical': True
+    'cat_names': ['task_id', 'respect.unordered.factors', 'splitrule', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_ranger' : _rbv2_ranger})
 
@@ -54,8 +52,7 @@ _rbv2_xgboost = _rbv2_dict.copy()
 _rbv2_xgboost.update({
     'config_id' : 'rbv2_xgboost',
     'cont_names': ['nrounds', 'eta', 'gamma', 'lambda',  'alpha', 'subsample', 'max_depth', 'min_child_weight','colsample_bytree', 'colsample_bylevel', 'rate_drop', 'skip_drop', 'trainsize', 'repl'],
-    'cat_names': ['task_id', 'booster', 'num.impute.selected.cpo'],
-    'hierarchical': True
+    'cat_names': ['task_id', 'booster', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_xgboost' : _rbv2_xgboost})
 
@@ -81,7 +78,6 @@ _rbv2_super.update({
                    'xgboost.nrounds', 'xgboost.eta', 'xgboost.gamma', 'xgboost.lambda',  'xgboost.alpha', 'xgboost.subsample', 'xgboost.max_depth', 'xgboost.min_child_weight',
                    'xgboost.colsample_bytree', 'xgboost.colsample_bylevel', 'xgboost.rate_drop', 'xgboost.skip_drop',
                    'trainsize', 'repl'],
-    'cat_names': ['task_id', 'learner', 'svm.kernel', 'ranger.respect.unordered.factors', 'ranger.splitrule', 'aknn.distance', 'xgboost.booster', 'num.impute.selected.cpo'],
-    'hierarchical': True
+    'cat_names': ['task_id', 'learner', 'svm.kernel', 'ranger.respect.unordered.factors', 'ranger.splitrule', 'aknn.distance', 'xgboost.booster', 'num.impute.selected.cpo']
 })
 config_dict.update({'rbv2_super' : _rbv2_super})
