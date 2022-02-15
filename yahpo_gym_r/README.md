@@ -4,8 +4,8 @@
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 
-R Interface for the YAHPO GYM python module.
-
+R Interface for the YAHPO GYM python module. Documentation for the python module is available via the [module handbook](https://pfistfl.github.io/yahpo_gym/)
+while the R module builds its own documentation with the package.
 ## Installation
 
 The package can be installed from GitHub via
