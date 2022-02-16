@@ -28,9 +28,9 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   The scenario identifier.
     id = NULL,
 
-    #' @field id `instance` \cr
+    #' @field instance `character` \cr
     #'   The instance identifier.
-    id = NULL,
+    instance = NULL,
 
     #' @field onnx_session `onnxruntime.InferenceSession` \cr
     #'   A session to use for the predict. If `NULL` a new session is initialized.
