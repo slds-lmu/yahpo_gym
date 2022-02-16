@@ -55,8 +55,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @description
     #' Initialize a new object
     #'
-    #' @param key `character` \cr
+    #' @param scenario `character` \cr
     #'   Key for a benchmark scenario. See [`list_benchmarks`] for more information.
+    #' @param instance [`character`] \cr
+    #'   A valid instance. See `instances`.
     #' @param onnx_session `onnxruntime.InferenceSession` \cr
     #'   A matching `onnxruntime.InferenceSession`. See `session` for more information.
     #'   If no session is provided, new session is created.
@@ -70,18 +72,15 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
     #' @param noisy `logical` \cr
     #'   Should noisy surrogates be used instead of deterministic ones?
-    initialize = function(key, onnx_session = NULL, active_session = FALSE, download = FALSE, multithread = FALSE, check = FALSE, noisy = FALSE) {
-      self$id = assert_string(key)
+    initialize = function(scenario, instance = NULL, onnx_session = NULL, active_session = FALSE, download = FALSE, multithread = FALSE, check = FALSE, noisy = FALSE) {
+      self$id = assert_string(scenario)
+      self$instance = assert_string(instance)
       self$onnx_session = onnx_session
       self$active_session = assert_flag(active_session)
       self$download = assert_flag(download)
       self$multithread = assert_flag(multithread)
       self$check = assert_flag(check)
       self$noisy = assert_flag(noisy)
-      # Download files
-      if (assert_flag(download)) {
-        self$py_instance$config$download_files(files = list("param_set.R"))
-      }
     },
     #' @description
     #' Printer with some additional information.
@@ -170,15 +169,12 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @description
     #' Get Optimization ConfigSpace
     #'
-    #' @param instance [`character`] \cr
-    #'   A valid instance. See `instances`.
     #' @param drop_fidelity_params [`logical`] \cr
     #'   Should fidelity params be dropped? Defaults to `TRUE`.
     #' @return
     #'  A configspace containing the search space to optimize over.
-    get_opt_space_py = function(instance, drop_fidelity_params = TRUE) {
-      assert_choice(instance, self$instances)
-      self$py_instance$get_opt_space(instance, drop_fidelity_params)
+    get_opt_space_py = function(drop_fidelity_params = TRUE) {
+      self$py_instance$get_opt_space(drop_fidelity_params)
     },
 
     #' @description
@@ -247,7 +243,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       if (is.null(private$.py_instance)) {
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
-          config_id = self$id, session = self$onnx_session, active_session = self$active_session,
+          config_id = self$id, instance = self$instance, session = self$onnx_session, active_session = self$active_session,
           download = self$download, multithread = self$multithread, noisy = self$noisy
         )
       }

@@ -14,7 +14,7 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
   if key is None or test_instance is None:
     return None
 
-  b = BenchmarkSet(key, download = False)
+  b = BenchmarkSet(key, instance = test_instance)
 
   # Instance Fields
   assert type(b.config) == yahpo_gym.configuration.Configuration
@@ -39,11 +39,11 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
   # Getters
   assert type(b.get_fidelity_space()) == ConfigSpace.configuration_space.ConfigurationSpace
 
-  optspace =  b.get_opt_space(instance = test_instance, drop_fidelity_params = False)
+  optspace =  b.get_opt_space(drop_fidelity_params = False)
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
   assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names)
 
-  optspace =  b.get_opt_space(instance = test_instance)
+  optspace =  b.get_opt_space()
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
   assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names) - len(b.get_fidelity_space().get_hyperparameter_names())
 

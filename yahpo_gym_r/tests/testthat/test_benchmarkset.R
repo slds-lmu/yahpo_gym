@@ -1,14 +1,14 @@
 test_that("benchmarkset can be instantiated", {
   skip("Tested locally")
   reticulate::use_condaenv("yahpo_gym", required=TRUE)
-  b = BenchmarkSet$new("lcbench", active_session = TRUE)
+  b = BenchmarkSet$new("lcbench", instance = "3945", active_session = TRUE)
   id = reticulate::py_id(b$session)
   expect_r6(b, "BenchmarkSet")
   expect_character(b$instances, len = 35)
   expect_class(b$py_instance, "yahpo_gym.benchmark_set.BenchmarkSet")
   expect_class(b$session, "onnxruntime.capi.onnxruntime_inference_collection.InferenceSession")
   expect_true(b$id == "lcbench")
-  expect_class(b$get_opt_space_py("3945", FALSE), "ConfigSpace.configuration_space.ConfigurationSpace")
+  expect_class(b$get_opt_space_py(FALSE), "ConfigSpace.configuration_space.ConfigurationSpace")
   # Can build the objective
   obj = b$get_objective("189909")
   expect_r6(obj, "ObjectiveYAHPO")
@@ -24,14 +24,14 @@ test_that("benchmarkset can be instantiated", {
   # Errors
   expect_error(b$get_objective("123"))
 
-  b2 = BenchmarkSet$new("lcbench", onnx_session = b$session)
+  b2 = BenchmarkSet$new("lcbench", instance = "3945",onnx_session = b$session)
   expect_true(id == reticulate::py_id(b2$session))
   expect_r6(b2, "BenchmarkSet")
   expect_character(b2$instances, len = 35)
   expect_class(b2$py_instance, "yahpo_gym.benchmark_set.BenchmarkSet")
   expect_class(b2$session, "onnxruntime.capi.onnxruntime_inference_collection.InferenceSession")
   expect_true(b2$id == "lcbench")
-  expect_class(b2$get_opt_space_py("3945", FALSE), "ConfigSpace.configuration_space.ConfigurationSpace")
+  expect_class(b2$get_opt_space_py(FALSE), "ConfigSpace.configuration_space.ConfigurationSpace")
   # Can build the objective
   obj2 = b2$get_objective("189909")
   expect_r6(obj2, "ObjectiveYAHPO")

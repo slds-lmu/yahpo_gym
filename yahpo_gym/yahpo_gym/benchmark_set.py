@@ -176,30 +176,33 @@ class BenchmarkSet():
         """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, instance:str, drop_fidelity_params:bool = True):
+    def get_opt_space(self, drop_fidelity_params:bool = True):
         """
         Get the search space to be optimized.
         Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
         
         Parameters
         ----------
-        instance: str
-            A valid instance. See `instances`.
         drop_fidelity_params: bool
             Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
         """
-        # FIXME: assert instance is a valid choice
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
-        if self.config.instance_names is not None:
-            instance_names_idx = csn.get_hyperparameter_names().index(self.config.instance_names)
-            hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
+        
+        # Set constants (e.g. instance)
+        for p, v in self.constants.items():
+            param_idx = csn.get_hyperparameter_names().index(p)
+            hps[param_idx] = CSH.Constant(p,v)
+            
+        # Drop fidelity parameters
         if drop_fidelity_params:
             fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
             fidelity_params_idx.sort()
             fidelity_params_idx.reverse()
             for idx in fidelity_params_idx:
                 del hps[idx]
+                
+        # Rebuild ConfigSpace
         cnds = csn.get_conditions()
         fbds = csn.get_forbiddens()
         cs = CS.ConfigurationSpace()
@@ -309,7 +312,6 @@ class BenchmarkSet():
         for hp in missing:
             value = '#na#' if hp in self.config.cat_names else 0  # '#na#' for cats, see _integer_encode below
             configuration.update({hp:value})
-
 
         x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names if x not in self.config.drop_predict]).reshape(1, -1).astype(np.int32)
         x_cont = np.array([configuration[x] for x in self.config.cont_names]).reshape(1, -1).astype(np.float32)

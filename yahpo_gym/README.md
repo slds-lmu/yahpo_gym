@@ -98,17 +98,20 @@ print(bench.objective_function(value))
 The `BenchmarkSet` has the following important functions and fields (with relevant args):
 
 ```
-- `__init__`: config_id: str, "Name of the scenario"
+- `__init__`: 
+  args:
+    config_id: str, "Name of the scenario"
+    instance: str (optional), "A valid instance"
   "Instantiate the benchmark."
 
 - `objective_function`, configuration: Dict, "A dictionary of HP values to evaluate"
   "Evaluate the objective function."
 
+- `get_opt_space`:
+  "Get the Opt. Space (A `ConfigSpace.ConfigSpace`)."
+
 - `set_instance`: value: str, "A valid instance"
   "Set an instance. A list of available instances can be obtained via the `instances` field."
-
-- `get_opt_space`: instance: str, "A valid instance"
-  "Get the Opt. Space (A `ConfigSpace.ConfigSpace`)."
 
 - `set_session`: session: str, "A onnx session"
   "Set an onnx session."
@@ -125,8 +128,7 @@ from hpbandster.core.worker import Worker
 import hpbandster.core.nameserver as hpns
 from hpbandster.optimizers import BOHB as BOHB
 
-bench = benchmark_set.BenchmarkSet("lcbench")
-bench.set_instance("3945")
+bench = benchmark_set.BenchmarkSet("lcbench", instance = "3945")
 
 class lcbench(Worker):
 
@@ -160,7 +162,7 @@ class lcbench(Worker):
     @staticmethod
     def get_configspace():
         # sets OpenML_task_id constant to "3945" and removes the epoch fidelity parameter
-        cs = bench.get_opt_space(instance = "3945", drop_fidelity_params = True)
+        cs = bench.get_opt_space(drop_fidelity_params = True)
         return(cs)
 
 NS = hpns.NameServer(run_id="lcbench", host="127.0.0.1", port=None)

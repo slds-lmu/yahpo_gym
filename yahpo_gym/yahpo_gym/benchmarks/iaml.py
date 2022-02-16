@@ -7,7 +7,7 @@ _iaml_dict = {
     'fidelity_params': ['trainsize'],
     'instance_names': 'task_id',
     'runtime_name': 'timetrain',
-    'memory_name': 'rammodel',
+    'memory_name': 'rammodel'
 }
 
 # Ranger (Random Forest) 
