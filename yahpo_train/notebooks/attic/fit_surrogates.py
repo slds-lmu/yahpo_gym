@@ -195,7 +195,7 @@ def fit_from_best_params(key, best_params, tfms_fixed={}, log_wandb=False, **kwa
 
 
 def fit_nb301(key='nb301', **kwargs):
-    embds_dbl = [partial(ContTransformerMultScalar, m=1/52)]
+    embds_dbl = [partial(ContTransformerMultScalar, m=1/98)]
     embds_tgt = [partial(ContTransformerMultScalar, m=1/100), ContTransformerRange]
     fit_config(key, embds_dbl=embds_dbl, embds_tgt=embds_tgt, **kwargs)
         
