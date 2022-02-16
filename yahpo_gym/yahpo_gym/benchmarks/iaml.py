@@ -6,7 +6,8 @@ _iaml_dict = {
     'y_minimize' : [True, False, False, True, True, True, True, True, True, True, True, True],
     'fidelity_params': ['trainsize'],
     'instance_names': 'task_id',
-    'runtime_name': 'timetrain'
+    'runtime_name': 'timetrain',
+    'memory_name': 'rammodel',
 }
 
 # Ranger (Random Forest) 

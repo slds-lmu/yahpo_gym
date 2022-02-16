@@ -254,6 +254,32 @@ class BenchmarkSet():
         if self.config.instance_names is None:
             return self.config.config['instances']
         return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]
+    
+    @property
+    def targets(self):
+        """
+        A list of available targets for the scenario.
+        """
+        return self.config.y_names
+    
+    @property
+    def properties(self):
+        """
+        List of properties of the benchmark scenario: 
+        Describes the type of the search space: ('continuous', 'mixed', 'categorical', 'hierarchical')
+        and availability of metadata (e.g. 'memory': memory measurements are available).
+        """
+        props = []
+    
+        cat = length(self.config.cat_names) > 1
+        cont = length(self.config.cont_names) >= 1
+        props += ["mixed" if cat & cont else "categorical" if cat else "continuous"]
+        if self.config.hierarchical:
+            props += ["hierarchical"]
+        if self.config.memory_name != '':
+            props += ["memory"]
+            
+        return props
 
 
     def __repr__(self):

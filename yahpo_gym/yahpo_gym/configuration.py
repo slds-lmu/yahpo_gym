@@ -35,6 +35,7 @@ class Configuration():
         self.runtime_name = self.config['runtime_name']
         self.drop_predict = self.config['drop_predict']
         self.hierarchical = self.config['hierarchical']
+        self.memory_name = self.config['memory_name']
         
     def get_path(self, key: str):
         return f'{self.config_path}/{self.config[key]}'
@@ -73,6 +74,7 @@ class Configuration():
             'cat_names': [],
             'fidelity_params': [],
             'runtime_name': '',
+            'memory_name': '',
             'model_old': 'model.onnx',
             'drop_predict': [], 
             'instances': [],
