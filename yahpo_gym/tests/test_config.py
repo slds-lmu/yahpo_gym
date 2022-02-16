@@ -25,3 +25,8 @@ def test_config():
 
   # properties
   assert cc.hp_names == (['task', 'lr_schedule'] + ['epoch', 'batch_size', 'dropout_1'])
+  
+  
+def test_print_cfg_table():
+  from yahpo_gym.configuration import cfg
+  print(cfg())

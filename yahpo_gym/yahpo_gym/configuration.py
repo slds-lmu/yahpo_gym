@@ -34,6 +34,8 @@ class Configuration():
         self.instance_names = self.config['instance_names']
         self.runtime_name = self.config['runtime_name']
         self.drop_predict = self.config['drop_predict']
+        self.hierarchical = self.config['hierarchical']
+        self.memory_name = self.config['memory_name']
         
     def get_path(self, key: str):
         return f'{self.config_path}/{self.config[key]}'
@@ -72,9 +74,11 @@ class Configuration():
             'cat_names': [],
             'fidelity_params': [],
             'runtime_name': '',
+            'memory_name': '',
             'model_old': 'model.onnx',
             'drop_predict': [], 
-            'instances': []
+            'instances': [],
+            'hierarchical': False
         }
 
     @property
@@ -136,7 +140,8 @@ class ConfigDict():
             out += "\n< No configs loaded >"
         for k in self.configs.keys():
             v = self.get_item(k)
-            out += "\n{:<15} {:<15} {:<10} {:<10} {:<10} {:<10}".format(k, v.instance_names, len(v.cat_names)-1, len(v.cont_names)-len(v.fidelity_params), len(v.fidelity_params), len(v.y_names))
+            name = v.instance_names if v.instance_names is not None else "Task"
+            out += "\n{:<15} {:<15} {:<10} {:<10} {:<10} {:<10}".format(k, name, len(v.cat_names)-1, len(v.cont_names)-len(v.fidelity_params), len(v.fidelity_params), len(v.y_names))
         return out
 
 

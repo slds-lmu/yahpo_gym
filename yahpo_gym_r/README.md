@@ -4,8 +4,8 @@
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 
-R Interface for the YAHPO GYM python module.
-
+R Interface for the YAHPO GYM python module. Documentation for the python module is available via the [module handbook](https://pfistfl.github.io/yahpo_gym/)
+while the R module builds its own documentation with the package.
 ## Installation
 
 The package can be installed from GitHub via
@@ -81,6 +81,30 @@ p$optimize(ois)
 
 
 ### Available Problems
+
+**Overview over problems**
+
+|Scenario     | #HPs| #Targets| #Instances|Space      |Fidelity |
+|:------------|----:|--------:|----------:|:----------|:--------|
+|lcbench      |    9|        6|         35|Numeric    |epoch    |
+|fcnet        |   12|        4|          4|Mixed      |epoch    |
+|nb301        |   35|        2|          1|Mixed+Deps |epoch    |
+|rbv2_svm     |    9|        6|         96|Mixed+Deps |frac     |
+|rbv2_ranger  |   11|        6|        114|Mixed+Deps |frac     |
+|rbv2_rpart   |    8|        6|        101|Mixed      |frac     |
+|rbv2_glmnet  |    6|        6|         98|Mixed      |frac     |
+|rbv2_xgboost |   17|        6|        109|Mixed+Deps |frac     |
+|rbv2_aknn    |    9|        6|         99|Mixed      |frac     |
+|rbv2_super   |   41|        6|         89|Mixed+Deps |frac     |
+|iaml_ranger  |   10|       12|          4|Mixed+Deps |frac     |
+|iaml_rpart   |    6|       12|          4|Numeric    |frac     |
+|iaml_glmnet  |    4|       12|          4|Numeric    |frac     |
+|iaml_xgboost |   15|       12|          4|Mixed+Deps |frac     |
+|iaml_super   |   30|       12|          4|Mixed+Deps |frac     |
+
+with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
+The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
+Search spaces can be continuous, mixed and have dependencies (Deps). 
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
 

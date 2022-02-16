@@ -196,7 +196,7 @@ Should function evaluationd be logged? Initialized to `FALSE`.}
 Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.}
 
 \item{\code{seed}}{`integer` \cr
-Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `0L`.}
+Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `NULL` (no seed).}
 }
 \if{html}{\out{</div>}}
 }
