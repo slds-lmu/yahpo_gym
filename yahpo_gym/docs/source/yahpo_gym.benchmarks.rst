@@ -28,10 +28,10 @@ yahpo\_gym.benchmarks.lcbench module
     :undoc-members:
     :show-inheritance:
 
-yahpo\_gym.benchmarks.nasbench\_301 module
+yahpo\_gym.benchmarks.nb301 module
 ------------------------------------------
 
-.. automodule:: yahpo_gym.benchmarks.nasbench_301
+.. automodule:: yahpo_gym.benchmarks.nb301
     :members:
     :undoc-members:
     :show-inheritance:
