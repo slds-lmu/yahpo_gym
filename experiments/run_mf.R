@@ -9,6 +9,9 @@ yahpo_gym = import("yahpo_gym")
 
 packages = c("data.table", "mlr3misc", "mlr3hyperband")
 
+# FIXME: clean up logs/no logging?
+# less budget for nb301/iaml_super
+
 reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
 #reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
 saveRegistry(reg)
@@ -289,13 +292,22 @@ for (i in seq_len(nrow(optimizers))) {
 }
 
 jobs = findJobs()
-resources.default = list(walltime = 3600L, memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
+resources.default = list(walltime = 3600 * 12L, memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
 submitJobs(jobs, resources = resources.default)
 
 done = findDone()
 results = reduceResultsList(done, function(x, job) {
+  budget_var = if (job$instance$scenario %in% c("lcbench", "nb301")) "epoch" else "trainsize"
+  target_var = job$instance$target
   # FIXME: minimize direction of target
-  x 
+  if (!job$instance$minimize) {
+    x[, (target_var) := - get(target_var)]
+  }
+  
+  tmp = x[, c(target_var, budget_var, "method", "scenario", "instance", "repl"), with = FALSE]
+  tmp[, iter := seq_len(.N)]
+  colnames(tmp) = c("target", "budget", "method", "scenario", "instance", "repl", "iter")
+  tmp
 })
 results = rbindlist(results, fill = TRUE)
 saveRDS(results, "results.rds")

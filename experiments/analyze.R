@@ -3,35 +3,35 @@ library(mlr3misc)
 library(ggplot2)
 library(pammtools)
 dat = readRDS("results.rds")
-dat[, iter := seq_len(.N), by = .(method, scenario, target, instance, repl)]
-dat[, cumbudget := cumsum(epoch), by = .(method, scenario, target, instance, repl)]
-dat[, incumbent := cummax(val_accuracy), by = .(method, scenario, target, instance, repl)]
+dat[, cumbudget := cumsum(budget), by = .(method, scenario, instance, repl)]
+dat[, cumbudget_scaled := cumbudget / max(cumbudget), by = .(method, scenario, instance, repl)]
+dat[, incumbent := cummin(target), by = .(method, scenario, instance, repl)]
 
-get_incumbent_cumbudget = function(incumbent, cumbudget) {
-  budgets = seq(0, 7280, by = 52)
+get_incumbent_cumbudget = function(incumbent, cumbudget_scaled) {
+  budgets = seq(0, 1, length.out = 101)
   map_dbl(budgets, function(budget) {
-    ind = which(cumbudget <= budget)
+    ind = which(cumbudget_scaled <= budget)
     if (length(ind) == 0L) {
-      0
+      max(incumbent)
     } else {
-      max(incumbent[ind])
+      min(incumbent[ind])
     }
   })
 }
 
-dat_budget = dat[, .(incumbent_budget = get_incumbent_cumbudget(incumbent, cumbudget), cumbudget = seq(0, 7280, by = 52)), by = .(method, scenario, target, instance, repl)]
+dat_budget = dat[, .(incumbent_budget = get_incumbent_cumbudget(incumbent, cumbudget_scaled), cumbudget_scaled = seq(0, 1, length.out = 101)), by = .(method, scenario, instance, repl)]
 
-agg_budget = dat_budget[, .(mean = mean(incumbent_budget), se = sd(incumbent_budget) / sqrt(.N)), by = .(cumbudget, method, scenario, target, instance)]
+agg_budget = dat_budget[, .(mean = mean(incumbent_budget), se = sd(incumbent_budget) / sqrt(.N)), by = .(cumbudget_scaled, method, scenario, instance)]
 
-ggplot(aes(x = cumbudget, y = mean, colour = method, fill = method), data = agg_budget) +
+ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), data = agg_budget) +
   geom_step(lwd = 1) +
   geom_stepribbon(aes(min = mean - se, max = mean + se), colour = NA, alpha = 0.3) +
-  facet_wrap(~ scenario + instance + target, scales = "free")
+  facet_wrap(~ scenario + instance, scales = "free")
 
-ggplot(aes(x = cumbudget, y = mean, colour = method, fill = method), data = agg_budget[cumbudget > 6000]) +
+ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), data = agg_budget[cumbudget_scaled > 0.1]) +
   geom_step(lwd = 1) +
   geom_stepribbon(aes(min = mean - se, max = mean + se), colour = NA, alpha = 0.3) +
-  facet_wrap(~ scenario + instance + target, scales = "free")
+  facet_wrap(~ scenario + instance, scales = "free")
 
 methods = unique(dat_budget$method)
 ranks = map_dtr(unique(dat_budget$scenario), function(scenario_) {
