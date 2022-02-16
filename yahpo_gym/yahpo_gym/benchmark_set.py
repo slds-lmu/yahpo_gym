@@ -46,8 +46,6 @@ class BenchmarkSet():
 
         assert config_id is not None, "Please provide a valid config_id."
         self.config = cfg(config_id, download=download)
-        if instance is not None:
-            self.set_instance(instance)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
@@ -58,6 +56,8 @@ class BenchmarkSet():
         self.session = None
         self.archive = []
 
+        if instance is not None:
+            self.set_instance(instance)        
 
         if self.active_session or (session is not None):
             self.set_session(session, multithread=multithread)
@@ -82,8 +82,10 @@ class BenchmarkSet():
             self.set_session(multithread=multithread)
 
         # Always work with a list of configurations
-        if isinstance(configuration, dict):
-            configuration = [configuration]
+        if isinstance(configuration, dict) or isinstance(configuration, CS.Configuration):
+            configuration = [configuration] 
+        
+        configuration = [cf.get_dictionary() if isinstance(cf, CS.Configuration) else cf for cf in configuration]
 
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
