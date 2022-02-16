@@ -115,7 +115,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         args = private$.py_instance_args
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
           args$config_id, session=args$onnx_session, active_session = args$active_session,
-          download = args$download, check = args$check, noisy = args$noisy, multithread = args$multithread
+          check = args$check, noisy = args$noisy, multithread = args$multithread
         )
       }
       return(private$.py_instance)

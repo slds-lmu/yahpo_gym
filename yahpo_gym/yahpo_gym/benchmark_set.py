@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, config_id: str = None, instance: str = None, download: bool = False, active_session: bool = False,
+    def __init__(self, config_id: str = None, instance: str = None, active_session: bool = False,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
         noisy: bool = False):
         """
@@ -27,8 +27,6 @@ class BenchmarkSet():
         instance: str
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`). 
             See `BenchmarkSet(<key>).instances` for a list of available instances.
-        download: bool
-            Should required data be downloaded (if not available)? Initialized to `False`.
         active_session: bool
             Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
         session: onnx.Session
@@ -45,7 +43,7 @@ class BenchmarkSet():
         """
 
         assert config_id is not None, "Please provide a valid config_id."
-        self.config = cfg(config_id, download=download)
+        self.config = cfg(config_id)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session

@@ -4,14 +4,6 @@ yahpo\_gym.benchmarks package
 Submodules
 ----------
 
-yahpo\_gym.benchmarks.download\_checks module
----------------------------------------------
-
-.. automodule:: yahpo_gym.benchmarks.download_checks
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 yahpo\_gym.benchmarks.fcnet module
 ----------------------------------
 
