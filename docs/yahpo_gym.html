@@ -143,11 +143,11 @@ Only relevant if no session is given.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="yahpo_gym.benchmark_set.BenchmarkSet.get_opt_space">
-<span class="sig-name descname"><span class="pre">get_opt_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_fidelity_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yahpo_gym.benchmark_set.BenchmarkSet.get_opt_space" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_opt_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_fidelity_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yahpo_gym.benchmark_set.BenchmarkSet.get_opt_space" title="Permalink to this definition"></a></dt>
 <dd><p>Get the search space to be optimized.
 Sets ‘instance’ as a constant instance and removes all fidelity parameters if ‘drop_fidelity_params = True’.</p>
 <dl class="simple">
-<dt>drop_fidelity_params: bool</dt><dd><p>Should fidelity params be dropped from the <cite>opt_space</cite>? Defaults to <cite>True</cite>.</p>
+<dt>drop_fidelity_params: bool</dt><dd><p>Should fidelity params be dropped from the <cite>opt_space</cite>? Defaults to <cite>False</cite>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -320,6 +320,16 @@ relevant meta-information about a specific benchmark scenario.</p>
 <dl class="simple">
 <dt>key: str</dt><dd><p>The key of the configuration to retrieve.
 If none, prints available keys.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="yahpo_gym.configuration.list_scenarios">
+<span class="sig-prename descclassname"><span class="pre">yahpo_gym.configuration.</span></span><span class="sig-name descname"><span class="pre">list_scenarios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#yahpo_gym.configuration.list_scenarios" title="Permalink to this definition"></a></dt>
+<dd><p>List available scenarios.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>_type_: List</p>
 </dd>
 </dl>
 </dd></dl>
