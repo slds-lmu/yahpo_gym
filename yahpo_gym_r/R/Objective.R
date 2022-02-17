@@ -46,7 +46,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       noise = ifelse(py_instance_args$noisy, "noisy", "deterministic")
       # asserts id, domain, codomain, properties
       super$initialize(
-        id = paste0("YAHPO_", py_instance_args$config_id),
+        id = paste0("YAHPO_", py_instance_args$scenario),
         domain = domain_new,
         codomain = codomain,
         properties = noise,
@@ -114,7 +114,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         gym = reticulate::import("yahpo_gym")
         args = private$.py_instance_args
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
-          args$config_id, session=args$onnx_session, active_session = args$active_session,
+          args$scenario, session=args$onnx_session, active_session = args$active_session,
           check = args$check, noisy = args$noisy, multithread = args$multithread
         )
       }

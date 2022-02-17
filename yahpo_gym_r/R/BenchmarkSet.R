@@ -120,7 +120,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         instance,
         multifidelity,
         list(
-          config_id = self$id, session = self$onnx_session, active_session = self$active_session, 
+          scenario = self$id, session = self$onnx_session, active_session = self$active_session, 
           check = self$check, mulltithread = self$multithread, noisy = self$noisy
         ),
         self$domain,
@@ -240,7 +240,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       if (is.null(private$.py_instance)) {
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
-          config_id = self$id, instance = self$instance, session = self$onnx_session, active_session = self$active_session,
+          scenario = self$id, instance = self$instance, session = self$onnx_session, active_session = self$active_session,
           multithread = self$multithread, noisy = self$noisy
         )
       }

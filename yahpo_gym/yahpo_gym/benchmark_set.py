@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, config_id: str = None, instance: str = None, active_session: bool = False,
+    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = False,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
         noisy: bool = False):
         """
@@ -42,8 +42,8 @@ class BenchmarkSet():
             Use stochastic surrogate models? Initialized to `False`.
         """
 
-        assert config_id is not None, "Please provide a valid config_id."
-        self.config = cfg(config_id)
+        assert scenario is not None, "Please provide a valid scenario."
+        self.config = cfg(scenario)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
