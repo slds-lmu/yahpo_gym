@@ -20,6 +20,10 @@ reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mo", 
 #reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
 saveRegistry(reg)
 
+# FIXME: acq_budget and n_points and maxit for focussearch
+# FIXME: ehvi easier for computation
+# FIXME: random interleaving in all methods?
+
 make_optim_instance = function(instance) {
   benchmark = BenchmarkSet$new(as.character(instance$scenario), download = FALSE)
   benchmark$subset_codomain(instance$targets[[1L]])
@@ -42,6 +46,21 @@ random_wrapper = function(job, data, instance, ...) {
   optim_instance
 }
 
+randomx4_wrapper = function(job, data, instance, ...) {
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
+  library(yahpogym)
+  logger = lgr::get_logger("bbotk")
+  logger$set_threshold("warn")
+  future::plan("sequential")
+
+  instance$budget = 4L * instance$budget
+
+  optim_instance = make_optim_instance(instance)
+  optimizer = opt("random_search")
+  optimizer$optimize(optim_instance)
+  optim_instance
+}
+
 parego_wrapper = function(job, data, instance, ...) {
   reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(yahpogym)
@@ -54,7 +73,7 @@ parego_wrapper = function(job, data, instance, ...) {
 
   surrogate = default_surrogate(optim_instance, n_learner = 1L)
   acq_function = AcqFunctionEI$new()
-  acq_optimizer = AcqOptimizer$new(opt("focus_search", n_points = 1000L, maxit = 5L), terminator = trm("evals", n_evals = acq_budget))
+  acq_optimizer = AcqOptimizer$new(opt("focus_search", n_points = 500L, maxit = 5L), terminator = trm("evals", n_evals = acq_budget))
 
   design = generate_design_lhs(optim_instance$search_space, 4L * optim_instance$search_space$length)$data
   optim_instance$eval_batch(design)
@@ -75,7 +94,7 @@ smsego_wrapper = function(job, data, instance, ...) {
 
   surrogate = default_surrogate(optim_instance)
   acq_function = AcqFunctionSmsEgo$new()
-  acq_optimizer = AcqOptimizer$new(opt("focus_search", n_points = 1000L, maxit = 5L), terminator = trm("evals", n_evals = acq_budget))
+  acq_optimizer = AcqOptimizer$new(opt("focus_search", n_points = 500L, maxit = 5L), terminator = trm("evals", n_evals = acq_budget))
 
   design = generate_design_lhs(optim_instance$search_space, 4L * optim_instance$search_space$length)$data
   optim_instance$eval_batch(design)
@@ -96,7 +115,7 @@ ehvi_wrapper = function(job, data, instance, ...) {
 
   surrogate = default_surrogate(optim_instance)
   acq_function = AcqFunctionEHVI$new()
-  acq_optimizer = AcqOptimizer$new(opt("focus_search", n_points = 1000L, maxit = 5L), terminator = trm("evals", n_evals = acq_budget))
+  acq_optimizer = AcqOptimizer$new(opt("focus_search", n_points = 500L, maxit = 5L), terminator = trm("evals", n_evals = acq_budget))
 
   design = generate_design_lhs(optim_instance$search_space, 4L * optim_instance$search_space$length)$data
   optim_instance$eval_batch(design)
@@ -126,26 +145,38 @@ mego_wrapper = function(job, data, instance, ...) {
 
 # add algorithms
 addAlgorithm("random", fun = random_wrapper)
+addAlgorithm("randomx4", fun = randomx4_wrapper)
 addAlgorithm("parego", fun = parego_wrapper)
 addAlgorithm("smsego", fun = smsego_wrapper)
 addAlgorithm("ehvi", fun = ehvi_wrapper)
 addAlgorithm("mego", fun = mego_wrapper)
 
 # setup scenarios and instances
+get_lcbench_setup = function(budget_factor = 30) {
+  bench = yahpo_gym$benchmark_set$BenchmarkSet("lcbench")
+  ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
+  instances = c("167152", "167185", "189873")
+  targets = list(c("val_accuracy", "val_cross_entropy"))
+  budget = ndim * budget_factor
+  setup = setDT(expand.grid(scenario = "lcbench", instance = instances, targets = targets, ndim = ndim, budget = budget, stringsAsFactors = FALSE))
+  setup[, minimize := map(targets, function(x) bench$config$config$y_minimize[match(x, bench$config$config$y_names)])]
+  setup
+}
+
 get_iaml_setup = function(budget_factor = 30) {
-  setup = map_dtr(c("iaml_glmnet", "iaml_rpart", "iaml_ranger", "iaml_xgboost", "iaml_super"), function(scenario) {
+  setup = map_dtr(c("iaml_rpart", "iaml_ranger", "iaml_xgboost", "iaml_super"), function(scenario) {
+    if (scenario == "iaml_super") budget_factor = 20L
     bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
     ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
-    instances = c("40981", "41146", "1489", "1067")
-    targets = list(c("mmce", "nf"))
+    instances = switch(scenario, iaml_rpart = c("1489", "1067"), iaml_ranger = c("1489", "1067"), iaml_xgboost = c("40981", "1489"), iaml_super = c("1489", "1067"))
+    targets = if (scenario == "iaml_xgboost") list(c("mmce", "nf"), c("mmce", "nf", "ias")) else list(c("mmce", "nf"))
     budget = ndim * budget_factor
-    minimize = bench$config$config$y_minimize[match(targets[[1L]], bench$config$config$y_names)]
-
-    setup = setDT(expand.grid(scenario = scenario, instance = instances, targets = targets, budget = budget, ndim = ndim, minimize = list(minimize), stringsAsFactors = FALSE))
+    setup = setDT(expand.grid(scenario = scenario, instance = instances, targets = targets, ndim = ndim, budget = budget, stringsAsFactors = FALSE))
+    setup[, minimize := map(targets, function(x) bench$config$config$y_minimize[match(x, bench$config$config$y_names)])]
   })
 }
 
-setup = rbind(get_iaml_setup())
+setup = rbind(get_lcbench_setup(), get_iaml_setup())
 
 setup[, id := seq_len(.N)]
 
@@ -160,7 +191,7 @@ prob_designs = unlist(prob_designs, recursive = FALSE, use.names = FALSE)
 names(prob_designs) = nn
 
 # add jobs for optimizers
-optimizers = data.table(algorithm = c("random", "parego", "smsego", "ehvi", "mego"))
+optimizers = data.table(algorithm = c("random", "randomx4", "parego", "smsego", "ehvi", "mego"))
 
 for (i in seq_len(nrow(optimizers))) {
   algo_designs = setNames(list(optimizers[i, ]), nm = optimizers[i, ]$algorithm)
@@ -179,18 +210,8 @@ submitJobs(jobs, resources = resources.default)
 
 done = findDone()
 results = reduceResultsList(done, function(x, job) {
-  budget_var = if (job$instance$scenario %in% c("lcbench", "nb301")) "epoch" else "trainsize"
-  target_var = job$instance$target
-  # FIXME: minimize direction of target
-  if (!job$instance$minimize) {
-    x[, (target_var) := - get(target_var)]
-  }
-  
-  tmp = x[, c(target_var, budget_var, "method", "scenario", "instance", "repl"), with = FALSE]
-  tmp[, iter := seq_len(.N)]
-  colnames(tmp) = c("target", "budget", "method", "scenario", "instance", "repl", "iter")
-  tmp
+  # FIXME:
 })
 results = rbindlist(results, fill = TRUE)
-saveRDS(results, "results.rds")
+saveRDS(results, "results_mo.rds")
 

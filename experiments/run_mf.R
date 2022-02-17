@@ -10,7 +10,7 @@ yahpo_gym = import("yahpo_gym")
 packages = c("data.table", "mlr3misc", "mlr3hyperband")
 
 # FIXME: clean up logs/no logging?
-# less budget for nb301/iaml_super
+# NOTE: budget factor is 30 except for nb301 and rbv2_super
 
 reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
 #reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
@@ -209,7 +209,7 @@ addAlgorithm("smac_hpo", fun = smac_hpo_wrapper)
 addAlgorithm("random", fun = random_wrapper)
 
 # setup scenarios and instances
-get_nb301_setup = function(budget_factor = 30) {
+get_nb301_setup = function(budget_factor = 20L) {
   scenario = "nb301"
   bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
   fidelity_space = bench$get_fidelity_space()
@@ -227,7 +227,7 @@ get_nb301_setup = function(budget_factor = 30) {
   setup
 }
 
-get_lcbench_setup = function(budget_factor = 30) {
+get_lcbench_setup = function(budget_factor = 30L) {
   scenario = "lcbench"
   bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
   fidelity_space = bench$get_fidelity_space()
@@ -245,8 +245,9 @@ get_lcbench_setup = function(budget_factor = 30) {
   setup
 }
 
-get_iaml_setup = function(budget_factor = 30) {
-  setup = map_dtr(c("iaml_glmnet", "iaml_rpart", "iaml_ranger", "iaml_xgboost", "iaml_super"), function(scenario) {
+get_rbv2_setup = function(budget_factor = 30L) {
+  setup = map_dtr(c("rbv2_glmnet", "rbv2_rpart", "rbv2_ranger", "rbv2_xgboost", "rbv2_super"), function(scenario) {
+    if (scenario == "rbv2_super") budget_factor = 20L
     bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
     fidelity_space = bench$get_fidelity_space()
     fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -254,8 +255,8 @@ get_iaml_setup = function(budget_factor = 30) {
     max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
     ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
 
-    instances = c("40981", "41146", "1489", "1067")
-    target = "mmce"
+    instances = switch(scenario, rbv2_glmnet = c(), rbv2_rpart = c(), rbv2_ranger = c(), rbv2_xgboost = c(), rbv2_super = c())
+    target = "acc"
     budget = ndim * max_budget * budget_factor
     on_integer_scale = FALSE
     minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
@@ -263,7 +264,7 @@ get_iaml_setup = function(budget_factor = 30) {
   })
 }
 
-setup = rbind(get_nb301_setup(), get_lcbench_setup(), get_iaml_setup())
+setup = rbind(get_nb301_setup(), get_lcbench_setup(), get_rbv2_setup())
 
 setup[, id := seq_len(.N)]
 
@@ -310,5 +311,5 @@ results = reduceResultsList(done, function(x, job) {
   tmp
 })
 results = rbindlist(results, fill = TRUE)
-saveRDS(results, "results.rds")
+saveRDS(results, "results_mf.rds")
 

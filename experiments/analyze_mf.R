@@ -2,7 +2,7 @@ library(data.table)
 library(mlr3misc)
 library(ggplot2)
 library(pammtools)
-dat = readRDS("results.rds")
+dat = readRDS("results_mf.rds")
 dat[, cumbudget := cumsum(budget), by = .(method, scenario, instance, repl)]
 dat[, cumbudget_scaled := cumbudget / max(cumbudget), by = .(method, scenario, instance, repl)]
 dat[, incumbent := cummin(target), by = .(method, scenario, instance, repl)]
@@ -63,5 +63,4 @@ ranks_total = ranks_agg[, .(mean = mean(mean), se = sd(mean) / sqrt(.N)), by = .
 ggplot(aes(x = cumbudget, y = mean, colour = method, fill = method), data = ranks_total) +
   geom_line(lwd = 1) +
   geom_ribbon(aes(min = mean - se, max = mean + se), colour = NA, alpha = 0.3)
-
 
