@@ -137,3 +137,12 @@ def cfg(key: str = None, **kwargs):
         return config_dict
 
 config_dict = ConfigDict()
+
+def list_scenarios():
+    """
+    List available scenarios.
+
+    Returns:
+        _type_: List
+    """
+    return [x for x in cfg().configs.keys()]
