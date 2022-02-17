@@ -16,8 +16,16 @@ packages = c("data.table", "mlr3", "mlr3learners", "mlr3pipelines", "mlr3misc", 
 RhpcBLASctl::blas_set_num_threads(1L)
 RhpcBLASctl::omp_set_num_threads(1L)
 
-reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mo", packages = packages)
-#reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
+root = here::here()
+experiments_dir = file.path(root, "experiments")
+
+source_files = map_chr("helpers.R", function(x) file.path(experiments_dir, x))
+for (sf in source_files) {
+  source(sf)
+}
+
+reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mo", packages = packages, source = source_files)
+#reg = makeExperimentRegistry(file.dir = NA, conf.file = NA, source = source_files)
 saveRegistry(reg)
 
 # FIXME: acq_budget and n_points and maxit for focussearch
@@ -25,7 +33,7 @@ saveRegistry(reg)
 # FIXME: random interleaving in all methods?
 
 make_optim_instance = function(instance) {
-  benchmark = BenchmarkSet$new(as.character(instance$scenario), download = FALSE)
+  benchmark = BenchmarkSet$new(as.character(instance$scenario), instance = as.character(instance$instance), download = FALSE)
   benchmark$subset_codomain(instance$targets[[1L]])
   objective = benchmark$get_objective(as.character(instance$instance), multifidelity = FALSE, check_values = FALSE)
   budget = instance$budget
@@ -153,7 +161,7 @@ addAlgorithm("mego", fun = mego_wrapper)
 
 # setup scenarios and instances
 get_lcbench_setup = function(budget_factor = 30) {
-  bench = yahpo_gym$benchmark_set$BenchmarkSet("lcbench")
+  bench = yahpo_gym$benchmark_set$BenchmarkSet("lcbench", instance = "167152")
   ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
   instances = c("167152", "167185", "189873")
   targets = list(c("val_accuracy", "val_cross_entropy"))
@@ -166,7 +174,7 @@ get_lcbench_setup = function(budget_factor = 30) {
 get_iaml_setup = function(budget_factor = 30) {
   setup = map_dtr(c("iaml_rpart", "iaml_ranger", "iaml_xgboost", "iaml_super"), function(scenario) {
     if (scenario == "iaml_super") budget_factor = 20L
-    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "1489")
     ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
     instances = switch(scenario, iaml_rpart = c("1489", "1067"), iaml_ranger = c("1489", "1067"), iaml_xgboost = c("40981", "1489"), iaml_super = c("1489", "1067"))
     targets = if (scenario == "iaml_xgboost") list(c("mmce", "nf"), c("mmce", "nf", "ias")) else list(c("mmce", "nf"))
@@ -204,8 +212,11 @@ for (i in seq_len(nrow(optimizers))) {
   addJobTags(ids, as.character(optimizers[i, ]$algorithm))
 }
 
-jobs = findJobs()
-resources.default = list(walltime = 3600 * 12L, memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
+tab = getJobTable()
+tab[, walltime := map_dbl(prob.pars, function(x) x$budget) * 30]
+tab["ehvi" %in% tags, walltime := walltime * 10]
+jobs = tab[, c("job.id", "walltime")]
+resources.default = list(memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
 submitJobs(jobs, resources = resources.default)
 
 done = findDone()
