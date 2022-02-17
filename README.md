@@ -1,10 +1,10 @@
 # YAHPO GYM
-[![Unittests](https://github.com/pfistfl/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[![Docs](https://github.com/pfistfl/yahpo_gym/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://pfistfl.github.io/yahpo_gym/) 
+[![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
+[![Docs](https://github.com/slds-lmu/yahpo_gym/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
-[![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
-[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
+[![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
+[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
 ### What is YAHPO GYM? 
 
@@ -32,7 +32,7 @@ This repository contains three modules/packages:
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
 across a large variety of problems.
 
-![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/results.png?raw=true)
+![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/results.png?raw=true)
 
 <br><br>
 ---
@@ -75,9 +75,9 @@ YAHPO GYM is the module for inference and allows for evaluating a HPC configurat
 
 Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtained [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
-An example for evaluation and running HPO methods is given in the README of the [YAHPO GYM Module](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
+An example for evaluation and running HPO methods is given in the README of the [YAHPO GYM Module](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 
-A quick introduction is given in the accompanying [jupyter notebook](https://github.com/pfistfl/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
+A quick introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
 
 #### YAHPO Train
 
