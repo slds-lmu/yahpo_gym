@@ -3,7 +3,7 @@ from yahpo_train.learner import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
 from yahpo_gym import benchmark_set
-from yahpo_gym.benchmarks import lcbench, rbv2, nasbench_301, fcnet, taskset, iaml
+from yahpo_gym.benchmarks import lcbench, rbv2, nb301, fcnet, taskset, iaml
 from yahpo_gym.configuration import cfg
 from fastai.callback.wandb import *
 from functools import partial

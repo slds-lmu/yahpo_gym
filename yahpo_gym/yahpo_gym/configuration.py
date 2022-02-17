@@ -21,7 +21,7 @@ class Configuration():
         self.config = config
         
         # Set attributes
-        self.config_id = self.config['config_id']
+        self.scenario = self.config['config_id']
         self.y_names = self.config['y_names']
         self.cat_names = self.config['cat_names']
         self.cont_names = self.config['cont_names']

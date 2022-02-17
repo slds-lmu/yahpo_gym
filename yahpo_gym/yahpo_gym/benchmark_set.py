@@ -22,7 +22,7 @@ class BenchmarkSet():
 
         Parameters
         ----------
-        config_id: str
+        scenario: str
             (Required) A key for `ConfigDict` pertaining to a valid benchmark scenario (e.g. `lcbench`).
         instance: str
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`). 
@@ -286,7 +286,7 @@ class BenchmarkSet():
 
 
     def __repr__(self):
-        return f"BenchmarkSet ({self.config.config_id})"
+        return f"BenchmarkSet ({self.config.scenario})"
 
     def _config_to_xs(self, configuration):
         if type(configuration) == CS.Configuration:
