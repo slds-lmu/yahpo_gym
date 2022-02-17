@@ -26,7 +26,7 @@ class Configuration():
             self.download_files()
         
         # Set attributes
-        self.config_id = self.config['config_id']
+        self.scenario = self.config['config_id']
         self.y_names = self.config['y_names']
         self.cat_names = self.config['cat_names']
         self.cont_names = self.config['cont_names']
@@ -43,7 +43,7 @@ class Configuration():
     def download_files(self, data: bool = False, update: bool = False, files: list = []):
         d = FastDownload(
             base=self.config['basedir'],
-            data=self.config['config_id'],
+            data=self.config['scenario'],
             archive=self.config['config_id'],
             module = yahpo_gym.benchmarks
          )

@@ -100,7 +100,7 @@ The `BenchmarkSet` has the following important functions and fields (with releva
 ```
 - `__init__`: 
   args:
-    config_id: str, "Name of the scenario"
+    scenario: str, "Name of the scenario"
     instance: str (optional), "A valid instance"
   "Instantiate the benchmark."
 
