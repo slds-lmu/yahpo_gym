@@ -17,5 +17,5 @@ Path to save configuration object including "path" to.}
 Initialize a local configuration
 }
 \details{
-Allows setting a path the required meta-data for YAHPO Gym is downloaded to.
+Allows setting a path the required meta-data for YAHPO Gym is installed to.
 }

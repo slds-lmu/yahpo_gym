@@ -17,7 +17,7 @@ jobs:
     - name: Make docs
       run: |
         cd yahpo_gym/docs
-        printf "data_path: ~/file/to/data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
+        printf "data_path: ~/file/to/data" >> ~/.config/yahpo_gym
         pip install sphinx_rtd_theme
         make html
     - name: Pull latest gh-pages

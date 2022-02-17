@@ -20,7 +20,7 @@ class LocalConfiguration():
         self.settings_path = Path(settings_path).expanduser().absolute()
         self._config = None
     
-    def init_config(self, data_path: str = "", download_url: str ="https://syncandshare.lrz.de/dl/fiCMkzqj1bv1LfCUyvZKmLvd"):
+    def init_config(self, data_path: str = ""):
         """
         Initialize a new local configuration.
 
@@ -28,8 +28,6 @@ class LocalConfiguration():
         The 
         It is currently used to globally store the following information
         'data_path': A path to the metadata required for inference.
-        'download_url': URL used for downloading the required surrogate models.
-
 
         Parameters
         ----------
@@ -37,7 +35,7 @@ class LocalConfiguration():
             Path to the directory where surrogate models and metadata are saved.
         """
         os.makedirs(os.path.dirname(self.settings_path), exist_ok=True)
-        config = {'data_path': str(data_path), 'download_url':download_url}
+        config = {'data_path': str(data_path)}
         with self.settings_path.open('w', encoding='utf-8') as fh:
             yaml.dump(config, fh)
         return None
@@ -58,7 +56,7 @@ class LocalConfiguration():
             yaml.dump(config, fh)
 
     def _load_config(self):
-        config = {"data_path":"", "download_url":""}
+        config = {"data_path":""}
         try:
             with self.settings_path.open('r') as fh:
                 config = yaml.load(fh, Loader=yaml.FullLoader)
@@ -83,13 +81,6 @@ class LocalConfiguration():
         Path where metadata and surrogate models for inference are stored.
         """
         return Path(self.config.get('data_path')).expanduser().absolute()
-
-    @property
-    def download_url(self):
-        """
-        Path where metadata and surrogate models for inference are stored.
-        """
-        return self.config.get('download_url')
 
 local_config = LocalConfiguration()
 __all__ = ['local_config', 'LocalConfiguration']

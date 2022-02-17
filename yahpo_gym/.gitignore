@@ -8,5 +8,3 @@ build/
 
 # Ignore OSX finder directories
 .DS_Store
-
-benchmarks/download_checks.py

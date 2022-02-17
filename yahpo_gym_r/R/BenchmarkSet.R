@@ -7,7 +7,7 @@
 #' and additional helper functionality.
 #'
 #' @section Methods:
-#'   * new(key, onnx_session, active_session, download): Initialize the class.
+#'   * new(key, onnx_session, active_session): Initialize the class.
 #'   * get_objective(): Obtain the [`bbotk::Objective`].
 #'   * get_opt_space_py(): Obtain the [`ConfigSpace`].
 #'
@@ -40,10 +40,6 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
     active_session = NULL,
 
-    #' @field download `logical` \cr
-    #'   Download data in case it is not available?
-    download = NULL,
-
     #' @field multithread `logical` \cr
     #'   Should the ONNX session be allowed to leverage multithreading capabilities?
     multithread = NULL,
@@ -68,20 +64,17 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   If no session is provided, new session is created.
     #' @param active_session `logical` \cr
     #'   Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.
-    #' @param download `logical` \cr
-    #'   Download the required data on instantiation? Default `FALSE`.
     #' @param multithread `logical` \cr
     #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @param check `logical` \cr
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
     #' @param noisy `logical` \cr
     #'   Should noisy surrogates be used instead of deterministic ones?
-    initialize = function(scenario, instance = NULL, onnx_session = NULL, active_session = FALSE, download = FALSE, multithread = FALSE, check = FALSE, noisy = FALSE) {
+    initialize = function(scenario, instance = NULL, onnx_session = NULL, active_session = FALSE, multithread = FALSE, check = FALSE, noisy = FALSE) {
       self$id = assert_string(scenario)
       self$instance = assert_string(instance)
       self$onnx_session = onnx_session
       self$active_session = assert_flag(active_session)
-      self$download = assert_flag(download)
       self$multithread = assert_flag(multithread)
       self$check = assert_flag(check)
       self$noisy = assert_flag(noisy)
@@ -128,7 +121,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         multifidelity,
         list(
           config_id = self$id, session = self$onnx_session, active_session = self$active_session, 
-          download = self$download, check = self$check, mulltithread = self$multithread, noisy = self$noisy
+          check = self$check, mulltithread = self$multithread, noisy = self$noisy
         ),
         self$domain,
         self$codomain,
@@ -248,7 +241,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         gym = reticulate::import("yahpo_gym")
         private$.py_instance = gym$benchmark_set$BenchmarkSet(
           config_id = self$id, instance = self$instance, session = self$onnx_session, active_session = self$active_session,
-          download = self$download, multithread = self$multithread, noisy = self$noisy
+          multithread = self$multithread, noisy = self$noisy
         )
       }
       return(private$.py_instance)

@@ -17,7 +17,7 @@ and additional helper functionality.
 }
 \section{Methods}{
 
-  * new(key, onnx_session, active_session, download): Initialize the class.
+  * new(key, onnx_session, active_session): Initialize the class.
   * get_objective(): Obtain the [`bbotk::Objective`].
   * get_opt_space_py(): Obtain the [`ConfigSpace`].
 }
@@ -40,14 +40,14 @@ b$instances
 \item{\code{id}}{`character` \cr
 The scenario identifier.}
 
+\item{\code{instance}}{`character` \cr
+The instance identifier.}
+
 \item{\code{onnx_session}}{`onnxruntime.InferenceSession` \cr
 A session to use for the predict. If `NULL` a new session is initialized.}
 
 \item{\code{active_session}}{`logical` \cr
 Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.}
-
-\item{\code{download}}{`logical` \cr
-Download data in case it is not available?}
 
 \item{\code{multithread}}{`logical` \cr
 Should the ONNX session be allowed to leverage multithreading capabilities?}
@@ -108,10 +108,10 @@ A python `yahpo_gym.BenchmarkSet`.}
 Initialize a new object
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$new(
-  key,
+  scenario,
+  instance = NULL,
   onnx_session = NULL,
   active_session = FALSE,
-  download = FALSE,
   multithread = FALSE,
   check = FALSE,
   noisy = FALSE
@@ -121,8 +121,11 @@ Initialize a new object
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{key}}{`character` \cr
+\item{\code{scenario}}{`character` \cr
 Key for a benchmark scenario. See [`list_benchmarks`] for more information.}
+
+\item{\code{instance}}{[`character`] \cr
+A valid instance. See `instances`.}
 
 \item{\code{onnx_session}}{`onnxruntime.InferenceSession` \cr
 A matching `onnxruntime.InferenceSession`. See `session` for more information.
@@ -130,9 +133,6 @@ If no session is provided, new session is created.}
 
 \item{\code{active_session}}{`logical` \cr
 Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `FALSE`.}
-
-\item{\code{download}}{`logical` \cr
-Download the required data on instantiation? Default `FALSE`.}
 
 \item{\code{multithread}}{`logical` \cr
 Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.}
@@ -243,15 +243,12 @@ A [`paradox::ParamSet`] containing the search space to optimize over.
 \subsection{Method \code{get_opt_space_py()}}{
 Get Optimization ConfigSpace
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(instance, drop_fidelity_params = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BenchmarkSet$get_opt_space_py(drop_fidelity_params = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{instance}}{[`character`] \cr
-A valid instance. See `instances`.}
-
 \item{\code{drop_fidelity_params}}{[`logical`] \cr
 Should fidelity params be dropped? Defaults to `TRUE`.}
 }
