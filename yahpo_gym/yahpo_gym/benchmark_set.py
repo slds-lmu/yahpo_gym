@@ -46,8 +46,6 @@ class BenchmarkSet():
 
         assert config_id is not None, "Please provide a valid config_id."
         self.config = cfg(config_id, download=download)
-        if instance is not None:
-            self.set_instance(instance)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
@@ -58,6 +56,8 @@ class BenchmarkSet():
         self.session = None
         self.archive = []
 
+        if instance is not None:
+            self.set_instance(instance)        
 
         if self.active_session or (session is not None):
             self.set_session(session, multithread=multithread)
@@ -82,8 +82,10 @@ class BenchmarkSet():
             self.set_session(multithread=multithread)
 
         # Always work with a list of configurations
-        if isinstance(configuration, dict):
-            configuration = [configuration]
+        if isinstance(configuration, dict) or isinstance(configuration, CS.Configuration):
+            configuration = [configuration] 
+        
+        configuration = [cf.get_dictionary() if isinstance(cf, CS.Configuration) else cf for cf in configuration]
 
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
@@ -174,30 +176,33 @@ class BenchmarkSet():
         """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, instance:str, drop_fidelity_params:bool = True):
+    def get_opt_space(self, drop_fidelity_params:bool = True):
         """
         Get the search space to be optimized.
         Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
         
         Parameters
         ----------
-        instance: str
-            A valid instance. See `instances`.
         drop_fidelity_params: bool
             Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
         """
-        # FIXME: assert instance is a valid choice
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
-        if self.config.instance_names is not None:
-            instance_names_idx = csn.get_hyperparameter_names().index(self.config.instance_names)
-            hps[instance_names_idx] = CSH.Constant(self.config.instance_names, instance)
+        
+        # Set constants (e.g. instance)
+        for p, v in self.constants.items():
+            param_idx = csn.get_hyperparameter_names().index(p)
+            hps[param_idx] = CSH.Constant(p,v)
+            
+        # Drop fidelity parameters
         if drop_fidelity_params:
             fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
             fidelity_params_idx.sort()
             fidelity_params_idx.reverse()
             for idx in fidelity_params_idx:
                 del hps[idx]
+                
+        # Rebuild ConfigSpace
         cnds = csn.get_conditions()
         fbds = csn.get_forbiddens()
         cs = CS.ConfigurationSpace()
@@ -254,6 +259,32 @@ class BenchmarkSet():
         if self.config.instance_names is None:
             return self.config.config['instances']
         return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]
+    
+    @property
+    def targets(self):
+        """
+        A list of available targets for the scenario.
+        """
+        return self.config.y_names
+    
+    @property
+    def properties(self):
+        """
+        List of properties of the benchmark scenario: 
+        Describes the type of the search space: ('continuous', 'mixed', 'categorical', 'hierarchical')
+        and availability of metadata (e.g. 'memory': memory measurements are available).
+        """
+        props = []
+    
+        cat = length(self.config.cat_names) > 1
+        cont = length(self.config.cont_names) >= 1
+        props += ["mixed" if cat & cont else "categorical" if cat else "continuous"]
+        if self.config.hierarchical:
+            props += ["hierarchical"]
+        if self.config.memory_name != '':
+            props += ["memory"]
+            
+        return props
 
 
     def __repr__(self):
@@ -281,7 +312,6 @@ class BenchmarkSet():
         for hp in missing:
             value = '#na#' if hp in self.config.cat_names else 0  # '#na#' for cats, see _integer_encode below
             configuration.update({hp:value})
-
 
         x_cat = np.array([self._integer_encode(configuration[x], x) for x in self.config.cat_names if x not in self.config.drop_predict]).reshape(1, -1).astype(np.int32)
         x_cont = np.array([configuration[x] for x in self.config.cont_names]).reshape(1, -1).astype(np.float32)

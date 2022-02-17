@@ -8,11 +8,10 @@ from yahpo_gym.benchmarks import *
 
 
 def test_objective_timed_lcbench():
-    b = BenchmarkSet("lcbench", download = False)
+    b = BenchmarkSet("lcbench", instance = "3945", download = False)
     fidelity_config = {"epoch" : 50}
-    test_instance = "3945"
 
-    optspace =  b.get_opt_space(instance = test_instance)
+    optspace =  b.get_opt_space()
     assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
 
     for i in range(3):
