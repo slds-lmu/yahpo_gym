@@ -6,12 +6,14 @@ library(mlr3pipelines)
 library(mlr3misc)
 library(mlr3mbo)  # @moo
 library(bbotk)  # @focussearch
+library(paradox)  # @expression_params
+library(miesmuschel)  # @ yahpo_mo
 reticulate::use_virtualenv("mf_env/", required = TRUE)
 #reticulate::use_virtualenv("/home/lps/.local/share/virtualenvs/yahpo_gym-4ygV7ggv/", required = TRUE)
 library(reticulate)
 yahpo_gym = import("yahpo_gym")
 
-packages = c("data.table", "mlr3", "mlr3learners", "mlr3pipelines", "mlr3misc", "mlr3mbo", "bbotk")
+packages = c("data.table", "mlr3", "mlr3learners", "mlr3pipelines", "mlr3misc", "mlr3mbo", "bbotk", "paradox", "miesmuschel")
 
 RhpcBLASctl::blas_set_num_threads(1L)
 RhpcBLASctl::omp_set_num_threads(1L)
@@ -29,17 +31,7 @@ reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mo", 
 saveRegistry(reg)
 
 # FIXME: acq_budget and n_points and maxit for focussearch
-# FIXME: ehvi easier for computation
 # FIXME: random interleaving in all methods?
-
-make_optim_instance = function(instance) {
-  benchmark = BenchmarkSet$new(as.character(instance$scenario), instance = as.character(instance$instance), download = FALSE)
-  benchmark$subset_codomain(instance$targets[[1L]])
-  objective = benchmark$get_objective(as.character(instance$instance), multifidelity = FALSE, check_values = FALSE)
-  budget = instance$budget
-  optim_instance = OptimInstanceMultiCrit$new(objective, search_space = benchmark$get_search_space(drop_fidelity_params = TRUE), terminator = trm("evals", n_evals = budget), check_values = FALSE)
-  optim_instance
-}
 
 random_wrapper = function(job, data, instance, ...) {
   reticulate::use_virtualenv("mf_env/", required = TRUE)
@@ -65,6 +57,27 @@ randomx4_wrapper = function(job, data, instance, ...) {
 
   optim_instance = make_optim_instance(instance)
   optimizer = opt("random_search")
+  optimizer$optimize(optim_instance)
+  optim_instance
+}
+
+mies_wrapper = function(job, data, instance, ...) {
+  reticulate::use_virtualenv("mf_env/", required = TRUE)
+  library(yahpogym)
+  logger = lgr::get_logger("bbotk")
+  logger$set_threshold("warn")
+  future::plan("sequential")
+
+  optim_instance = make_optim_instance(instance)
+  mutator_numeric = mut("cmpmaybe", mut("gauss"), p = 0.2)
+  mutator_categorical = mut("cmpmaybe", mut("unif", can_mutate_to_same = FALSE), p = 0.2)
+  mutator = mut("combine", list(ParamDbl = mutator_numeric, ParamInt = mutator_numeric, ParamFct = mutator_categorical, ParamLgl = mutator_categorical))
+  recombinator = rec("maybe", rec("xounif", p = 0.2), p = 1)
+  parent_selector_main = sel("tournament", scl("nondom"))
+  survival_selector = sel("best", scl("nondom"))
+  mu = floor(instance$budget / 6)
+  lambda = floor(mu / 4)
+  optimizer = opt("mies", lambda = lambda, mu = mu, survival_strategy = "plus", mutator = mutator, recombinator = recombinator, parent_selector = parent_selector_main, survival_selector)
   optimizer$optimize(optim_instance)
   optim_instance
 }
@@ -154,6 +167,7 @@ mego_wrapper = function(job, data, instance, ...) {
 # add algorithms
 addAlgorithm("random", fun = random_wrapper)
 addAlgorithm("randomx4", fun = randomx4_wrapper)
+addAlgorithm("mies", fun = mies_wrapper)
 addAlgorithm("parego", fun = parego_wrapper)
 addAlgorithm("smsego", fun = smsego_wrapper)
 addAlgorithm("ehvi", fun = ehvi_wrapper)
@@ -199,7 +213,7 @@ prob_designs = unlist(prob_designs, recursive = FALSE, use.names = FALSE)
 names(prob_designs) = nn
 
 # add jobs for optimizers
-optimizers = data.table(algorithm = c("random", "randomx4", "parego", "smsego", "ehvi", "mego"))
+optimizers = data.table(algorithm = c("random", "randomx4", "mies", "parego", "smsego", "ehvi", "mego"))
 
 for (i in seq_len(nrow(optimizers))) {
   algo_designs = setNames(list(optimizers[i, ]), nm = optimizers[i, ]$algorithm)
@@ -221,7 +235,20 @@ submitJobs(jobs, resources = resources.default)
 
 done = findDone()
 results = reduceResultsList(done, function(x, job) {
-  # FIXME:
+  pars = job$pars
+  tmp = x$archive$data[, pars$prob.pars$targets, with = FALSE]
+  tmp[, method := pars$algo.pars$algorithm]
+  tmp[, scenario := pars$prob.pars$scenario]
+  tmp[, instance := pars$prob.pars$instance]
+  tmp[, targets := paste0(pars$prob.pars$targets, collapse = "_")]
+  tmp[, iter := seq_len(.N)]
+  tmp[, repl := job$repl]
+  for (i in seq_along(pars$prob.pars$targets)) {
+    target = pars$prob.pars$targets[i]
+    minimize = pars$prob.pars$minimize[i]
+    tmp[[target]] = (if (minimize) 1 else -1) * tmp[[target]]
+  }
+  tmp
 })
 results = rbindlist(results, fill = TRUE)
 saveRDS(results, "results_mo.rds")
