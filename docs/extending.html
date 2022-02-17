@@ -89,7 +89,7 @@ This includes a <cite>config_id</cite> (an id variable); <cite>y_names</cite>, <
 numeric and categorical variables respectively and so on.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym.configuration</span> <span class="kn">import</span> <span class="n">config_dict</span><span class="p">,</span> <span class="n">cfg</span>
 <span class="n">_new_dict</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;config_id&#39;</span> <span class="p">:</span> <span class="s1">&#39;&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="c1"># Add some Id</span>
+    <span class="s1">&#39;scenario&#39;</span> <span class="p">:</span> <span class="s1">&#39;&lt;ID&gt;&#39;</span><span class="p">,</span> <span class="c1"># Add some Id</span>
     <span class="s1">&#39;y_names&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;valid_loss&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="c1"># names of target variables</span>
     <span class="s1">&#39;y_minimize&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="c1"># whether target variables should be minimized</span>
     <span class="s1">&#39;cont_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="s1">&#39;learning_rate&#39;</span><span class="p">],</span> <span class="c1"># numeric variables</span>
