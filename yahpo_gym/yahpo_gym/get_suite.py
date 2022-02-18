@@ -1,7 +1,7 @@
 from pandas import read_json
 from yahpo_gym.local_config import local_config
 
-def get_tasks(type:str, version:int =0):
+def get_suite(type:str, version:int =0):
     """
     Interface for benchmark scenario meta information. 
     Abstract base class used to instantiate configurations that contain all

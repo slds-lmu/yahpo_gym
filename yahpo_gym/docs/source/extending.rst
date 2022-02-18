@@ -17,7 +17,7 @@ numeric and categorical variables respectively and so on.
 
     from yahpo_gym.configuration import config_dict, cfg
     _new_dict = {
-        'config_id' : '<ID>', # Add some Id
+        'scenario' : '<ID>', # Add some Id
         'y_names' : ['valid_loss', ...], # names of target variables
         'y_minimize' : [True, ...], # whether target variables should be minimized
         'cont_names': ['epoch', 'learning_rate'], # numeric variables

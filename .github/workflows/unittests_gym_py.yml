@@ -19,7 +19,7 @@ jobs:
       run: |
         cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym
         pip install -e .[test]
-        printf "data_path: ~/work/yahpo_data\ndownload_url: https://no_address.com" >> ~/.config/yahpo_gym
+        printf "data_path: ~/work/yahpo_data\n" >> ~/.config/yahpo_gym
     - name: Run yahpo_gym tests [python]
       run: |
         pytest -sv yahpo_gym/tests/

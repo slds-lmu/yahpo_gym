@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, config_id: str = None, instance: str = None, download: bool = False, active_session: bool = False,
+    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = False,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
         noisy: bool = False):
         """
@@ -22,13 +22,11 @@ class BenchmarkSet():
 
         Parameters
         ----------
-        config_id: str
+        scenario: str
             (Required) A key for `ConfigDict` pertaining to a valid benchmark scenario (e.g. `lcbench`).
         instance: str
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`). 
             See `BenchmarkSet(<key>).instances` for a list of available instances.
-        download: bool
-            Should required data be downloaded (if not available)? Initialized to `False`.
         active_session: bool
             Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
         session: onnx.Session
@@ -44,8 +42,8 @@ class BenchmarkSet():
             Use stochastic surrogate models? Initialized to `False`.
         """
 
-        assert config_id is not None, "Please provide a valid config_id."
-        self.config = cfg(config_id, download=download)
+        assert scenario is not None, "Please provide a valid scenario."
+        self.config = cfg(scenario)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
@@ -176,7 +174,7 @@ class BenchmarkSet():
         """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, drop_fidelity_params:bool = True):
+    def get_opt_space(self, drop_fidelity_params:bool = False):
         """
         Get the search space to be optimized.
         Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
@@ -184,7 +182,7 @@ class BenchmarkSet():
         Parameters
         ----------
         drop_fidelity_params: bool
-            Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
+            Should fidelity params be dropped from the `opt_space`? Defaults to `False`.
         """
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
@@ -288,7 +286,7 @@ class BenchmarkSet():
 
 
     def __repr__(self):
-        return f"BenchmarkSet ({self.config.config_id})"
+        return f"BenchmarkSet ({self.config.scenario})"
 
     def _config_to_xs(self, configuration):
         if type(configuration) == CS.Configuration:
