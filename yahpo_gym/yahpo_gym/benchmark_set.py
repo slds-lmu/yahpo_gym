@@ -174,7 +174,7 @@ class BenchmarkSet():
         """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, drop_fidelity_params:bool = False):
+    def get_opt_space(self, drop_fidelity_params:bool = False, seed:Optional[int] = None):
         """
         Get the search space to be optimized.
         Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
@@ -183,6 +183,8 @@ class BenchmarkSet():
         ----------
         drop_fidelity_params: bool
             Should fidelity params be dropped from the `opt_space`? Defaults to `False`.
+        seed : int
+            Seed for the ConfigSpace. Optional, initialized to None.
         """
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
@@ -203,7 +205,7 @@ class BenchmarkSet():
         # Rebuild ConfigSpace
         cnds = csn.get_conditions()
         fbds = csn.get_forbiddens()
-        cs = CS.ConfigurationSpace()
+        cs = CS.ConfigurationSpace(seed = seed)
         cs.add_hyperparameters(hps)
         cs.add_conditions(cnds)
         cs.add_forbidden_clauses(fbds)
