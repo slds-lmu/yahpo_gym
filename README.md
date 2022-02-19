@@ -1,6 +1,6 @@
 # YAHPO GYM
-[![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[![Docs](https://github.com/slds-lmu/yahpo_gym/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
+[![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
+[![Docs](https://github.com/slds-lmu/yahpo_gym/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
 [![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
@@ -9,7 +9,7 @@
 ### What is YAHPO GYM? 
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
-The underlying software with additional documentation and background can be found [here](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym).
+The underlying software with additional documentation and background can be found [here](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 See the [module Documentation](https://slds-lmu.github.io/yahpo_gym/) for more info.
 
 - **Problem Variety**: Optimization problems in YAHPO Gym stem from diverse Hyperparameter Optimization scenarios on tabular as well as image data
@@ -87,5 +87,5 @@ YAHPO Train is still in a preliminary state but can already be used to reproduce
 
 #### Related Software:
 
-- [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
+- [rbv2](https://github.com/slds-lmu/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
 - [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench): can be used to reproduce several other scenarios in a real setting. Furthermroe, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.

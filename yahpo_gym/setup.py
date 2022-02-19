@@ -31,5 +31,5 @@ setup(name='yahpo_gym',
           "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc", 'pandas']
       },
       keywords=['module', 'train', 'yahpo'],
-      url="https://github.com/pfistfl/yahpo_gym",
+      url="https://github.com/slds-lmu/yahpo_gym",
       classifiers=["Development Status :: 3 - Alpha"])

@@ -28,8 +28,8 @@ setup(name='yahpo_train',
       install_requires=[
           'torch>=1.0.0',
           'fastai',
-          'yahpo_gym @ git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym'
+          'yahpo_gym @ git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym'
       ],
       keywords=['module', 'train', 'yahpo'],
-      url="https://github.com/pfistfl/yahpo_gym",
+      url="https://github.com/slds-lmu/yahpo_gym",
       classifiers=["Development Status :: 3 - Alpha"])

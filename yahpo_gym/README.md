@@ -1,8 +1,8 @@
 # YAHPO Gym (python)
-[![Unittests](https://github.com/pfistfl/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
+[![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
 [![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
-[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
+[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
 
 ### What is YAHPO GYM? 
@@ -21,7 +21,7 @@ Since all our benchmarks are based on surrogate models that approximate the unde
 across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g. [HpBandSter](https://github.com/automl/HpBandSter).
 
-![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/results.png?raw=true)
+![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/results.png?raw=true)
 
 
 **Overview over problems**
@@ -56,14 +56,14 @@ The **full, up-to-date overview** can be obtained from the [Documentation](https
 ### Installation
 
 ```console
-pip install "git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym"
+pip install "git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym"
 ```
 
 ### Setup
 
 To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`).
 
-You can download these [here (Github)](https://github.com/pfistfl/yahpo_data) or [here (Synchshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
+You can download these [here (Github)](https://github.com/slds-lmu/yahpo_data) or [here (Synchshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
 You should pertain the folder structure as on the hosting site (i.e., create a `"path-to-data"` directory, for example named `"multifidelity_data"`, containing the individual, e.g., `"lcench"`, directories).
 
@@ -77,7 +77,7 @@ local_config.set_data_path("path-to-data")
 ### Usage
 
 This example showcases the simplicity of YAHPO GYM's API. 
-A longer introduction is given in the accompanying [jupyter notebook](https://github.com/pfistfl/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
+A longer introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
 
 
 ```py

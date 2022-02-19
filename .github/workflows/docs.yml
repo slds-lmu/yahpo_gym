@@ -24,7 +24,7 @@ jobs:
       if: (contains(github.ref, 'main')) && github.event_name == 'push'
       run: |
         cd ..
-        git clone https://github.com/pfistfl/yahpo_gym.git --branch gh-pages --single-branch gh-pages
+        git clone https://github.com/slds-lmu/yahpo_gym.git --branch gh-pages --single-branch gh-pages
     - name: Copy new docs into gh-pages
       if: (contains(github.ref, 'develop') || contains(github.ref, 'main')) && github.event_name == 'push'
       run: |
