@@ -1,6 +1,6 @@
 # YAHPO Gym (python)
 [![Unittests](https://github.com/pfistfl/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://pfistfl.github.io/yahpo_gym/) 
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 
@@ -49,7 +49,7 @@ The fidelity is given either as the dataset fraction `frac` or the number of epo
 Search spaces can be continuous, mixed and have dependencies (Deps). 
 
 
-The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
+The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
 ---
 

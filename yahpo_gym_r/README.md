@@ -1,10 +1,10 @@
 # YAHPO GYM (R)
 [![Unittests](https://github.com/pfistfl/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://pfistfl.github.io/yahpo_gym/) 
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
 
-R Interface for the YAHPO GYM python module. Documentation for the python module is available via the [module handbook](https://pfistfl.github.io/yahpo_gym/)
+R Interface for the YAHPO GYM python module. Documentation for the python module is available via the [module handbook](https://slds-lmu.github.io/yahpo_gym/)
 while the R module builds its own documentation with the package.
 ## Installation
 
@@ -105,7 +105,7 @@ with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instanc
 The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
 Search spaces can be continuous, mixed and have dependencies (Deps). 
 
-The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
+The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
 We can list all available benchmark problems
 
