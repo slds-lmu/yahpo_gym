@@ -117,75 +117,12 @@ The `BenchmarkSet` has the following important functions and fields (with releva
   "Set an onnx session."
 ```
 
-### BOHB example
+### Example: Tuning an instance using HPBandSter
 
-```py
-from yahpo_gym import benchmark_set
-import yahpo_gym.benchmarks.lcbench
-import time
-import numpy as np
-from hpbandster.core.worker import Worker
-import hpbandster.core.nameserver as hpns
-from hpbandster.optimizers import BOHB as BOHB
+We include a full example for optimization using **BOHB** on a yahpo_gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
 
-bench = benchmark_set.BenchmarkSet("lcbench", instance = "3945")
+### Further Examples
 
-class lcbench(Worker):
-
-    def __init__(self, *args, sleep_interval=0, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.bench = bench
-        self.sleep_interval = sleep_interval
-
-    def compute(self, config, budget, **kwargs):
-        """
-        Args:
-            config: dictionary containing the sampled configurations by the optimizer
-            budget: (float) amount of epochs the model can use to train
-
-        Returns:
-            dictionary with mandatory fields:
-                "loss" (scalar)
-                "info" (dict)
-        """
-
-        config.update({"epoch": int(np.round(budget))})  # update epoch
-        result = bench.objective_function(config)[0]  # evaluate
-
-        time.sleep(self.sleep_interval)
-
-        return({
-                    "loss": - float(result.get("val_accuracy")),  # we want to maximize validation accuracy
-                    "info": "empty"
-                })
-    
-    @staticmethod
-    def get_configspace():
-        # sets OpenML_task_id constant to "3945" and removes the epoch fidelity parameter
-        cs = bench.get_opt_space(drop_fidelity_params = True)
-        return(cs)
-
-NS = hpns.NameServer(run_id="lcbench", host="127.0.0.1", port=None)
-NS.start()
-
-w = lcbench(sleep_interval=0, nameserver="127.0.0.1", run_id ="lcbench")
-w.run(background=True)
-
-bohb = BOHB(configspace=w.get_configspace(),
-            run_id="lcbench", nameserver="127.0.0.1",
-            min_budget=1, max_budget=52)
-
-res = bohb.run(n_iterations=1)
-
-bohb.shutdown(shutdown_workers=True)
-NS.shutdown()
-
-id2config = res.get_id2config_mapping()
-incumbent = res.get_incumbent_id()
-
-print("Best found configuration:", id2config[incumbent]["config"])
-print("A total of %i unique configurations where sampled." % len(id2config.keys()))
-print("A total of %i runs where executed." % len(res.get_all_runs()))
-print("Total budget corresponds to %.1f full function evaluations."%(sum([r.budget for r in res.get_all_runs()])/1))
-```
-
+- [General Usage](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
+- [Code Samples](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/code_sample.ipynb)
+- [Transfer HPO](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
