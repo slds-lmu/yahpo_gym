@@ -49,7 +49,7 @@ Extending YAHO Gym
 
 Data
 ***********************
-The relevant surrogate models and meta-data can be obtained from yahpo_data (https://github.com/pfistfl/yahpo_data).
+The relevant surrogate models and meta-data can be obtained from yahpo_data (https://github.com/slds-lmu/yahpo_data).
 We will release new versioned updates of the repository in the future.
 
 Indices and tables
