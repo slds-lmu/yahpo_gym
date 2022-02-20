@@ -25,11 +25,11 @@ setup(name='yahpo_gym',
       license='LGPLv3',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
       include_package_data=True,
-      install_requires=['onnxruntime', 'fastdownload', 'pyyaml', 'configspace', 'pandas'],
+      install_requires=['onnxruntime>=1.10.0', 'pyyaml', 'configspace', 'pandas'],
       extras_require={
           "test": ["pytest>=4.6","mypy", "pre-commit", "pytest-cov"],
           "docs": ["sphinx", "sphinx-gallery", "sphinx_bootstrap_theme", "numpydoc", 'pandas']
       },
       keywords=['module', 'train', 'yahpo'],
-      url="https://github.com/pfistfl/yahpo_gym",
+      url="https://github.com/slds-lmu/yahpo_gym",
       classifiers=["Development Status :: 3 - Alpha"])

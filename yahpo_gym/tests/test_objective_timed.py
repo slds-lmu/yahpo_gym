@@ -8,7 +8,7 @@ from yahpo_gym.benchmarks import *
 
 
 def test_objective_timed_lcbench():
-    b = BenchmarkSet("lcbench", instance = "3945", download = False)
+    b = BenchmarkSet("lcbench", instance = "3945")
     fidelity_config = {"epoch" : 50}
 
     optspace =  b.get_opt_space()

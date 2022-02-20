@@ -1,4 +1,4 @@
-# Installation instructions: https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym_r
+# Installation instructions: https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym_r
 reticulate::use_condaenv("yahpo_gym", required=TRUE)
 setwd("yahpo_gym_r")
 devtools::load_all()

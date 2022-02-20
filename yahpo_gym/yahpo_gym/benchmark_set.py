@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, scenario: str = None, instance: str = None, download: bool = False, active_session: bool = False,
+    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = False,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
         noisy: bool = False):
         """
@@ -27,8 +27,6 @@ class BenchmarkSet():
         instance: str
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`). 
             See `BenchmarkSet(<key>).instances` for a list of available instances.
-        download: bool
-            Should required data be downloaded (if not available)? Initialized to `False`.
         active_session: bool
             Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
         session: onnx.Session
@@ -45,7 +43,7 @@ class BenchmarkSet():
         """
 
         assert scenario is not None, "Please provide a valid scenario."
-        self.config = cfg(scenario, download=download)
+        self.config = cfg(scenario)
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
@@ -176,7 +174,7 @@ class BenchmarkSet():
         """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, drop_fidelity_params:bool = True):
+    def get_opt_space(self, drop_fidelity_params:bool = False, seed:int = None):
         """
         Get the search space to be optimized.
         Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
@@ -184,7 +182,9 @@ class BenchmarkSet():
         Parameters
         ----------
         drop_fidelity_params: bool
-            Should fidelity params be dropped from the `opt_space`? Defaults to `True`.
+            Should fidelity params be dropped from the `opt_space`? Defaults to `False`.
+        seed : int
+            Seed for the ConfigSpace. Optional, initialized to None.
         """
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
@@ -205,7 +205,7 @@ class BenchmarkSet():
         # Rebuild ConfigSpace
         cnds = csn.get_conditions()
         fbds = csn.get_forbiddens()
-        cs = CS.ConfigurationSpace()
+        cs = CS.ConfigurationSpace(seed = seed)
         cs.add_hyperparameters(hps)
         cs.add_conditions(cnds)
         cs.add_forbidden_clauses(fbds)

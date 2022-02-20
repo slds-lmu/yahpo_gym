@@ -1,12 +1,11 @@
 import pandas as pd
 import yahpo_gym
 from yahpo_gym.local_config import local_config
-from fastdownload import FastDownload
 from pathlib import Path
 from typing import Dict
 
 class Configuration():
-    def __init__(self, config_dict: Dict, download: bool = False):
+    def __init__(self, config_dict: Dict):
         """
         Interface for benchmark scenario meta information. 
         Abstract base class used to instantiate configurations that contain all
@@ -20,13 +19,9 @@ class Configuration():
         config = self._get_default_dict().copy()
         config.update(config_dict)
         self.config = config
-
-
-        if download:
-            self.download_files()
         
         # Set attributes
-        self.scenario = self.config['config_id']
+        self.config_id = self.config['config_id']
         self.y_names = self.config['y_names']
         self.cat_names = self.config['cat_names']
         self.cont_names = self.config['cont_names']
@@ -40,28 +35,9 @@ class Configuration():
     def get_path(self, key: str):
         return f'{self.config_path}/{self.config[key]}'
 
-    def download_files(self, data: bool = False, update: bool = False, files: list = []):
-        d = FastDownload(
-            base=self.config['basedir'],
-            data=self.config['scenario'],
-            archive=self.config['config_id'],
-            module = yahpo_gym.benchmarks
-         )
-
-        fullurl = self.config['download_url'] + "/" + self.config['config_id'] + "/"
-        files = files + [self.config['encoding'], self.config['config_space'], self.config['model']]
-        if data:
-            files = files + [self.config['dataset']]
-
-        for file in files:
-            if update:
-                d.update(fullurl + file)
-            d.download(fullurl + file)
-    
     def _get_default_dict(self):
         return {
             'basedir': local_config.data_path,
-            'download_url': local_config.download_url,
             'config_id': '',
             'model': 'new_model.onnx',
             'dataset': 'data.csv',
@@ -161,3 +137,12 @@ def cfg(key: str = None, **kwargs):
         return config_dict
 
 config_dict = ConfigDict()
+
+def list_scenarios():
+    """
+    List available scenarios.
+
+    Returns:
+        _type_: List
+    """
+    return [x for x in cfg().configs.keys()]
