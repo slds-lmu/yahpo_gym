@@ -28,12 +28,11 @@ reticulate::conda_create(
   python_version = "3.8"
 )
 reticulate::conda_install(envname = "yahpo_gym", packages="configspace", channel="conda-forge")
-reticulate::conda_install(envname = "yahpo_gym", packages="fastdownload", channel="fastai")
 reticulate::conda_install(envname = "yahpo_gym", pip=TRUE,
   packages="'git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym'")
 ```
 
-Now we can instantiate a local config that sets up the path files are downloaded to:
+Now we can instantiate a local config that sets up the path files are installed to:
 
 ```r
 reticulate::use_condaenv("yahpo_gym", required=TRUE)
@@ -54,7 +53,7 @@ library("yahpogym")
 and subsequently instantiate the benchmark (random search, full fidelity) to obtain our objective.
 
 ```r
-b = BenchmarkSet$new("iaml_glmnet", download = FALSE)
+b = BenchmarkSet$new("iaml_glmnet")
 obj = b$get_objective("40981", multifidelity = FALSE)
 ```
 

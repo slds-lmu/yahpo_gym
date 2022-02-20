@@ -27,7 +27,6 @@ setup(name='yahpo_train',
       include_package_data=True,
       install_requires=[
           'torch>=1.0.0',
-          'fastdownload',
           'fastai',
           'yahpo_gym @ git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym'
       ],
