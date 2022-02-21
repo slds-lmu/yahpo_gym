@@ -85,6 +85,23 @@ YAHPO Train is the module for training new surrogate models.
 
 YAHPO Train is still in a preliminary state but can already be used to reproduce and refit models introduced in our [paper](https://arxiv.org/abs/2109.03670).
 
+
+#### Roadmap
+
+We want to add several features to **yahpo gym** in future versions:
+
+- **Asynchronous Evaluation**
+  We would like to allow for faster-than-realtime asynchronous evaluation in future versions. This is currently available as an experimental feature via `objective_function_timed`, but requires additional (experimental) evaluation for release. 
+- **Noisy Surrogate Models**
+  We would like to allow for surrogates that more closely reflect the underlying (noisy) nature of real HPO experiments. Currently, noisy evaluation are available using `noisy = True` during instantiation, but this feature is considered experimental and
+  requires additional evaluation for release.
+- **Integration with HPO-Bench**
+  HPO-Bench is a robust and mature library for benchmarking HPO Problems. Due to similarity in structure and scope, it would make sense to integrate YAHPO Gym with HPO, extending the number of scenarios available in HPO-Bench. 
+- **Additional Scenarios**
+  We are always happy to include additional (interesting) scenarios. If you know of (or want to add) an additional scenario, get in touch!
+
+  We welcome input, discussion or additions by the broader community. Get in touch via issues or emails if you have questions, comments or would like to collaborate!
+
 #### Related Software:
 
 - [rbv2](https://github.com/slds-lmu/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
