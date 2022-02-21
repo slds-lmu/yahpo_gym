@@ -288,7 +288,7 @@ class BenchmarkSet():
 
 
     def __repr__(self):
-        return f"BenchmarkSet ({self.config.scenario})"
+        return f"BenchmarkSet ({self.config.config_id})"
 
     def _config_to_xs(self, configuration):
         if type(configuration) == CS.Configuration:
