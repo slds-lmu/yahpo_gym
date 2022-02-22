@@ -1,11 +1,11 @@
 # YAHPO Gym (python)
 [![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
-[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/)
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
 
-### What is YAHPO GYM? 
+### What is YAHPO GYM?
 
 ---
 
@@ -17,7 +17,7 @@ Here, an `instance` is the concrete task of optimizing hyperparameters of a neur
 ### Why should I use it?
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
-Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks
 across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g. [HpBandSter](https://github.com/automl/HpBandSter).
 
@@ -46,7 +46,7 @@ Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to
 
 with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
 The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
-Search spaces can be continuous, mixed and have dependencies (Deps). 
+Search spaces can be continuous, mixed and have dependencies (Deps).
 
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
@@ -76,7 +76,7 @@ local_config.set_data_path("path-to-data")
 
 ### Usage
 
-This example showcases the simplicity of YAHPO GYM's API. 
+This example showcases the simplicity of YAHPO GYM's API.
 A longer introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
 
 
@@ -98,7 +98,7 @@ print(bench.objective_function(value))
 The `BenchmarkSet` has the following important functions and fields (with relevant args):
 
 ```
-- `__init__`: 
+- `__init__`:
   args:
     scenario: str, "Name of the scenario"
     instance: str (optional), "A valid instance"
@@ -121,8 +121,10 @@ The `BenchmarkSet` has the following important functions and fields (with releva
 
 We include a full example for optimization using **BOHB** on a yahpo_gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
 
-### Further Examples
+### All Examples
 
 - [General Usage](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
 - [Code Samples](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/code_sample.ipynb)
+- [Tuning with HpBandSter on Yahpo Gym](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb)
 - [Transfer HPO](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
+- [Paper experiments](https://github.com/slds-lmu/yahpo_exps/tree/main/paper)

@@ -47,6 +47,14 @@ Extending YAHO Gym
 
    extending
 
+Examples
+***********************
+.. toctree::
+   :maxdepth: 1
+
+   examples
+
+
 Data
 ***********************
 The relevant surrogate models and meta-data can be obtained from yahpo_data (https://github.com/slds-lmu/yahpo_data).
