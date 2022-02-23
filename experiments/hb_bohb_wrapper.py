@@ -50,8 +50,7 @@ def run_bohb(scenario, instance, target, minimize, on_integer_scale, n_iteration
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
-    bench.set_instance(instance)
+    bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     fidelity_space = bench.get_fidelity_space()
     fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
@@ -103,8 +102,7 @@ def run_hb(scenario, instance, target, minimize, on_integer_scale, n_iterations,
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
-    bench.set_instance(instance)
+    bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     fidelity_space = bench.get_fidelity_space()
     fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower

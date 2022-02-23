@@ -31,8 +31,7 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
-    bench.set_instance(instance)
+    bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
     fidelity_space = bench.get_fidelity_space()
@@ -81,8 +80,7 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
-    bench.set_instance(instance)
+    bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
     fidelity_space = bench.get_fidelity_space()

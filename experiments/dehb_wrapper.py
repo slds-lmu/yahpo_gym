@@ -36,8 +36,7 @@ def run_dehb(scenario, instance, target, minimize, on_integer_scale, n_trials, s
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
-    bench.set_instance(instance)
+    bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     opt_space = bench.get_opt_space(instance)
     opt_space_fixed = CS.ConfigurationSpace(seed=seed)
     hps = opt_space.get_hyperparameter_names()

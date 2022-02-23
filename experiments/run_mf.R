@@ -21,7 +21,7 @@ hb_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -47,7 +47,7 @@ bohb_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -73,7 +73,7 @@ optuna_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -100,7 +100,7 @@ dehb_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -127,7 +127,7 @@ smac_mf_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -153,7 +153,7 @@ smac_hpo_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -179,7 +179,7 @@ random_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -211,7 +211,7 @@ addAlgorithm("random", fun = random_wrapper)
 # setup scenarios and instances
 get_nb301_setup = function(budget_factor = 20L) {
   scenario = "nb301"
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "CIFAR10")
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
@@ -229,7 +229,7 @@ get_nb301_setup = function(budget_factor = 20L) {
 
 get_lcbench_setup = function(budget_factor = 30L) {
   scenario = "lcbench"
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "167168")
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
@@ -248,7 +248,7 @@ get_lcbench_setup = function(budget_factor = 30L) {
 get_rbv2_setup = function(budget_factor = 30L) {
   setup = map_dtr(c("rbv2_glmnet", "rbv2_rpart", "rbv2_ranger", "rbv2_xgboost", "rbv2_super"), function(scenario) {
     if (scenario == "rbv2_super") budget_factor = 20L
-    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "1040")
     fidelity_space = bench$get_fidelity_space()
     fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
     min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower

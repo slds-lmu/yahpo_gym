@@ -30,9 +30,6 @@ reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mo", 
 #reg = makeExperimentRegistry(file.dir = NA, conf.file = NA, source = source_files)
 saveRegistry(reg)
 
-# FIXME: acq_budget and n_points and maxit for focussearch
-# FIXME: random interleaving in all methods?
-
 random_wrapper = function(job, data, instance, ...) {
   reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(yahpogym)
@@ -221,7 +218,7 @@ for (i in seq_len(nrow(optimizers))) {
   ids = addExperiments(
     prob.designs = prob_designs,
     algo.designs = algo_designs,
-    repls = 1L
+    repls = 10L
   )
   addJobTags(ids, as.character(optimizers[i, ]$algorithm))
 }
