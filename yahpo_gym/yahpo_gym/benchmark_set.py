@@ -357,5 +357,5 @@ class BenchmarkSet():
     def _get_model_path(self):
         path = self.config.get_path("model")
         if self.noisy:
-            path.replace('.onnx', '_noisy.onnx')
+            self.config.get_path("model_noisy")
         return path

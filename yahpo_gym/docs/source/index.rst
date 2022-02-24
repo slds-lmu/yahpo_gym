@@ -40,6 +40,13 @@ Scenarios & Instances
 
    scenarios
 
+Getting Started
+***********************
+.. toctree::
+   :maxdepth: 2
+
+   getting_started
+
 Extending YAHO Gym
 ***********************
 .. toctree::
