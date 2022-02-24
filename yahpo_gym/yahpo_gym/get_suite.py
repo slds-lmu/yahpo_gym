@@ -1,7 +1,7 @@
 from pandas import read_json
 from yahpo_gym.local_config import local_config
 
-def get_suite(type:str, version:int =0):
+def get_suite(type:str, version:float = 0.1):
     """
     Interface for benchmark scenario meta information. 
     Abstract base class used to instantiate configurations that contain all
@@ -11,7 +11,7 @@ def get_suite(type:str, version:int =0):
     ----------
     type: str
         The type of benchmark to be used. Can be either 'single' (single-objective) or 'multi' (multi-objective).
-    version: int
+    version: float
         The version of the benchmark to be used.
     """
     assert type in ['single', 'multi'], "type must be either 'single' or 'multi'"
@@ -23,7 +23,7 @@ def get_suite(type:str, version:int =0):
         data = read_json(f, orient='records')
     return data
 
-def _data_has_version(version: int):
+def _data_has_version(version: float):
     fp = local_config.data_path.joinpath("VERSION")
     with open(fp, "r") as f:
         for line in f:
