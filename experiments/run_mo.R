@@ -171,31 +171,42 @@ addAlgorithm("ehvi", fun = ehvi_wrapper)
 addAlgorithm("mego", fun = mego_wrapper)
 
 # setup scenarios and instances
-get_lcbench_setup = function(budget_factor = 30) {
+get_lcbench_setup = function(budget_factor = 40L) {
   bench = yahpo_gym$benchmark_set$BenchmarkSet("lcbench", instance = "167152")
   ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
   instances = c("167152", "167185", "189873")
   targets = list(c("val_accuracy", "val_cross_entropy"))
-  budget = ndim * budget_factor
+  budget = ceiling(20L + sqrt(ndim) * budget_factor)
   setup = setDT(expand.grid(scenario = "lcbench", instance = instances, targets = targets, ndim = ndim, budget = budget, stringsAsFactors = FALSE))
   setup[, minimize := map(targets, function(x) bench$config$config$y_minimize[match(x, bench$config$config$y_names)])]
   setup
 }
 
-get_iaml_setup = function(budget_factor = 30) {
-  setup = map_dtr(c("iaml_rpart", "iaml_ranger", "iaml_xgboost", "iaml_super"), function(scenario) {
-    if (scenario == "iaml_super") budget_factor = 20L
+get_iaml_setup = function(budget_factor = 40L) {
+  setup = map_dtr(c("iaml_glmnet", "iaml_ranger", "iaml_xgboost", "iaml_super"), function(scenario) {
     bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "1489")
     ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
-    instances = switch(scenario, iaml_rpart = c("1489", "1067"), iaml_ranger = c("1489", "1067"), iaml_xgboost = c("40981", "1489"), iaml_super = c("1489", "1067"))
-    targets = if (scenario == "iaml_xgboost") list(c("mmce", "nf"), c("mmce", "nf", "ias")) else list(c("mmce", "nf"))
-    budget = ndim * budget_factor
+    instances = switch(scenario, iaml_glmnet = c("40981", "41146"), iaml_ranger = c("1489", "1067"), iaml_xgboost = c("40981", "1489"), iaml_super = c("1489", "1067"))
+    targets = if (scenario == "iaml_xgboost") list(c("mmce", "nf", "ias"), c("mmce", "nf", "ias", "rammodel")) else if (scenario == "iaml_glmnet") list(c("mmce", "nf")) else list(c("mmce", "nf", "ias"))
+    budget = ceiling(20L + sqrt(ndim) * budget_factor)
     setup = setDT(expand.grid(scenario = scenario, instance = instances, targets = targets, ndim = ndim, budget = budget, stringsAsFactors = FALSE))
     setup[, minimize := map(targets, function(x) bench$config$config$y_minimize[match(x, bench$config$config$y_names)])]
   })
 }
 
-setup = rbind(get_lcbench_setup(), get_iaml_setup())
+get_rbv2_setup = function(budget_factor = 40L) {
+  setup = map_dtr(c("rbv2_rpart", "rbv2_ranger", "rbv2_xgboost", "rbv2_super"), function(scenario) {
+    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "1040")
+    ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
+    instances = switch(scenario, rbv2_rpart = c("1489", "1067"), rbv2_ranger = c("1489", "1067"), rbv2_xgboost = c("40981", "1489"), rbv2_super = c("1489", "1067"))
+    targets = list(c("accuracy", "memory"))
+    budget = ceiling(20L + sqrt(ndim) * budget_factor)
+    setup = setDT(expand.grid(scenario = scenario, instance = instances, targets = targets, ndim = ndim, budget = budget, stringsAsFactors = FALSE))
+    setup[, minimize := map(targets, function(x) bench$config$config$y_minimize[match(x, bench$config$config$y_names)])]
+  })
+}
+
+setup = rbind(get_lcbench_setup(), get_iaml_setup(), get_rbv2_setup())
 
 setup[, id := seq_len(.N)]
 
@@ -224,7 +235,7 @@ for (i in seq_len(nrow(optimizers))) {
 }
 
 tab = getJobTable()
-tab[, walltime := map_dbl(prob.pars, function(x) x$budget) * 30]
+tab[, walltime := map_dbl(prob.pars, function(x) x$budget) * 40L]
 tab["ehvi" %in% tags, walltime := walltime * 10]
 jobs = tab[, c("job.id", "walltime")]
 resources.default = list(memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)

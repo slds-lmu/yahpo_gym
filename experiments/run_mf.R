@@ -209,7 +209,7 @@ addAlgorithm("smac_hpo", fun = smac_hpo_wrapper)
 addAlgorithm("random", fun = random_wrapper)
 
 # setup scenarios and instances
-get_nb301_setup = function(budget_factor = 20L) {
+get_nb301_setup = function(budget_factor = 40L) {
   scenario = "nb301"
   bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "CIFAR10")
   fidelity_space = bench$get_fidelity_space()
@@ -220,14 +220,14 @@ get_nb301_setup = function(budget_factor = 20L) {
 
   instances = "CIFAR10"
   target = "val_accuracy"
-  budget = ndim * max_budget * budget_factor
+  budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
   setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
   setup
 }
 
-get_lcbench_setup = function(budget_factor = 30L) {
+get_lcbench_setup = function(budget_factor = 40L) {
   scenario = "lcbench"
   bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "167168")
   fidelity_space = bench$get_fidelity_space()
@@ -238,16 +238,15 @@ get_lcbench_setup = function(budget_factor = 30L) {
 
   instances = c("167168", "189873", "189906")
   target = "val_accuracy"
-  budget = ndim * max_budget * budget_factor
+  budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
   setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
   setup
 }
 
-get_rbv2_setup = function(budget_factor = 30L) {
+get_rbv2_setup = function(budget_factor = 40L) {
   setup = map_dtr(c("rbv2_glmnet", "rbv2_rpart", "rbv2_ranger", "rbv2_xgboost", "rbv2_super"), function(scenario) {
-    if (scenario == "rbv2_super") budget_factor = 20L
     bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "1040")
     fidelity_space = bench$get_fidelity_space()
     fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
@@ -255,9 +254,9 @@ get_rbv2_setup = function(budget_factor = 30L) {
     max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
     ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
 
-    instances = switch(scenario, rbv2_glmnet = c(), rbv2_rpart = c(), rbv2_ranger = c(), rbv2_xgboost = c(), rbv2_super = c())
+    instances = switch(scenario, rbv2_glmnet = c(), rbv2_rpart = c("14", "40499"), rbv2_ranger = c(), rbv2_xgboost = c(), rbv2_super = c())
     target = "acc"
-    budget = ndim * max_budget * budget_factor
+    budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
     on_integer_scale = FALSE
     minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
     setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
