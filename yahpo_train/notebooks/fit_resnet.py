@@ -71,7 +71,7 @@ if __name__ == "__main__":
     tfms_fcnet = {}  # FIXME:
     tfms_list.update({"fcnet":tfms_fcnet})
     
-    keys = ["lcbench", "nb301", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet"]
+    keys = ["lcbench", "nb301", "rbv2_super", "rbv2_xgboost", "rbv2_ranger", "rbv2_rpart", "rbv2_glmnet", "rbv2_aknn", "rbv2_svm", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet"]
     for key in keys:
         torch.manual_seed(0)
         random.seed(0)

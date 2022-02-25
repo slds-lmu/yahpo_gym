@@ -22,7 +22,7 @@ def chunk(n, size):
 
 def get_set_metrics(key, set="test", model=None, instance=None, chunk_size=10000):
     # NOTE: this is somewhat slow because we first map the points to the right format for the onnx model and then use the onnx model for prediction
-    bench = benchmark_set.BenchmarkSet(key)
+    bench = benchmark_set.BenchmarkSet(key, active_session=True)
     if model is not None:
         bench.config.config.update({"model":model})
     bench.check = False  # see note below

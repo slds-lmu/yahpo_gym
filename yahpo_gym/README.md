@@ -1,11 +1,11 @@
 # YAHPO Gym (python)
-[![Unittests](https://github.com/pfistfl/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/pfistfl/yahpo_gym/actions)
-[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://pfistfl.github.io/yahpo_gym/) 
+[![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/)
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
-[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/pfistfl/yahpo_gym/tree/main/yahpo_gym)
+[![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
 
-### What is YAHPO GYM? 
+### What is YAHPO GYM?
 
 ---
 
@@ -17,11 +17,11 @@ Here, an `instance` is the concrete task of optimizing hyperparameters of a neur
 ### Why should I use it?
 
 **YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
-Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks
 across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g. [HpBandSter](https://github.com/automl/HpBandSter).
 
-![image](https://github.com/pfistfl/yahpo_gym/blob/main/assets/results.png?raw=true)
+![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/results.png?raw=true)
 
 
 **Overview over problems**
@@ -46,10 +46,10 @@ Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to
 
 with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
 The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
-Search spaces can be continuous, mixed and have dependencies (Deps). 
+Search spaces can be continuous, mixed and have dependencies (Deps).
 
 
-The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
+The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://pfistfl.github.io/yahpo_gym/scenarios.html).
 
@@ -58,14 +58,14 @@ The **full, up-to-date overview** can be obtained from the [Documentation](https
 ### Installation
 
 ```console
-pip install "git+https://github.com/pfistfl/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym"
+pip install "git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym"
 ```
 
 ### Setup
 
 To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`).
 
-You can download these [here (Github)](https://github.com/pfistfl/yahpo_data) or [here (Synchshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
+You can download these [here (Github)](https://github.com/slds-lmu/yahpo_data) or [here (Synchshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
 You should pertain the folder structure as on the hosting site (i.e., create a `"path-to-data"` directory, for example named `"multifidelity_data"`, containing the individual, e.g., `"lcench"`, directories).
 
@@ -78,8 +78,8 @@ local_config.set_data_path("path-to-data")
 
 ### Usage
 
-This example showcases the simplicity of YAHPO GYM's API. 
-A longer introduction is given in the accompanying [jupyter notebook](https://github.com/pfistfl/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
+This example showcases the simplicity of YAHPO GYM's API.
+A longer introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
 
 
 ```py
@@ -100,7 +100,7 @@ print(bench.objective_function(value))
 The `BenchmarkSet` has the following important functions and fields (with relevant args):
 
 ```
-- `__init__`: 
+- `__init__`:
   args:
     scenario: str, "Name of the scenario"
     instance: str (optional), "A valid instance"
@@ -119,75 +119,14 @@ The `BenchmarkSet` has the following important functions and fields (with releva
   "Set an onnx session."
 ```
 
-### BOHB example
+### Example: Tuning an instance using HPBandSter
 
-```py
-from yahpo_gym import benchmark_set
-import yahpo_gym.benchmarks.lcbench
-import time
-import numpy as np
-from hpbandster.core.worker import Worker
-import hpbandster.core.nameserver as hpns
-from hpbandster.optimizers import BOHB as BOHB
+We include a full example for optimization using **BOHB** on a yahpo_gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
 
-bench = benchmark_set.BenchmarkSet("lcbench", instance = "3945")
+### All Examples
 
-class lcbench(Worker):
-
-    def __init__(self, *args, sleep_interval=0, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.bench = bench
-        self.sleep_interval = sleep_interval
-
-    def compute(self, config, budget, **kwargs):
-        """
-        Args:
-            config: dictionary containing the sampled configurations by the optimizer
-            budget: (float) amount of epochs the model can use to train
-
-        Returns:
-            dictionary with mandatory fields:
-                "loss" (scalar)
-                "info" (dict)
-        """
-
-        config.update({"epoch": int(np.round(budget))})  # update epoch
-        result = bench.objective_function(config)[0]  # evaluate
-
-        time.sleep(self.sleep_interval)
-
-        return({
-                    "loss": - float(result.get("val_accuracy")),  # we want to maximize validation accuracy
-                    "info": "empty"
-                })
-    
-    @staticmethod
-    def get_configspace():
-        # sets OpenML_task_id constant to "3945" and removes the epoch fidelity parameter
-        cs = bench.get_opt_space(drop_fidelity_params = True)
-        return(cs)
-
-NS = hpns.NameServer(run_id="lcbench", host="127.0.0.1", port=None)
-NS.start()
-
-w = lcbench(sleep_interval=0, nameserver="127.0.0.1", run_id ="lcbench")
-w.run(background=True)
-
-bohb = BOHB(configspace=w.get_configspace(),
-            run_id="lcbench", nameserver="127.0.0.1",
-            min_budget=1, max_budget=52)
-
-res = bohb.run(n_iterations=1)
-
-bohb.shutdown(shutdown_workers=True)
-NS.shutdown()
-
-id2config = res.get_id2config_mapping()
-incumbent = res.get_incumbent_id()
-
-print("Best found configuration:", id2config[incumbent]["config"])
-print("A total of %i unique configurations where sampled." % len(id2config.keys()))
-print("A total of %i runs where executed." % len(res.get_all_runs()))
-print("Total budget corresponds to %.1f full function evaluations."%(sum([r.budget for r in res.get_all_runs()])/1))
-```
-
+- [General Usage](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
+- [Code Samples](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/code_sample.ipynb)
+- [Tuning with HpBandSter on Yahpo Gym](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb)
+- [Transfer HPO](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
+- [Paper experiments](https://github.com/slds-lmu/yahpo_exps/tree/main/paper)
