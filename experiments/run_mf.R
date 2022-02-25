@@ -254,7 +254,7 @@ get_rbv2_setup = function(budget_factor = 40L) {
     max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
     ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
 
-    instances = switch(scenario, rbv2_glmnet = c(), rbv2_rpart = c("14", "40499"), rbv2_ranger = c(), rbv2_xgboost = c(), rbv2_super = c())
+    instances = switch(scenario, rbv2_glmnet = c("375", "458"), rbv2_rpart = c("14", "40499"), rbv2_ranger = c("16", "42"), rbv2_xgboost = c("12", "1501", "16", "40499"), rbv2_super = c("1053", "1457", "1063", "1479", "15", "1468"))
     target = "acc"
     budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
     on_integer_scale = FALSE
