@@ -14,7 +14,7 @@ jobs:
     - name: Clone required data
       run: |
         cd ~/work
-        git clone https://github.com/pfistfl/yahpo_data.git
+        git clone https://github.com/slds-lmu/yahpo_data.git
     - name: Prepare [python]
       run: |
         cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym

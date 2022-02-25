@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = False,
+    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = True,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
         noisy: bool = False):
         """
@@ -28,7 +28,7 @@ class BenchmarkSet():
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`). 
             See `BenchmarkSet(<key>).instances` for a list of available instances.
         active_session: bool
-            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
+            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `Trtue`.
         session: onnx.Session
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
@@ -174,7 +174,7 @@ class BenchmarkSet():
         """
         self.set_constant(self.config.instance_names, value)
 
-    def get_opt_space(self, drop_fidelity_params:bool = False):
+    def get_opt_space(self, drop_fidelity_params:bool = False, seed:int = None):
         """
         Get the search space to be optimized.
         Sets 'instance' as a constant instance and removes all fidelity parameters if 'drop_fidelity_params = True'.
@@ -183,6 +183,8 @@ class BenchmarkSet():
         ----------
         drop_fidelity_params: bool
             Should fidelity params be dropped from the `opt_space`? Defaults to `False`.
+        seed : int
+            Seed for the ConfigSpace. Optional, initialized to None.
         """
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
@@ -203,7 +205,7 @@ class BenchmarkSet():
         # Rebuild ConfigSpace
         cnds = csn.get_conditions()
         fbds = csn.get_forbiddens()
-        cs = CS.ConfigurationSpace()
+        cs = CS.ConfigurationSpace(seed = seed)
         cs.add_hyperparameters(hps)
         cs.add_conditions(cnds)
         cs.add_forbidden_clauses(fbds)
@@ -286,7 +288,7 @@ class BenchmarkSet():
 
 
     def __repr__(self):
-        return f"BenchmarkSet ({self.config.scenario})"
+        return f"BenchmarkSet({self.config.config_id})"
 
     def _config_to_xs(self, configuration):
         if type(configuration) == CS.Configuration:
@@ -355,5 +357,5 @@ class BenchmarkSet():
     def _get_model_path(self):
         path = self.config.get_path("model")
         if self.noisy:
-            path.replace('.onnx', '_noisy.onnx')
+            self.config.get_path("model_noisy")
         return path

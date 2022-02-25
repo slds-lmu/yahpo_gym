@@ -72,7 +72,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should noisy surrogates be used instead of deterministic ones?
     initialize = function(scenario, instance = NULL, onnx_session = NULL, active_session = FALSE, multithread = FALSE, check = FALSE, noisy = FALSE) {
       self$id = assert_string(scenario)
-      self$instance = assert_string(instance)
+      self$instance = assert_string(instance, null.ok = TRUE)
       self$onnx_session = onnx_session
       self$active_session = assert_flag(active_session)
       self$multithread = assert_flag(multithread)

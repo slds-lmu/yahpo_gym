@@ -36,7 +36,7 @@ Users can now instantiate a `Benchmark` or `config` with this `<ID>`, e.g. using
 2. **Add the required metadata**:
 This includes fitted surrogates and parameter spaces that we'll add to our ``data_path``.
 For an example on how the final data looks like implemented models
-and hyperparameters see https://github.com/pfistfl/yahpo_data.
+and hyperparameters see https://github.com/slds-lmu/yahpo_data.
 
 
 - Add a folder using the benchmark's `<ID>` to your ``data_path``.

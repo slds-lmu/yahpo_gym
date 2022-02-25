@@ -2,18 +2,16 @@ library(batchtools)
 library(data.table)
 library(mlr3misc)
 library(mlr3hyperband)
-reticulate::use_virtualenv("mf_env/", required = TRUE)
-#reticulate::use_virtualenv("/home/lps/.local/share/virtualenvs/yahpo_gym-4ygV7ggv/", required = TRUE)
+reticulate::use_virtualenv("mf_env/", required = TRUE)  # virtualenv where yahpo gym ist installed
 library(reticulate)
 yahpo_gym = import("yahpo_gym")
 
 packages = c("data.table", "mlr3misc", "mlr3hyperband")
 
 # FIXME: clean up logs/no logging?
-# NOTE: budget factor is 30 except for nb301 and rbv2_super
 
 reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
-#reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)
+#reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)  # use this for temporary registry
 saveRegistry(reg)
 
 hb_wrapper = function(job, data, instance, ...) {
@@ -21,10 +19,14 @@ hb_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
-  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  if (grepl("rbv2_", instance$scenario)) {
+    fidelity_param_id = "trainsize"
+  } else {
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  }
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
@@ -47,10 +49,14 @@ bohb_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
-  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  if (grepl("rbv2_", instance$scenario)) {
+    fidelity_param_id = "trainsize"
+  } else {
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  }
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
@@ -73,10 +79,14 @@ optuna_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
-  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  if (grepl("rbv2_", instance$scenario)) {
+    fidelity_param_id = "trainsize"
+  } else {
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  }
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
@@ -100,10 +110,14 @@ dehb_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
-  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  if (grepl("rbv2_", instance$scenario)) {
+    fidelity_param_id = "trainsize"
+  } else {
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  }
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
@@ -127,10 +141,14 @@ smac_mf_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
-  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  if (grepl("rbv2_", instance$scenario)) {
+    fidelity_param_id = "trainsize"
+  } else {
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  }
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
@@ -153,10 +171,14 @@ smac_hpo_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
-  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  if (grepl("rbv2_", instance$scenario)) {
+    fidelity_param_id = "trainsize"
+  } else {
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  }
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   schedule = hyperband_schedule(r_min = min_budget, r_max = max_budget, eta = 3, integer_budget = instance$on_integer_scale)
@@ -179,10 +201,14 @@ random_wrapper = function(job, data, instance, ...) {
   library(reticulate)
   yahpo_gym = import("yahpo_gym")
 
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(instance$scenario, instance = instance$instance)
   bench$set_instance(instance$instance)
   fidelity_space = bench$get_fidelity_space()
-  fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  if (grepl("rbv2_", instance$scenario)) {
+    fidelity_param_id = "trainsize"
+  } else {
+    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+  }
   max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
   n_trials = as.integer(ceiling(instance$budget / max_budget))  # full budget
 
@@ -209,9 +235,9 @@ addAlgorithm("smac_hpo", fun = smac_hpo_wrapper)
 addAlgorithm("random", fun = random_wrapper)
 
 # setup scenarios and instances
-get_nb301_setup = function(budget_factor = 20L) {
+get_nb301_setup = function(budget_factor = 40L) {
   scenario = "nb301"
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "CIFAR10")
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
@@ -220,16 +246,16 @@ get_nb301_setup = function(budget_factor = 20L) {
 
   instances = "CIFAR10"
   target = "val_accuracy"
-  budget = ndim * max_budget * budget_factor
+  budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
   setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
   setup
 }
 
-get_lcbench_setup = function(budget_factor = 30L) {
+get_lcbench_setup = function(budget_factor = 40L) {
   scenario = "lcbench"
-  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+  bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "167168")
   fidelity_space = bench$get_fidelity_space()
   fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
   min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
@@ -238,26 +264,25 @@ get_lcbench_setup = function(budget_factor = 30L) {
 
   instances = c("167168", "189873", "189906")
   target = "val_accuracy"
-  budget = ndim * max_budget * budget_factor
+  budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
   setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
   setup
 }
 
-get_rbv2_setup = function(budget_factor = 30L) {
+get_rbv2_setup = function(budget_factor = 40L) {
   setup = map_dtr(c("rbv2_glmnet", "rbv2_rpart", "rbv2_ranger", "rbv2_xgboost", "rbv2_super"), function(scenario) {
-    if (scenario == "rbv2_super") budget_factor = 20L
-    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario)
+    bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "1040")
     fidelity_space = bench$get_fidelity_space()
-    fidelity_param_id = fidelity_space$get_hyperparameter_names()[1]
+    fidelity_param_id = "trainsize"
     min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
     max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
-    ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
+    ndim = length(bench$config_space$get_hyperparameter_names()) - 3L
 
-    instances = switch(scenario, rbv2_glmnet = c(), rbv2_rpart = c(), rbv2_ranger = c(), rbv2_xgboost = c(), rbv2_super = c())
+    instances = switch(scenario, rbv2_glmnet = c("375", "458"), rbv2_rpart = c("14", "40499"), rbv2_ranger = c("16", "42"), rbv2_xgboost = c("12", "1501", "16", "40499"), rbv2_super = c("1053", "1457", "1063", "1479", "15", "1468"))
     target = "acc"
-    budget = ndim * max_budget * budget_factor
+    budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
     on_integer_scale = FALSE
     minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
     setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))

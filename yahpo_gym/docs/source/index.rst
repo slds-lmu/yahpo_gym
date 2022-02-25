@@ -40,6 +40,13 @@ Scenarios & Instances
 
    scenarios
 
+Getting Started
+***********************
+.. toctree::
+   :maxdepth: 1
+
+   getting_started
+
 Extending YAHO Gym
 ***********************
 .. toctree::
@@ -47,9 +54,17 @@ Extending YAHO Gym
 
    extending
 
+Examples
+***********************
+.. toctree::
+   :maxdepth: 1
+
+   examples
+
+
 Data
 ***********************
-The relevant surrogate models and meta-data can be obtained from yahpo_data (https://github.com/pfistfl/yahpo_data).
+The relevant surrogate models and meta-data can be obtained from yahpo_data (https://github.com/slds-lmu/yahpo_data).
 We will release new versioned updates of the repository in the future.
 
 Indices and tables

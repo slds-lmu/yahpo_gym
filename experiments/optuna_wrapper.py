@@ -12,7 +12,7 @@ from functools import partial
 import random
 import pandas as pd
 import numpy as np
-from copy import copy
+from copy import deepcopy
 
 def get_value(hp_name, cs, trial):
     hp = cs.get_hyperparameter(hp_name)
@@ -69,14 +69,17 @@ def objective_mf(trial, bench, opt_space, fidelity_param_id, valid_budgets, targ
     X = sample_config_from_optuna(trial, opt_space)
 
     # FIXME: this follows sh brackets
-    # we could also evaluate all budgets in a seq from min_budget to max_budget 
-    for budget in valid_budgets:
-        X.update({fidelity_param_id: budget})
-        y = bench.objective_function(X, logging=True, multithread=False)[0]
-        trial.report(float(y.get(target)), step=budget)
+    # we could also evaluate all budgets in a seq from min_budget to max_budget
+    for i in range(len(valid_budgets)):
+        X_ = deepcopy(X)
+        if "rbv2_" in bench.config.config_id:
+            X_.update({"repl":10})  # manual fix required for rbv2_
+        X_.update({fidelity_param_id: valid_budgets[i]})
+        y = bench.objective_function(X_, logging=True, multithread=False)[0]
+        trial.report(float(y.get(target)), step=i)
 
         if trial.should_prune():
-                raise optuna.TrialPruned()
+            raise optuna.TrialPruned()
 
     return float(y.get(target))
 
@@ -95,18 +98,20 @@ def run_optuna(scenario, instance, target, minimize, on_integer_scale, n_trials,
     random.seed(seed)
     np.random.seed(seed)
 
-    bench = benchmark_set.BenchmarkSet(scenario, multithread=False)
-    bench.set_instance(instance)
+    bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
     fidelity_space = bench.get_fidelity_space()
-    fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
+    if "rbv2_" in scenario:  # manual fix required for rbv2_
+        fidelity_param_id = "trainsize"
+    else:
+        fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     direction = "minimize" if minimize else "maximize"
 
     # TPEsampler with median pruning checked at sh brackets above
-    study = optuna.create_study(direction=direction, sampler=TPESampler(seed=seed), pruner=MedianPruner())
+    study = optuna.create_study(direction=direction, sampler=TPESampler(seed=seed, n_startup_trials=5), pruner=MedianPruner(n_startup_trials=5, n_warmup_steps=0, interval_steps=1))
     reduction_factor = 3  # eta
     sh_iters = precompute_sh_iters(min_budget, max_budget, reduction_factor)
     valid_budgets = precompute_budgets(max_budget, reduction_factor, sh_iters, on_integer_scale=on_integer_scale)
