@@ -18,7 +18,11 @@ def run_random(scenario, instance, n_trials, seed):
 
     for i in range(n_trials):
         x = opt_space.sample_configuration(1).get_dictionary()
-        x.update({fidelity_param_id: max_budget})
+        if "rbv2_" in scenario:  # manual fix required for rbv2_
+            x.update({"repl":10})
+            x.update({"trainsize":1})
+        else:
+           x.update({fidelity_param_id: max_budget})
         y = bench.objective_function(x, logging=True, multithread=False)[0]
 
     time = pd.DataFrame.from_dict([x.get("time") for x in bench.archive])

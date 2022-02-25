@@ -15,6 +15,8 @@ from smac.intensification.hyperband import Hyperband
 
 def tae_runner(configuration, budget, bench, fidelity_param_id, target, factor, on_integer_scale):
     X = configuration.get_dictionary()
+    if "rbv2_" in bench.config.config_id:
+        X.update({"repl":10})  # manual fix required for rbv2_
     X.update({fidelity_param_id: int(round(budget)) if on_integer_scale else budget})
     y = bench.objective_function(X, logging=False, multithread=False)[0]
 
@@ -22,6 +24,8 @@ def tae_runner(configuration, budget, bench, fidelity_param_id, target, factor, 
 
 def tae_runner_max_budget(configuration, max_budget, bench, fidelity_param_id, target, factor, on_integer_scale):
     X = configuration.get_dictionary()
+    if "rbv2_" in bench.config.config_id:
+        X.update({"repl":10})  # manual fix required for rbv2_
     X.update({fidelity_param_id: int(round(max_budget)) if on_integer_scale else max_budget})
     y = bench.objective_function(X, logging=False, multithread=False)[0]
 
@@ -35,7 +39,10 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
     fidelity_space = bench.get_fidelity_space()
-    fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
+    if "rbv2_" in scenario:  # manual fix required for rbv2_
+        fidelity_param_id = "trainsize"
+    else:
+        fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1
@@ -65,6 +72,8 @@ def run_smac4mf(scenario, instance, target, minimize, on_integer_scale, n_trials
     values = values.rename(columns = {0: fidelity_param_id, 1: "config_id"})
     for index, row in values.iterrows():
         X = results.get_all_configs()[int(row["config_id"] - 1)].get_dictionary()
+        if "rbv2_" in scenario:
+            X.update({"repl":10})  # manual fix required for rbv2_
         X.update({fidelity_param_id:row[fidelity_param_id]})
         bench.objective_function(X, logging=True, multithread=False)
     
@@ -84,7 +93,10 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     opt_space = bench.get_opt_space(instance)
     opt_space.seed(seed)
     fidelity_space = bench.get_fidelity_space()
-    fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
+    if "rbv2_" in scenario:  # manual fix required for rbv2_
+        fidelity_param_id = "trainsize"
+    else:
+        fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1
@@ -110,7 +122,11 @@ def run_smac4hpo(scenario, instance, target, minimize, on_integer_scale, n_trial
     values = values.rename(columns = {0: fidelity_param_id, 1: "config_id"})
     for index, row in values.iterrows():
         X = results.get_all_configs()[int(row["config_id"] - 1)].get_dictionary()
-        X.update({fidelity_param_id:max_budget})
+        if "rbv2_" in scenario:  # manual fix required for rbv2_
+            X.update({"repl":10})
+            X.update({"trainsize":1})
+        else:
+            X.update({fidelity_param_id: max_budget})
         bench.objective_function(X, logging=True, multithread=False)
     
     time = pd.DataFrame.from_dict([x.get("time") for x in bench.archive])

@@ -28,6 +28,8 @@ class worker(Worker):
         bench = self.bench
         target = self.target
         on_integer_scale = self.on_integer_scale
+        if "rbv2_" in bench.config.config_id:
+            config.update({"repl":10})  # manual fix required for rbv2_
         config.update({fidelity_param_id: int(round(budget)) if self.on_integer_scale else budget})
         y = bench.objective_function(config, logging=True, multithread=False)[0]
 
@@ -52,7 +54,10 @@ def run_bohb(scenario, instance, target, minimize, on_integer_scale, n_iteration
 
     bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     fidelity_space = bench.get_fidelity_space()
-    fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
+    if "rbv2_" in scenario:  # manual fix required for rbv2_
+        fidelity_param_id = "trainsize"
+    else:
+        fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1
@@ -104,7 +109,10 @@ def run_hb(scenario, instance, target, minimize, on_integer_scale, n_iterations,
 
     bench = benchmark_set.BenchmarkSet(scenario, instance=instance, multithread=False)
     fidelity_space = bench.get_fidelity_space()
-    fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
+    if "rbv2_" in scenario:  # manual fix required for rbv2_
+        fidelity_param_id = "trainsize"
+    else:
+        fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1

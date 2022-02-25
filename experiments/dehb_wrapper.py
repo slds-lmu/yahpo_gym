@@ -18,6 +18,8 @@ def dehb_target_function(configuration, budget, **kwargs):
     on_integer_scale = kwargs["on_integer_scale"]
 
     X = configuration.get_dictionary()
+    if "rbv2_" in bench.config.config_id:
+        X.update({"repl":10})  # manual fix required for rbv2_
     X.update({bench.config.instance_names: instance})
     X.update({fidelity_param_id: int(round(budget)) if on_integer_scale else budget})
     y = bench.objective_function(X, logging=True, multithread=False)[0]
@@ -51,7 +53,10 @@ def run_dehb(scenario, instance, target, minimize, on_integer_scale, n_trials, s
         opt_space_fixed.add_forbidden(forbidden)
     dimensions = len(opt_space_fixed.get_hyperparameters())
     fidelity_space = bench.get_fidelity_space()
-    fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
+    if "rbv2_" in scenario:  # manual fix required for rbv2_
+        fidelity_param_id = "trainsize"
+    else:
+        fidelity_param_id = fidelity_space.get_hyperparameter_names()[0]
     min_budget = fidelity_space.get_hyperparameter(fidelity_param_id).lower
     max_budget = fidelity_space.get_hyperparameter(fidelity_param_id).upper
     factor = 1 if minimize else -1
