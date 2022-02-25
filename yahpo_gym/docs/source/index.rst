@@ -43,7 +43,7 @@ Scenarios & Instances
 Getting Started
 ***********************
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    getting_started
 
