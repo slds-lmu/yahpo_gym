@@ -17,7 +17,7 @@ def get_suite(type:str, version:float = 0.1):
     assert type in ['single', 'multi'], "type must be either 'single' or 'multi'"
     assert _data_has_version(version), "version must coincide with version in `local_config.data_path`"
     # Get file
-    fp = local_config.data_path.joinpath("benchmark_suites").joinpath("v{version}").joinpath(f"{type}_.json")
+    fp = local_config.data_path.joinpath("benchmark_suites").joinpath(f"v{version}").joinpath(f"{type}.json")
     # Read json
     with open(fp, "r") as f:
         data = read_json(f, orient='records')
