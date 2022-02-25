@@ -3,7 +3,7 @@ import pytest
 def test_config():
   import yahpo_gym.configuration as cfg
   _test_dict = {
-      'scenario' : 'TEST_BENCHMARK',
+      'config_id' : 'TEST_BENCHMARK',
       'y_names' : ['valid_loss', 'runtime','n_params'],
       'y_minimize' : [True, False, True, False, True, False],
       'cont_names': ['epoch', 'batch_size', 'dropout_1'],
@@ -15,7 +15,7 @@ def test_config():
 
   cc = cfg.Configuration(_test_dict)
 
-  assert cc.scenario == 'TEST_BENCHMARK'
+  assert cc.config_id == 'TEST_BENCHMARK'
   assert cc.y_names == ['valid_loss', 'runtime','n_params']
   assert cc.cont_names == ['epoch', 'batch_size', 'dropout_1']
   assert cc.cat_names == ['task', 'lr_schedule']
