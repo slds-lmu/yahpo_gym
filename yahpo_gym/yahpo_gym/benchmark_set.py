@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = False,
+    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = True,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
         noisy: bool = False):
         """
@@ -28,7 +28,7 @@ class BenchmarkSet():
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`). 
             See `BenchmarkSet(<key>).instances` for a list of available instances.
         active_session: bool
-            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
+            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `Trtue`.
         session: onnx.Session
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
