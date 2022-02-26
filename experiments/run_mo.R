@@ -31,7 +31,7 @@ reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mo", 
 saveRegistry(reg)
 
 random_wrapper = function(job, data, instance, ...) {
-  reticulate::use_virtualenv("mf_env/", required = TRUE)
+  #reticulate::use_virtualenv("mf_env/", required = TRUE)
   library(yahpogym)
   logger = lgr::get_logger("bbotk")
   logger$set_threshold("warn")
@@ -197,8 +197,8 @@ get_iaml_setup = function(budget_factor = 40L) {
 get_rbv2_setup = function(budget_factor = 40L) {
   setup = map_dtr(c("rbv2_rpart", "rbv2_ranger", "rbv2_xgboost", "rbv2_super"), function(scenario) {
     bench = yahpo_gym$benchmark_set$BenchmarkSet(scenario, instance = "1040")
-    ndim = length(bench$config_space$get_hyperparameter_names()) - 2L
-    instances = switch(scenario, rbv2_rpart = c("41163", "1476", "40499"), rbv2_ranger = c("6", "40979", "1476"), rbv2_xgboost = c("1478", "1476", "32"), rbv2_super = c("1457", "6", "1053"))
+    ndim = length(bench$config_space$get_hyperparameter_names()) - 3L
+    instances = switch(scenario, rbv2_rpart = c("41163", "1476", "40499"), rbv2_ranger = c("6", "40979", "375"), rbv2_xgboost = c("28", "182", "12"), rbv2_super = c("1457", "6", "1053"))
     targets = list(c("acc", "memory"))
     budget = ceiling(20L + sqrt(ndim) * budget_factor)
     setup = setDT(expand.grid(scenario = scenario, instance = instances, targets = targets, ndim = ndim, budget = budget, stringsAsFactors = FALSE))
@@ -229,7 +229,7 @@ for (i in seq_len(nrow(optimizers))) {
   ids = addExperiments(
     prob.designs = prob_designs,
     algo.designs = algo_designs,
-    repls = 10L
+    repls = 1L
   )
   addJobTags(ids, as.character(optimizers[i, ]$algorithm))
 }

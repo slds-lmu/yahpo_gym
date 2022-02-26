@@ -1,5 +1,5 @@
 make_optim_instance = function(instance) {
-  benchmark = BenchmarkSet$new(as.character(instance$scenario), instance = as.character(instance$instance), download = FALSE)
+  benchmark = BenchmarkSet$new(as.character(instance$scenario), instance = as.character(instance$instance))
   benchmark$subset_codomain(instance$targets[[1L]])
   objective = benchmark$get_objective(as.character(instance$instance), multifidelity = FALSE, check_values = FALSE)
   budget = instance$budget

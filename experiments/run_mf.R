@@ -278,7 +278,7 @@ get_rbv2_setup = function(budget_factor = 40L) {
     fidelity_param_id = "trainsize"
     min_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$lower
     max_budget = fidelity_space$get_hyperparameter(fidelity_param_id)$upper
-    ndim = length(bench$config_space$get_hyperparameter_names()) - 3L
+    ndim = length(bench$config_space$get_hyperparameter_names()) - 3L  # repl and trainsize and instance
 
     instances = switch(scenario, rbv2_glmnet = c("375", "458"), rbv2_rpart = c("14", "40499"), rbv2_ranger = c("16", "42"), rbv2_xgboost = c("12", "1501", "16", "40499"), rbv2_super = c("1053", "1457", "1063", "1479", "15", "1468"))
     target = "acc"
@@ -312,20 +312,19 @@ for (i in seq_len(nrow(optimizers))) {
   ids = addExperiments(
     prob.designs = prob_designs,
     algo.designs = algo_designs,
-    repls = 1L
+    repls = 30L
   )
   addJobTags(ids, as.character(optimizers[i, ]$algorithm))
 }
 
 jobs = findJobs()
-resources.default = list(walltime = 3600 * 12L, memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
+resources.default = list(walltime = 3600 * 3L, memory = 2048L, ntasks = 1L, ncpus = 1L, nodes = 1L, clusters = "teton", max.concurrent.jobs = 9999L)
 submitJobs(jobs, resources = resources.default)
 
 done = findDone()
 results = reduceResultsList(done, function(x, job) {
   budget_var = if (job$instance$scenario %in% c("lcbench", "nb301")) "epoch" else "trainsize"
   target_var = job$instance$target
-  # FIXME: minimize direction of target
   if (!job$instance$minimize) {
     x[, (target_var) := - get(target_var)]
   }
