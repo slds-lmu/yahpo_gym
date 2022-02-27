@@ -39,7 +39,8 @@ class Configuration():
         return {
             'basedir': local_config.data_path,
             'config_id': '',
-            'model': 'new_model.onnx',
+            'model': 'model.onnx',
+            'model_noisy':'model_noisy.onnx',
             'dataset': 'data.csv',
             'test_dataset': 'test_data.csv',
             'config_space': 'config_space.json',
@@ -51,7 +52,6 @@ class Configuration():
             'fidelity_params': [],
             'runtime_name': '',
             'memory_name': '',
-            'model_old': 'model.onnx',
             'drop_predict': [], 
             'instances': [],
             'hierarchical': False

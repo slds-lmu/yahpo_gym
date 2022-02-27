@@ -20,9 +20,9 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
   assert type(b.config) == yahpo_gym.configuration.Configuration
   assert type(b.encoding) == dict
   assert type(b.config_space) == ConfigSpace.configuration_space.ConfigurationSpace
-  assert b.active_session == False
+  assert b.active_session == True
   assert type(b.constants) == dict
-  assert b.session is None
+  assert b.session is not None
   assert len(b.archive) == 0
   assert b.check == True
 
@@ -43,7 +43,7 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
   assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names)
 
-  optspace =  b.get_opt_space()
+  optspace =  b.get_opt_space(drop_fidelity_params = True)
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
   assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names) - len(b.get_fidelity_space().get_hyperparameter_names())
 

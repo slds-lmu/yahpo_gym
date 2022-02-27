@@ -11,7 +11,7 @@ def test_objective_timed_lcbench():
     b = BenchmarkSet("lcbench", instance = "3945")
     fidelity_config = {"epoch" : 50}
 
-    optspace =  b.get_opt_space()
+    optspace =  b.get_opt_space(drop_fidelity_params = True)
     assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
 
     for i in range(3):

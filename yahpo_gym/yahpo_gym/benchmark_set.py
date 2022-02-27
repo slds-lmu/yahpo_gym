@@ -13,7 +13,7 @@ import ConfigSpace.hyperparameters as CSH
 
 class BenchmarkSet():
 
-    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = False,
+    def __init__(self, scenario: str = None, instance: str = None, active_session: bool = True,
         session: Union[rt.InferenceSession, None] = None, multithread: bool = True, check: bool = True,
         noisy: bool = False):
         """
@@ -28,7 +28,7 @@ class BenchmarkSet():
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`). 
             See `BenchmarkSet(<key>).instances` for a list of available instances.
         active_session: bool
-            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `False`.
+            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `Trtue`.
         session: onnx.Session
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
@@ -288,7 +288,7 @@ class BenchmarkSet():
 
 
     def __repr__(self):
-        return f"BenchmarkSet ({self.config.config_id})"
+        return f"BenchmarkSet({self.config.config_id})"
 
     def _config_to_xs(self, configuration):
         if type(configuration) == CS.Configuration:
@@ -357,5 +357,5 @@ class BenchmarkSet():
     def _get_model_path(self):
         path = self.config.get_path("model")
         if self.noisy:
-            path.replace('.onnx', '_noisy.onnx')
+            self.config.get_path("model_noisy")
         return path
