@@ -9,17 +9,17 @@
 
 ---
 
-**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [our paper](https://arxiv.org/abs/2109.03670).
+**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problems to benchmark hyperparameter optimization (HPO) methods described in [our paper](https://arxiv.org/abs/2109.03670).
 
-YAHPO GYM consists of several `scenarios`, e.g. the collection of all benchmark instances in `lcbench` is a `scenario`.
-Here, an `instance` is the concrete task of optimizing hyperparameters of a neural network on a given dataset from OpenML.
+YAHPO GYM consists of several `scenarios`. A scenario (e.g. `lcbench`) is a collection of benchmark instances with the same underlying hyperparameter optimization task (e.g., optimizing the hyperparameters of a neural network) on different datasets taken from [OpenML](https://www.openml.org/). 
+
 
 ### Why should I use it?
 
-**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+**YAHPO GYM** provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks
 across a large variety of problems.
-Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g. [HpBandSter](https://github.com/automl/HpBandSter).
+Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space and can thus be seamlessly integrated into many existing projects (e.g. [HpBandSter](https://github.com/automl/HpBandSter)).
 
 ![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/results.png?raw=true)
 
@@ -89,36 +89,15 @@ bench.instances
 # Set an instance
 bench.set_instance("3945")
 # Sample a point from the configspace (containing parameters for the instance and budget)
-value = bench.config_space.sample_configuration(1).get_dictionary()
+config = bench.get_opt_space().sample_configuration(1).get_dictionary()
 # Evaluate
-print(bench.objective_function(value))
+print(bench.objective_function(config))
 ```
 
-The `BenchmarkSet` has the following important functions and fields (with relevant args):
-
-```
-- `__init__`:
-  args:
-    scenario: str, "Name of the scenario"
-    instance: str (optional), "A valid instance"
-  "Instantiate the benchmark."
-
-- `objective_function`, configuration: Dict, "A dictionary of HP values to evaluate"
-  "Evaluate the objective function."
-
-- `get_opt_space`:
-  "Get the Opt. Space (A `ConfigSpace.ConfigSpace`)."
-
-- `set_instance`: value: str, "A valid instance"
-  "Set an instance. A list of available instances can be obtained via the `instances` field."
-
-- `set_session`: session: str, "A onnx session"
-  "Set an onnx session."
-```
 
 ### Example: Tuning an instance using HPBandSter
 
-We include a full example for optimization using **BOHB** on a yahpo_gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
+We include a full example for optimization using **BOHB** on a YAHPO GYM instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
 
 ### All Examples
 
