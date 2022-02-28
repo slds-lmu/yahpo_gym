@@ -81,31 +81,32 @@ p$optimize(ois)
 
 ### Available Problems
 
-**Overview over problems**
+**Overview over benchmark instances**
 
 |Scenario     | #HPs| #Targets| #Instances|Space      |Fidelity |
 |:------------|----:|--------:|----------:|:----------|:--------|
-|lcbench      |    9|        6|         35|Numeric    |epoch    |
-|fcnet        |   12|        4|          4|Mixed      |epoch    |
-|nb301        |   35|        2|          1|Mixed+Deps |epoch    |
-|rbv2_svm     |    9|        6|         96|Mixed+Deps |frac     |
-|rbv2_ranger  |   11|        6|        114|Mixed+Deps |frac     |
-|rbv2_rpart   |    8|        6|        101|Mixed      |frac     |
-|rbv2_glmnet  |    6|        6|         98|Mixed      |frac     |
-|rbv2_xgboost |   17|        6|        109|Mixed+Deps |frac     |
-|rbv2_aknn    |    9|        6|         99|Mixed      |frac     |
-|rbv2_super   |   41|        6|         89|Mixed+Deps |frac     |
-|iaml_ranger  |   10|       12|          4|Mixed+Deps |frac     |
-|iaml_rpart   |    6|       12|          4|Numeric    |frac     |
-|iaml_glmnet  |    4|       12|          4|Numeric    |frac     |
-|iaml_xgboost |   15|       12|          4|Mixed+Deps |frac     |
-|iaml_super   |   30|       12|          4|Mixed+Deps |frac     |
+|rbv2_svm     |    6|        9|        106|Mixed      |frac     |
+|rbv2_ranger  |    8|        9|        119|Mixed      |frac     |
+|rbv2_rpart   |    5|        9|        117|Mixed      |frac     |
+|rbv2_glmnet  |    3|        9|        115|Mixed      |frac     |
+|rbv2_xgboost |   14|        9|        119|Mixed      |frac     |
+|rbv2_aknn    |    6|        9|        118|Mixed      |frac     |
+|rbv2_super   |   38|        9|        103|Mixed      |frac     |
+|nb301        |   33|        2|          1|Mixed+Deps |epoch    |
+|lcbench      |    7|        6|         34|Continuous |epoch    |
+|iaml_ranger  |    8|       12|          4|Mixed+Deps |frac     |
+|iaml_rpart   |    4|       12|          4|Continuous |frac     |
+|iaml_glmnet  |    2|       12|          4|Continuous |frac     |
+|iaml_xgboost |   13|       12|          4|Mixed+Deps |frac     |
+|iaml_super   |   28|       12|          4|Mixed+Deps |frac     |
 
 with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
 The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
-Search spaces can be continuous, mixed and have dependencies (Deps). 
+Search spaces can be continuous, mixed and have dependencies (Deps).
+
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
+
 
 We can list all available benchmark problems
 
