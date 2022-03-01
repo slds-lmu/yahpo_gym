@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation (Python) &mdash; yahpo_gym 0.1.0 documentation</title>
+  <title>Getting Started &mdash; yahpo_gym 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Extending YAHPO Gym" href="extending.html" />
-    <link rel="prev" title="Scenarios &amp; Instances" href="scenarios.html" /> 
+    <link rel="next" title="Scenarios &amp; Instances" href="scenarios.html" />
+    <link rel="prev" title="yahpo_gym.benchmarks package" href="yahpo_gym.benchmarks.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,19 +43,22 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="yahpo_gym.html">YAHPO Gym Module Handbook</a></li>
 </ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation-python">Installation (Python)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup">Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+</ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="scenarios.html">Scenarios &amp; Instances</a></li>
 </ul>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation (Python)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#setup">Setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#usage">Usage</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples Gallery</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending YAHPO Gym</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Using YAHPO Gym: Examples</a></li>
 </ul>
 
         </div>
@@ -72,7 +75,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Installation (Python)</li>
+      <li>Getting Started</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -82,16 +85,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="installation-python">
-<h1>Installation (Python)<a class="headerlink" href="#installation-python" title="Permalink to this headline"></a></h1>
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
+<section id="installation-python">
+<h2>Installation (Python)<a class="headerlink" href="#installation-python" title="Permalink to this headline"></a></h2>
 <p>YAHPO Gym can be installed directly from GitHub using <cite>pip</cite>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">&quot;git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&amp;subdirectory=yahpo_gym&quot;</span>
 </pre></div>
 </div>
 </section>
 <section id="setup">
-<h1>Setup<a class="headerlink" href="#setup" title="Permalink to this headline"></a></h1>
-<p>To run a benchmark you need to obatin the ONNX model (<cite>model.onnx</cite>), [ConfigSpace](<a class="reference external" href="https://automl.github.io/ConfigSpace/">https://automl.github.io/ConfigSpace/</a>) (<cite>config_space.json</cite>) and some encoding info (<cite>encoding.json</cite>).</p>
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline"></a></h2>
+<p>To run a benchmark you need to obatin the ONNX model (<cite>model.onnx</cite>), <a class="reference external" href="https://automl.github.io/ConfigSpace">ConfigSpace</a> (<cite>config_space.json</cite>) and some encoding info (<cite>encoding.json</cite>).</p>
 <p>You can download all files for all scenarios in a single folder <a class="reference external" href="https://github.com/slds-lmu/yahpo_data">here (Github)</a>.</p>
 <p>You should pertain the folder structure as on the hosting site (i.e., create a <cite>“path-to-data”</cite> directory, for example named <cite>“multifidelity_data”</cite>, containing the individual, e.g., <cite>“lcench”</cite>, directories).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize the local config &amp; set path for surrogates and metadata</span>
@@ -102,7 +107,7 @@
 </div>
 </section>
 <section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
 <p>This example showcases the simplicity of YAHPO GYM’s API.
 Additional, more in-depth examples can be found in the <a class="reference external" href="https://slds-lmu.github.io/yahpo_gym/examples.html">Examples</a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym</span> <span class="kn">import</span> <span class="n">benchmark_set</span>
@@ -120,13 +125,14 @@ Additional, more in-depth examples can be found in the <a class="reference exter
 </pre></div>
 </div>
 </section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="scenarios.html" class="btn btn-neutral float-left" title="Scenarios &amp; Instances" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="extending.html" class="btn btn-neutral float-right" title="Extending YAHPO Gym" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="yahpo_gym.benchmarks.html" class="btn btn-neutral float-left" title="yahpo_gym.benchmarks package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scenarios.html" class="btn btn-neutral float-right" title="Scenarios &amp; Instances" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

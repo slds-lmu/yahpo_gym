@@ -18,8 +18,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation (Python)" href="getting_started.html" />
-    <link rel="prev" title="yahpo_gym.benchmarks package" href="yahpo_gym.benchmarks.html" /> 
+    <link rel="next" title="Examples Gallery" href="examples.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,22 +43,21 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="yahpo_gym.html">YAHPO Gym Module Handbook</a></li>
 </ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+</ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Scenarios &amp; Instances</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scenarios">Scenarios</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#instances">Instances</a></li>
 </ul>
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Installation (Python)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html#setup">Setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html#usage">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples Gallery</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="extending.html">Extending YAHPO Gym</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Using YAHPO Gym: Examples</a></li>
 </ul>
 
         </div>
@@ -87,6 +86,8 @@
              
   <section id="scenarios-instances">
 <h1>Scenarios &amp; Instances<a class="headerlink" href="#scenarios-instances" title="Permalink to this headline"></a></h1>
+<section id="scenarios">
+<h2>Scenarios<a class="headerlink" href="#scenarios" title="Permalink to this headline"></a></h2>
 <p>The following table provides an overview over <strong>Scenarios</strong> included in <strong>YAHPO GYM</strong> and included instances:</p>
 <ul class="simple">
 <li><p><cite>scenario</cite>: The name of the scenario.</p></li>
@@ -94,33 +95,38 @@
 <li><p><cite>n_cat</cite>, <cite>n_num</cite>: Number of categorical and continuous hyperparameters.</p></li>
 <li><p><cite>fidelity</cite>: Available fidelity parameters</p></li>
 <li><p><cite>n_instances</cite>: Number of instances (global).</p></li>
-<li><p><cite>min(task)</cite>, <cite>max(task)</cite>: Statistics on the number of samples used to fit surrogate models for each task.</p></li>
+<li><p><cite>min(task)</cite>, …,  <cite>max(task)</cite>: Statistics on the number of samples used to fit surrogate models for each task.</p></li>
 </ul>
 <table class="docutils align-default" id="id1">
 <caption><span class="caption-text">Scenario Overview</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
 <colgroup>
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head stub"><p>scenario</p></th>
+<tr class="row-odd"><th class="head stub"></th>
+<th class="head"><p>scenario</p></th>
 <th class="head"><p>n_targets</p></th>
-<th class="head"><p>n_cat</p></th>
-<th class="head"><p>n_num</p></th>
+<th class="head"><p>n_categorical</p></th>
+<th class="head"><p>n_numeric</p></th>
 <th class="head"><p>fidelity</p></th>
 <th class="head"><p>n_instances</p></th>
 <th class="head"><p>min(task)</p></th>
+<th class="head"><p>median(task)</p></th>
 <th class="head"><p>max(task)</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><th class="stub"><p>lcbench</p></th>
+<tr class="row-even"><th class="stub"><p>0</p></th>
+<td><p>lcbench</p></td>
 <td><p>6</p></td>
 <td><p>0</p></td>
 <td><p>8</p></td>
@@ -128,8 +134,10 @@
 <td><p>35</p></td>
 <td><p>104000</p></td>
 <td><p>104000</p></td>
+<td><p>104000</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>nb301</p></th>
+<tr class="row-odd"><th class="stub"><p>1</p></th>
+<td><p>nb301</p></td>
 <td><p>2</p></td>
 <td><p>34</p></td>
 <td><p>1</p></td>
@@ -137,44 +145,54 @@
 <td><p>1</p></td>
 <td><p>5578142</p></td>
 <td><p>5578142</p></td>
+<td><p>5578142</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>rbv2_svm</p></th>
+<tr class="row-even"><th class="stub"><p>2</p></th>
+<td><p>rbv2_svm</p></td>
 <td><p>6</p></td>
 <td><p>2</p></td>
 <td><p>6</p></td>
 <td><p>trainsize,repl</p></td>
 <td><p>96</p></td>
 <td><p>1470</p></td>
+<td><p>156135</p></td>
 <td><p>402150</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>rbv2_ranger</p></th>
+<tr class="row-odd"><th class="stub"><p>3</p></th>
+<td><p>rbv2_ranger</p></td>
 <td><p>6</p></td>
 <td><p>3</p></td>
 <td><p>7</p></td>
 <td><p>trainsize,repl</p></td>
 <td><p>114</p></td>
 <td><p>3570</p></td>
+<td><p>66465</p></td>
 <td><p>138918</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>rbv2_rpart</p></th>
+<tr class="row-even"><th class="stub"><p>4</p></th>
+<td><p>rbv2_rpart</p></td>
 <td><p>6</p></td>
 <td><p>1</p></td>
 <td><p>6</p></td>
 <td><p>trainsize,repl</p></td>
 <td><p>101</p></td>
 <td><p>3570</p></td>
+<td><p>21000</p></td>
 <td><p>38430</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>rbv2_glmnet</p></th>
+<tr class="row-odd"><th class="stub"><p>5</p></th>
+<td><p>rbv2_glmnet</p></td>
 <td><p>6</p></td>
 <td><p>1</p></td>
 <td><p>4</p></td>
 <td><p>trainsize,repl</p></td>
 <td><p>98</p></td>
 <td><p>1680</p></td>
+<td><p>28914</p></td>
 <td><p>47250</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>rbv2_xgboost</p></th>
+<tr class="row-even"><th class="stub"><p>6</p></th>
+<td><p>rbv2_xgboost</p></td>
 <td><p>6</p></td>
 <td><p>2</p></td>
 <td><p>14</p></td>
@@ -182,44 +200,54 @@
 <td><p>109</p></td>
 <td><p>14760</p></td>
 <td><p>100000</p></td>
+<td><p>100000</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>rbv2_aknn</p></th>
+<tr class="row-odd"><th class="stub"><p>7</p></th>
+<td><p>rbv2_aknn</p></td>
 <td><p>6</p></td>
 <td><p>2</p></td>
 <td><p>6</p></td>
 <td><p>trainsize,repl</p></td>
 <td><p>99</p></td>
 <td><p>1680</p></td>
+<td><p>22436</p></td>
 <td><p>85451</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>rbv2_super</p></th>
+<tr class="row-even"><th class="stub"><p>8</p></th>
+<td><p>rbv2_super</p></td>
 <td><p>6</p></td>
 <td><p>7</p></td>
 <td><p>33</p></td>
 <td><p>trainsize,repl</p></td>
 <td><p>89</p></td>
 <td><p>126880</p></td>
+<td><p>309213</p></td>
 <td><p>431204</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>iaml_ranger</p></th>
+<tr class="row-odd"><th class="stub"><p>9</p></th>
+<td><p>iaml_ranger</p></td>
 <td><p>12</p></td>
 <td><p>3</p></td>
 <td><p>6</p></td>
 <td><p>trainsize</p></td>
 <td><p>4</p></td>
 <td><p>402417</p></td>
+<td><p>418943</p></td>
 <td><p>419790</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>iaml_rpart</p></th>
+<tr class="row-even"><th class="stub"><p>10</p></th>
+<td><p>iaml_rpart</p></td>
 <td><p>12</p></td>
 <td><p>0</p></td>
 <td><p>5</p></td>
 <td><p>trainsize</p></td>
 <td><p>4</p></td>
 <td><p>52146</p></td>
+<td><p>107754</p></td>
 <td><p>137248</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>iaml_glmnet</p></th>
+<tr class="row-odd"><th class="stub"><p>11</p></th>
+<td><p>iaml_glmnet</p></td>
 <td><p>12</p></td>
 <td><p>0</p></td>
 <td><p>3</p></td>
@@ -227,33 +255,39 @@
 <td><p>4</p></td>
 <td><p>7000</p></td>
 <td><p>7000</p></td>
+<td><p>7000</p></td>
 </tr>
-<tr class="row-even"><th class="stub"><p>iaml_xgboost</p></th>
+<tr class="row-even"><th class="stub"><p>12</p></th>
+<td><p>iaml_xgboost</p></td>
 <td><p>12</p></td>
 <td><p>1</p></td>
 <td><p>13</p></td>
 <td><p>trainsize</p></td>
 <td><p>4</p></td>
 <td><p>839055</p></td>
+<td><p>839910</p></td>
 <td><p>840000</p></td>
 </tr>
-<tr class="row-odd"><th class="stub"><p>iaml_super</p></th>
+<tr class="row-odd"><th class="stub"><p>13</p></th>
+<td><p>iaml_super</p></td>
 <td><p>12</p></td>
 <td><p>5</p></td>
 <td><p>24</p></td>
 <td><p>trainsize</p></td>
 <td><p>4</p></td>
 <td><p>1301405</p></td>
+<td><p>1373224</p></td>
 <td><p>1404019</p></td>
 </tr>
 </tbody>
 </table>
-<p>In <cite>yahpo_gym</cite>, there is a <cite>Configuration</cite> object for each <strong>scenario</strong>.
-A list of all available scenarios can be obtained as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym.configuration</span> <span class="kn">import</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">cfgs</span><span class="p">()</span>
+<p>In <cite>yahpo_gym</cite>, there is a <cite>Configuration</cite> object for each <strong>scenario</strong>.</p>
+<p>A list of all available scenarios can be obtained as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym.configuration</span> <span class="kn">import</span> <span class="n">cfg</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">cfg</span><span class="p">())</span>
 </pre></div>
 </div>
+</section>
 <section id="instances">
 <h2>Instances<a class="headerlink" href="#instances" title="Permalink to this headline"></a></h2>
 <p>YAHPO GYM <strong>instances</strong> are evaluations of an ML algorithm (<strong>scenario</strong>) with a given set of hyperparameters on a specific task.
@@ -275,10 +309,10 @@ To provide an example, instance <cite>168868</cite> defines the <cite>Task</cite
 <td><p>168868,167152,167200,168330,189862,189909,167181,167149,126026,168910,167083,167190,189906,146212,189865,167168,168329,189873,34539,189866,167104,189908,3945,168335,126025,189354,126029,167161,167184,189905,168908,167185,167201,7593,168331</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>nb301</p></th>
-<td><p>CIFAR10</p></td>
+<td><p>data</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>rbv2_svm</p></th>
-<td><p>40978,40966,42,377,458,307,1515,1510,16,334,50,40984,40975,1479,54,15,12,1468,40496&lt;br&gt;1501,188,40994,1462,1063,40979,469,22,23381,29,312,6332,40981,470,40499,1480,18,14,11,1494,1049,37,41157,31,1068,38,40670,23,40982,40900,181,1050,1464,40983,28,1487,46,1067,3,41212,1056,1497,182,375,32,41143,4154,60,24,44,41146,40498,41156,1475,40701,1485,41216,1489,4135,1040,4534,4538,1476,1457,1053,4134,300,1478,40536,1111,1461,41142,1220,41163,41138,1486,41164</p></td>
+<td><p>40978,40966,42,377,458,307,1515,1510,16,334,50,40984,40975,1479,54,15,12,1468,40496,1501,188,40994,1462,1063,40979,469,22,23381,29,312,6332,40981,470,40499,1480,18,14,11,1494,1049,37,41157,31,1068,38,40670,23,40982,40900,181,1050,1464,40983,28,1487,46,1067,3,41212,1056,1497,182,375,32,41143,4154,60,24,44,41146,40498,41156,1475,40701,1485,41216,1489,4135,1040,4534,4538,1476,1457,1053,4134,300,1478,40536,1111,1461,41142,1220,41163,41138,1486,41164</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>rbv2_ranger</p></th>
 <td><p>41157,40984,54,1464,181,40496,1494,1050,40975,40994,15,1468,1462,1063,1510,334,377,11,1068,18,40982,37,469,1487,23,1515,50,458,1480,1067,40966,40983,1049,12,1497,40979,31,42,182,40900,1056,28,1501,40498,16,1479,14,60,40499,44,41146,41156,4154,40981,22,32,1489,1040,3,41216,38,312,46,29,375,1475,40685,1485,6332,470,40701,41143,41278,41027,24,1457,307,40670,188,4538,6,23381,1053,41163,41165,4134,41212,1478,40536,41142,1476,41161,4534,41159,40978,41164,300,1486,1111,1220,151,41138,40927,4135,41166,1590,4541,1461,40668,23517,41162,23512,41168,41150</p></td>
@@ -328,8 +362,8 @@ To provide an example, instance <cite>168868</cite> defines the <cite>Task</cite
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="yahpo_gym.benchmarks.html" class="btn btn-neutral float-left" title="yahpo_gym.benchmarks package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="getting_started.html" class="btn btn-neutral float-right" title="Installation (Python)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples Gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

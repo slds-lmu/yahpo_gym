@@ -2,6 +2,10 @@
 Scenarios \& Instances
 ************************
 
+
+Scenarios
+=======================
+
 The following table provides an overview over **Scenarios** included in **YAHPO GYM** and included instances:
 
 * `scenario`: The name of the scenario.
@@ -9,7 +13,7 @@ The following table provides an overview over **Scenarios** included in **YAHPO 
 * `n_cat`, `n_num`: Number of categorical and continuous hyperparameters.
 * `fidelity`: Available fidelity parameters
 * `n_instances`: Number of instances (global).
-* `min(task)`, `max(task)`: Statistics on the number of samples used to fit surrogate models for each task.
+* `min(task)`, ...,  `max(task)`: Statistics on the number of samples used to fit surrogate models for each task.
 
 .. csv-table:: Scenario Overview
    :file: _static/scenario_stats.csv
@@ -17,11 +21,12 @@ The following table provides an overview over **Scenarios** included in **YAHPO 
    :stub-columns: 1
 
 In `yahpo_gym`, there is a `Configuration` object for each **scenario**. 
+
 A list of all available scenarios can be obtained as follows:
 
 .. code-block:: python
 
-   from yahpo_gym.configuration import cfg, cfgs()
+   from yahpo_gym.configuration import cfg
    print(cfg())
 
 

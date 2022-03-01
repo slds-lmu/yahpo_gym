@@ -1,5 +1,5 @@
-Using YAHPO Gym: Examples
-************************
+Examples Gallery
+*******************************************************************************
 
 We provide several examples for using YAHPO Gym:
 
