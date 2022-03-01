@@ -33,12 +33,6 @@ Module Documentation
 
    yahpo_gym
 
-Scenarios & Instances
-***********************
-.. toctree::
-   :maxdepth: 1
-
-   scenarios
 
 Getting Started
 ***********************
@@ -47,12 +41,13 @@ Getting Started
 
    getting_started
 
-Extending YAHO Gym
+Scenarios & Instances
 ***********************
 .. toctree::
    :maxdepth: 1
 
-   extending
+   scenarios
+
 
 Examples
 ***********************
@@ -61,6 +56,13 @@ Examples
 
    examples
 
+Extending YAHO Gym
+***********************
+.. toctree::
+   :maxdepth: 1
+
+   extending
+   
 
 Data
 ***********************
