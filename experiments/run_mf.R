@@ -10,9 +10,11 @@ packages = c("data.table", "mlr3misc", "mlr3hyperband")
 
 # FIXME: clean up logs/no logging?
 
-reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
-#reg = makeExperimentRegistry(file.dir = NA, conf.file = NA)  # use this for temporary registry
+#reg = makeExperimentRegistry(file.dir = "/gscratch/lschnei8/registry_yahpo_mf", packages = packages)
+reg = makeExperimentRegistry(file.dir = NA, conf.file = NA, packages = packages)  # interactive session
 saveRegistry(reg)
+# reg = loadRegistry("registry_yahpo_mf_clean")  # to inspect the original registry on the cluster
+# tab = getJobTable()
 
 hb_wrapper = function(job, data, instance, ...) {
   reticulate::use_virtualenv("mf_env/", required = TRUE)
@@ -246,7 +248,7 @@ get_nb301_setup = function(budget_factor = 40L) {
 
   instances = "CIFAR10"
   target = "val_accuracy"
-  budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
+  budget = ceiling(20L * max_budget + sqrt(ndim) * max_budget * budget_factor)
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
   setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
@@ -264,7 +266,7 @@ get_lcbench_setup = function(budget_factor = 40L) {
 
   instances = c("167168", "189873", "189906")
   target = "val_accuracy"
-  budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
+  budget = ceiling(20L * max_budget + sqrt(ndim) * max_budget * budget_factor)
   on_integer_scale = TRUE
   minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
   setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
@@ -282,7 +284,7 @@ get_rbv2_setup = function(budget_factor = 40L) {
 
     instances = switch(scenario, rbv2_glmnet = c("375", "458"), rbv2_rpart = c("14", "40499"), rbv2_ranger = c("16", "42"), rbv2_xgboost = c("12", "1501", "16", "40499"), rbv2_super = c("1053", "1457", "1063", "1479", "15", "1468"))
     target = "acc"
-    budget = ceiling(20L + sqrt(ndim) * max_budget * budget_factor)
+    budget = ceiling(20L * max_budget + sqrt(ndim) * max_budget * budget_factor)
     on_integer_scale = FALSE
     minimize = bench$config$config$y_minimize[match(target, bench$config$config$y_names)]
     setup = setDT(expand.grid(scenario = scenario, instance = instances, target = target, ndim = ndim, max_budget = max_budget, budget = budget, on_integer_scale = on_integer_scale, minimize = minimize, stringsAsFactors = FALSE))
@@ -336,4 +338,15 @@ results = reduceResultsList(done, function(x, job) {
 })
 results = rbindlist(results, fill = TRUE)
 saveRDS(results, "results_mf.rds")
+
+
+tab = getJobTable()
+as.numeric(sum(tab$time.running), units = "hours")  # 388.0598 CPUh for our benchmark (optimizers + yahpo overhead which is negligable)
+
+running_time = reduceResultsList(done, function(x, job) {
+  time_var = if (job$instance$scenario == "lcbench") "time" else if (job$instance$scenario == "nb301") "runtime" else "timetrain"
+  sum(x[[time_var]])
+})
+
+sum(unlist(running_time)) / 3600 # 133996.3 CPUh for training time so 133996.3 + 388.0598 = 134384.4 for real
 

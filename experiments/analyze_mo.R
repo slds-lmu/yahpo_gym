@@ -3,7 +3,13 @@ library(mlr3misc)
 library(ggplot2)
 library(pammtools)
 library(emoa)
-results = readRDS("results_mo.rds")
+values = c("#386cb0", "#fdb462", "#7fc97f", "#ef3b2c", "#662506", "#a6cee3", "#984ea3")
+results = readRDS("results/results_mo.rds")
+results[method == "randomx4", budget := 1 / 4, by = .(method, scenario, instance, targets, repl)]
+results[method %nin% "randomx4", budget := 1, by = .(method, scenario, instance, targets, repl)]
+results[, cumbudget := 0.0]
+results[, cumbudget := as.double(cumsum(budget)), by = .(method, scenario, instance, targets, repl)]
+results[, cumbudget_scaled := cumbudget / max(cumbudget), by = .(method, scenario, instance, targets, repl)]
 
 dat = map_dtr(unique(results$scenario), function(scenario_) {
   map_dtr(unique(results$instance), function(instance_) {
@@ -19,14 +25,12 @@ dat = map_dtr(unique(results$scenario), function(scenario_) {
       pareto_ref = nondominated_points(t(unique(tmp[, y_cols, with = FALSE])))
         map_dtr(unique(tmp$method), function(method_) {
           map_dtr(unique(tmp$repl), function(repl_) {
-            map_dtr(unique(tmp$iter), function(iter_) {
-              dat = unique(tmp[method == method_ & repl == repl_ & iter <= iter_, y_cols, with = FALSE])
+            map_dtr(seq(0, 1, length.out = 101), function(budget_) {
+              dat = unique(tmp[method == method_ & repl == repl_ & cumbudget_scaled <= budget_, y_cols, with = FALSE])
               if (nrow(dat) == 0L) return(data.table())
               pareto = nondominated_points(t(unique(dat)))
-              dhv = dominated_hypervolume(pareto, ref = nadir)
               hvi = hypervolume_indicator(pareto, o = pareto_ref, ref = nadir)
-              eps = epsilon_indicator(pareto, o = pareto_ref)
-              data.table(scenario = scenario_, targets = targets_, instance = instance_, method = method_, repl = repl_, iter = iter_, dhv = dhv, hvi = hvi, eps = eps)
+              data.table(scenario = scenario_, targets = targets_, instance = instance_, method = method_, repl = repl_, cumbudget_scaled = budget_, hvi = hvi)
             })
           })
         })
@@ -34,45 +38,55 @@ dat = map_dtr(unique(results$scenario), function(scenario_) {
    })
 })
 
-agg = dat[, .(mean_dhv = mean(dhv), se_dhv = sd(dhv) / sqrt(.N), mean_hvi = mean(hvi), se_hvi = sd(hvi) / sqrt(.N), mean_eps = mean(eps), se_eps = sd(eps) / sqrt(.N)), by = .(scenario, instance, targets, method, iter)]
+agg = dat[, .(mean_hvi = mean(hvi), se_hvi = sd(hvi) / sqrt(.N)), by = .(cumbudget_scaled, method, scenario, instance, targets)]
+agg[, method := factor(method, levels = c("random", "randomx4", "parego", "smsego", "ehvi", "mego", "mies"), labels = c("Random", "Random x4", "ParEGO", "SMS-EGO", "EHVI", "MEGO", "MIES"))]
 
-ggplot(aes(x = iter, y = mean_hvi, colour = method, fill = method), data = agg) +
-  geom_step(aes(x = iter, y = mean_hvi)) +
-  geom_stepribbon(aes(x = iter, ymin = mean_hvi - se_hvi, ymax = mean_hvi + se_hvi), colour = NA, alpha = 0.5) +
-  xlab("Iteration") +
-  ylab("Mean Hypervolume Indicator") +
-  labs(colour = "Optimizer", fill = "Optimizer") +
-  theme_minimal(base_size = 10) +
-  facet_wrap(~ scenario + instance + targets, scales = "free")
+g = ggplot(aes(x = cumbudget_scaled, y = mean_hvi, colour = method, fill = method), data = agg[cumbudget_scaled > 0.10]) +
+  scale_y_log10() +
+  geom_step() +
+  geom_stepribbon(aes(min = mean_hvi - se_hvi, max = mean_hvi + se_hvi), colour = NA, alpha = 0.3) +
+  scale_colour_manual(values = values) +
+  scale_fill_manual(values = values) +
+  labs(x = "% Budget Used", y = "Mean Normalized HVI", colour = "Optimizer", fill = "Optimizer") +
+  facet_wrap(~ scenario + instance + targets, scales = "free") +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
+ggsave("plots/anytime_mo.png", plot = g, device = "png", width = 12, height = 15)
 
-methods = unique(dat$method)
-ranks = map_dtr(unique(dat$scenario), function(scenario_) {
-  map_dtr(unique(dat$instance), function(instance_) {
-    map_dtr(unique(dat$targets), function(targets_) {
-      map_dtr(unique(dat$repl), function(repl_) {
-        map_dtr(unique(dat$iter), function(iter_) {
-          res = dat[scenario == scenario_ & targets == targets_ & instance == instance_ & repl == repl_ & iter == iter_]
-          if (nrow(res) == 0L) {
-            return(data.table())
-          }
-          setorderv(res, "hvi", 1)
-          data.table(rank = match(methods, res$method), method = methods, scenario = scenario_, instance = instance_, targets = targets_, repl = repl_, iter = iter_)
-        })
+methods = unique(agg$method)
+ranks = map_dtr(unique(agg$scenario), function(scenario_) {
+  map_dtr(unique(agg$instance), function(instance_) {
+    map_dtr(unique(agg$targets), function(targets_) {
+      map_dtr(unique(agg$cumbudget_scaled), function(cumbudget_scaled_) {
+        res = agg[scenario == scenario_ & instance == instance_ & targets == targets_ & cumbudget_scaled == cumbudget_scaled_]
+        if (nrow(res) == 0L) {
+          return(data.table())
+        }
+        setorderv(res, "mean_hvi")
+        data.table(rank = match(methods, res$method), method = methods, scenario = scenario_, instance = instance_, targets = targets_, cumbudget_scaled = cumbudget_scaled_)
       })
     })
   })
 })
 
-ranks_agg = ranks[, .(mean = mean(rank), se = sd(rank) / sqrt(.N)), by = .(method, scenario, instance, targets, iter)]
+ranks_overall = ranks[, .(mean = mean(rank, na.rm = TRUE), se = sd(rank, na.rm = TRUE) / sqrt(sum(!is.na(rank)))), by = .(method, cumbudget_scaled)]
 
-ggplot(aes(x = iter, y = mean, colour = method, fill = method), data = ranks_agg) +
-  geom_line(lwd = 1) +
+g = ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), data = ranks_overall[cumbudget_scaled > 0.10]) +
+  geom_line() +
   geom_ribbon(aes(min = mean - se, max = mean + se), colour = NA, alpha = 0.3) +
-  facet_wrap(~ scenario + instance + targets, scales = "free")
+  scale_colour_manual(values = values) +
+  scale_fill_manual(values = values) +
+  labs(x = "% Budget Used", y = "Mean Rank", colour = "Optimizer", fill = "Optimizer") +
+  theme_minimal() +
+  theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
+ggsave("plots/anytime_average_rank_mo.png", plot = g, device = "png", width = 6, height = 4)
 
-ranks_total = ranks_agg[, .(mean = mean(mean, na.rm = TRUE), se = sd(mean) / sqrt(.N)), by = .(method, iter)]
-
-ggplot(aes(x = iter, y = mean, colour = method, fill = method), data = ranks_total) +
-  geom_line(lwd = 1) +
-  geom_ribbon(aes(min = mean - se, max = mean + se), colour = NA, alpha = 0.3)
+library(scmamp)
+best_agg = agg[cumbudget_scaled == 0.25]
+best_agg[, problem := paste0(scenario, "_", instance, "_", targets)]
+tmp = - as.matrix(dcast(best_agg, problem ~ method, value.var = "mean_hvi")[, -1])
+friedmanTest(tmp) # 1: chi(6) 40.851, p < 0.001; 0.25: chi(6) 48.103, p < 0.001
+png("plots/cd_025_mo.png", width = 6, height = 4, units = "in", res = 300, pointsize = 10)
+plotCD(tmp, cex = 1)
+dev.off()
 
