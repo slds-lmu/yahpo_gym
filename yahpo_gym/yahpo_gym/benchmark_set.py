@@ -211,15 +211,21 @@ class BenchmarkSet():
         cs.add_forbidden_clauses(fbds)
         return cs
 
-    def get_fidelity_space(self):
+    def get_fidelity_space(self, seed:int = None):
         """
         Get the fidelity space to be optimized for.
+        
+        Parameters
+        ----------
+        seed : int
+            Seed for the ConfigSpace. Optional, initialized to None.
         """
         csn = copy.deepcopy(self.config_space)
         hps = csn.get_hyperparameters()
         fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
         hps = [hps[idx] for idx in fidelity_params_idx]
-        cs = CS.ConfigurationSpace()
+        import pdb; pdb.set_trace()
+        cs = CS.ConfigurationSpace(seed=seed)
         cs.add_hyperparameters(hps)
         return cs
 
