@@ -224,7 +224,6 @@ class BenchmarkSet():
         hps = csn.get_hyperparameters()
         fidelity_params_idx = [csn.get_hyperparameter_names().index(fidelity_param) for fidelity_param in self.config.fidelity_params]
         hps = [hps[idx] for idx in fidelity_params_idx]
-        import pdb; pdb.set_trace()
         cs = CS.ConfigurationSpace(seed=seed)
         cs.add_hyperparameters(hps)
         return cs
