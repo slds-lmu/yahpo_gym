@@ -1,7 +1,7 @@
 Package: yahpogym
 Type: Package
 Title: Interface to the yahpo gym python module
-Version: 0.0.1
+Version: 1.0
 Authors@R:
     c(
         person(

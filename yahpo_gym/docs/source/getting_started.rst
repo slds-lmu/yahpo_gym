@@ -1,6 +1,10 @@
+Getting Started
+************************
+
+
 
 Installation (Python)
-************************
+=======================
 
 YAHPO Gym can be installed directly from GitHub using `pip`:
 
@@ -10,9 +14,9 @@ YAHPO Gym can be installed directly from GitHub using `pip`:
 
 
 Setup
-************************
+=======================
 
-To run a benchmark you need to obatin the ONNX model (`model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`).
+To run a benchmark you need to obatin the ONNX model (`model.onnx`), `ConfigSpace <https://automl.github.io/ConfigSpace>`_ (`config_space.json`) and some encoding info (`encoding.json`).
 
 You can download all files for all scenarios in a single folder `here (Github) <https://github.com/slds-lmu/yahpo_data>`_.
 
@@ -27,7 +31,7 @@ You should pertain the folder structure as on the hosting site (i.e., create a `
 
 
 Usage
-************************
+=======================
 
 This example showcases the simplicity of YAHPO GYM's API.
 Additional, more in-depth examples can be found in the `Examples <https://slds-lmu.github.io/yahpo_gym/examples.html>`_
