@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 import os
 import yaml
 
@@ -17,7 +18,13 @@ class LocalConfiguration():
             Path to the local configuration file.
             The default is "~/.config/yahpo_gym".
         """
-        self.settings_path = Path(settings_path).expanduser().absolute()
+        def __init__(self, settings_path: Optional[str] =None):
+            if settings_path is None: 
+                if 'YAHPO_LOCAL_CONFIG' in os.environ:
+                    settings_path = os.environ['YAHPO_LOCAL_CONFIG']
+                else: 
+                    settings_path = "~/.config/yahpo_gym"
+        self.settings_path = settings_path
         self._config = None
     
     def init_config(self, data_path: str = ""):
