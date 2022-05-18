@@ -9,10 +9,10 @@ Benchmark Set
 Benchmark Set
 }
 \details{
-R interface to a YAHPO GYM BenchmarkSet.
+R interface to a YAHPO Gym BenchmarkSet.
 
 
-Allows exporting the objective function from a `YAHPO GYM` BenchmarkSet.
+Allows exporting the objective function from a `YAHPO Gym` BenchmarkSet.
 and additional helper functionality.
 }
 \section{Methods}{

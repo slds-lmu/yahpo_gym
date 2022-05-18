@@ -2,7 +2,7 @@
 % Please edit documentation in R/Objective.R
 \name{preproc_xs}
 \alias{preproc_xs}
-\title{Preprocess r object for use with python's YAHPO GYM}
+\title{Preprocess r object for use with python's YAHPO Gym}
 \usage{
 preproc_xs(xss, ...)
 }
@@ -14,5 +14,5 @@ Named params, appended to `xs`.}
 List of hyperparams}
 }
 \description{
-Preprocess r object for use with python's YAHPO GYM
+Preprocess r object for use with python's YAHPO Gym
 }

@@ -31,8 +31,8 @@ sys.path.insert(0, os.path.abspath('../yahpo_gym'))
 # -- Project information -----------------------------------------------------
 
 project = 'yahpo_gym'
-copyright = '2021, Florian Pfisterer'
-author = 'Florian Pfisterer'
+copyright = '2021, Florian Pfisterer, Lennart Schneider'
+author = 'Florian Pfisterer, Lennart Schneider'
 
 # The short X.Y version
 version = '0.1'
@@ -146,7 +146,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'yahpo_gym.tex', 'yahpo\\_gym Documentation',
-     'Florian Pfisterer', 'manual'),
+     'Florian Pfisterer, Lennart Schneider', 'manual'),
 ]
 
 

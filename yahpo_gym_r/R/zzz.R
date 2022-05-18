@@ -5,7 +5,7 @@
 #' @import R6
 #' @import data.table
 #' @description
-#' A package that connects YAHPO GYM to R.
+#' A package that connects YAHPO Gym to R.
 "_PACKAGE"
 
 .onLoad = function(libname, pkgname) { # nocov start

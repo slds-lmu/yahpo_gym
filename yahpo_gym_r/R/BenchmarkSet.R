@@ -1,9 +1,9 @@
 ##' Benchmark Set
 #'
-#' R interface to a YAHPO GYM BenchmarkSet.
+#' R interface to a YAHPO Gym BenchmarkSet.
 #'
 #' @details
-#' Allows exporting the objective function from a `YAHPO GYM` BenchmarkSet.
+#' Allows exporting the objective function from a `YAHPO Gym` BenchmarkSet.
 #' and additional helper functionality.
 #'
 #' @section Methods:

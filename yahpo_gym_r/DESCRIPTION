@@ -1,6 +1,6 @@
 Package: yahpogym
 Type: Package
-Title: Interface to the yahpo gym python module
+Title: Interface to the YAHPO Gym python module
 Version: 1.0
 Authors@R:
     c(
@@ -9,10 +9,16 @@ Authors@R:
             family = "Pfisterer",
             role = c("cre", "aut"),
             email = "florian.pfisterer@stat.uni-muenchen.de"
+        ),
+        person(
+            given = "Lennart",
+            family = "Schneider",
+            role = "aut",
+            email = "lennart.sch@web.de"
         ))
 Description:
-    Exposes YAHPO GYM's objective function and parameter space for R.
-License: GPL-3
+    Exposes YAHPO Gym's objective function and parameter space for R.
+License: Apache License (= 2.0)
 Encoding: UTF-8
 Depends:
     R (>= 3.5)

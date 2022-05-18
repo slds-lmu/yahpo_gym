@@ -4,11 +4,16 @@
 \name{yahpogym-package}
 \alias{yahpogym}
 \alias{yahpogym-package}
-\title{yahpogym: Interface to the yahpo gym python module}
+\title{yahpogym: Interface to the YAHPO Gym python module}
 \description{
-A package that connects YAHPO GYM to R.
+A package that connects YAHPO Gym to R.
 }
 \author{
 \strong{Maintainer}: Florian Pfisterer \email{florian.pfisterer@stat.uni-muenchen.de}
+
+Authors:
+\itemize{
+  \item Lennart Schneider \email{lennart.sch@web.de}
+}
 
 }

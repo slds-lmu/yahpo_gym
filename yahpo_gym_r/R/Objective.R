@@ -129,7 +129,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
   )
 )
 
-#' @title Preprocess r object for use with python's YAHPO GYM
+#' @title Preprocess r object for use with python's YAHPO Gym
 #' @param xs `list` of `list` \cr
 #'   List of hyperparams
 #' @param ... `any` \cr
