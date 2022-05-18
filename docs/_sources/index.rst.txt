@@ -20,7 +20,7 @@ Our library makes use of ConfigSpace(https://automl.github.io/ConfigSpace/> to d
 many existing projects e.g. HpBandSter(https://github.com/automl/HpBandSter).
 
 
-.. image:: _static/results.png
+.. image:: _static/anytime_average_rank_mf.jpg
     :align: center
     :width: 800px
     :alt: alternate text
