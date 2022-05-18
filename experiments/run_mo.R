@@ -264,5 +264,5 @@ results = rbindlist(results, fill = TRUE)
 saveRDS(results, "results_mo.rds")
 
 tab = getJobTable()
-as.numeric(sum(tab$time.running), units = "hours")  # 2940.432 CPUh for our benchmark (optimizers + yahpo overhead which is negligable)
+as.numeric(sum(tab$time.running), units = "hours")  # 2952.233 CPUh for our benchmark (optimizers + yahpo overhead which is negligable)
 

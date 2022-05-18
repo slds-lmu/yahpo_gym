@@ -341,12 +341,12 @@ saveRDS(results, "results_mf.rds")
 
 
 tab = getJobTable()
-as.numeric(sum(tab$time.running), units = "hours")  # 388.0598 CPUh for our benchmark (optimizers + yahpo overhead which is negligable)
+as.numeric(sum(tab$time.running), units = "hours")  # 397.5094 CPUh for our benchmark (optimizers + yahpo overhead which is negligable)
 
 running_time = reduceResultsList(done, function(x, job) {
   time_var = if (job$instance$scenario == "lcbench") "time" else if (job$instance$scenario == "nb301") "runtime" else "timetrain"
   sum(x[[time_var]])
 })
 
-sum(unlist(running_time)) / 3600 # 133996.3 CPUh for training time so 133996.3 + 388.0598 = 134384.4 for real
+sum(unlist(running_time)) / 3600 # 128805.6 CPUh for training time so 128805.6 + 397.5094 = 129203.1 for real
 

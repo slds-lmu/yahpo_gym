@@ -1,8 +1,9 @@
-library(data.table)
-library(mlr3misc)
-library(ggplot2)
-library(pammtools)
-library(emoa)
+library(data.table)  # 1.14.2
+library(ggplot2)  # 3.3.5
+library(pammtools)  # 0.5.7
+library(emoa)  # 0.5-0.1
+library(mlr3misc)  # 0.10.0
+
 values = c("#386cb0", "#fdb462", "#7fc97f", "#ef3b2c", "#662506", "#a6cee3", "#984ea3")
 results = readRDS("results/results_mo.rds")
 results[method == "randomx4", budget := 1 / 4, by = .(method, scenario, instance, targets, repl)]
@@ -47,7 +48,7 @@ g = ggplot(aes(x = cumbudget_scaled, y = mean_hvi, colour = method, fill = metho
   geom_stepribbon(aes(min = mean_hvi - se_hvi, max = mean_hvi + se_hvi), colour = NA, alpha = 0.3) +
   scale_colour_manual(values = values) +
   scale_fill_manual(values = values) +
-  labs(x = "% Budget Used", y = "Mean Normalized HVI", colour = "Optimizer", fill = "Optimizer") +
+  labs(x = "Fraction of Budget Used", y = "Mean Normalized HVI", colour = "Optimizer", fill = "Optimizer") +
   facet_wrap(~ scenario + instance + targets, scales = "free") +
   theme_minimal() +
   theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
@@ -76,17 +77,25 @@ g = ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), 
   geom_ribbon(aes(min = mean - se, max = mean + se), colour = NA, alpha = 0.3) +
   scale_colour_manual(values = values) +
   scale_fill_manual(values = values) +
-  labs(x = "% Budget Used", y = "Mean Rank", colour = "Optimizer", fill = "Optimizer") +
+  labs(x = "Fraction of Budget Used", y = "Mean Rank", colour = "Optimizer", fill = "Optimizer") +
   theme_minimal() +
   theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
 ggsave("plots/anytime_average_rank_mo.png", plot = g, device = "png", width = 6, height = 4)
 
-library(scmamp)
+library(scmamp)  # 0.3.2
 best_agg = agg[cumbudget_scaled == 0.25]
 best_agg[, problem := paste0(scenario, "_", instance, "_", targets)]
 tmp = - as.matrix(dcast(best_agg, problem ~ method, value.var = "mean_hvi")[, -1])
-friedmanTest(tmp) # 1: chi(6) 40.851, p < 0.001; 0.25: chi(6) 48.103, p < 0.001
+friedmanTest(tmp) # 0.25: chi(6) 48.103, p < 0.001
 png("plots/cd_025_mo.png", width = 6, height = 4, units = "in", res = 300, pointsize = 10)
+plotCD(tmp, cex = 1)
+dev.off()
+
+best_agg = agg[cumbudget_scaled == 1]
+best_agg[, problem := paste0(scenario, "_", instance, "_", targets)]
+tmp = - as.matrix(dcast(best_agg, problem ~ method, value.var = "mean_hvi")[, -1])
+friedmanTest(tmp) # 1: chi(6) 41.091,, p < 0.001
+png("plots/cd_1_mo.png", width = 6, height = 4, units = "in", res = 300, pointsize = 10)
 plotCD(tmp, cex = 1)
 dev.off()
 
