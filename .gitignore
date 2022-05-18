@@ -137,3 +137,5 @@ notes
 
 *.db
 *.toml
+
+experiments/

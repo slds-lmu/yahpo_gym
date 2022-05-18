@@ -5,18 +5,18 @@
 [![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
 
-### What is YAHPO GYM?
+### What is YAHPO Gym?
 
 ---
 
-**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problems to benchmark hyperparameter optimization (HPO) methods described in [our paper](https://arxiv.org/abs/2109.03670).
+**YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problems to benchmark hyperparameter optimization (HPO) methods described in [our paper](https://arxiv.org/abs/2109.03670).
 
-YAHPO GYM consists of several `scenarios`. A scenario (e.g. `lcbench`) is a collection of benchmark instances with the same underlying hyperparameter optimization task (e.g., optimizing the hyperparameters of a neural network) on different datasets taken from [OpenML](https://www.openml.org/). 
+YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a collection of benchmark instances with the same underlying hyperparameter optimization task (e.g., optimizing the hyperparameters of a neural network) on different datasets taken from [OpenML](https://www.openml.org/). 
 
 
 ### Why should I use it?
 
-**YAHPO GYM** provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+**YAHPO Gym** provides blazing fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks
 across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space and can thus be seamlessly integrated into many existing projects (e.g. [HpBandSter](https://github.com/automl/HpBandSter)).
@@ -26,27 +26,25 @@ Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to
 
 **Overview over benchmark instances**
 
-|Scenario     | #HPs| #Targets| #Instances|Space      |Fidelity |
-|:------------|----:|--------:|----------:|:----------|:--------|
-|rbv2_svm     |    6|        9|        106|Mixed      |frac     |
-|rbv2_ranger  |    8|        9|        119|Mixed      |frac     |
-|rbv2_rpart   |    5|        9|        117|Mixed      |frac     |
-|rbv2_glmnet  |    3|        9|        115|Mixed      |frac     |
-|rbv2_xgboost |   14|        9|        119|Mixed      |frac     |
-|rbv2_aknn    |    6|        9|        118|Mixed      |frac     |
-|rbv2_super   |   38|        9|        103|Mixed      |frac     |
-|nb301        |   33|        2|          1|Mixed+Deps |epoch    |
-|lcbench      |    7|        6|         34|Continuous |epoch    |
-|iaml_ranger  |    8|       12|          4|Mixed+Deps |frac     |
-|iaml_rpart   |    4|       12|          4|Continuous |frac     |
-|iaml_glmnet  |    2|       12|          4|Continuous |frac     |
-|iaml_xgboost |   13|       12|          4|Mixed+Deps |frac     |
-|iaml_super   |   28|       12|          4|Mixed+Deps |frac     |
+|Scenario    |Search Space    |# Instances|Target Metrics                       |Fidelity| H|
+|:-----------|---------------:|----------:|------------------------------------:|:-------|:-|
+|rbv2_super  |38D: Mixed      |        103| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_svm    | 6D: Mixed      |        106| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_rpart  | 5D: Mixed      |        117| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_aknn   | 6D: Mixed      |        118| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_glmnet | 3D: Mixed      |        115| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_ranger | 8D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_xgboost|14D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|nb301       |34D: Categorical|          1| 2: perf(1) + rt(1)                  |epoch   | ✓|
+|lcbench     | 7D: Numeric    |         34| 6: perf(5) + rt(1)                  |epoch   |  |
+|iaml_super  |28D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
+|iaml_rpart  | 4D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
+|iaml_glmnet | 2D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
+|iaml_ranger | 8D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
+|iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
 
-with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
-The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
-Search spaces can be continuous, mixed and have dependencies (Deps).
-
+The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
+Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
@@ -75,7 +73,7 @@ local_config.set_data_path("path-to-data")
 
 ### Usage
 
-This example showcases the simplicity of YAHPO GYM's API.
+This example showcases the simplicity of YAHPO Gym's API.
 A longer introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
 
 
@@ -97,7 +95,7 @@ print(bench.objective_function(config))
 
 ### Example: Tuning an instance using HPBandSter
 
-We include a full example for optimization using **BOHB** on a YAHPO GYM instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
+We include a full example for optimization using **BOHB** on a YAHPO Gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
 
 ### All Examples
 

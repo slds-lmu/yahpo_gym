@@ -1,4 +1,4 @@
-# YAHPO GYM
+# YAHPO Gym
 [![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
 [![Docs](https://github.com/slds-lmu/yahpo_gym/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
 [![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
@@ -6,75 +6,74 @@
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 [![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
-### What is YAHPO GYM? 
+### What is YAHPO Gym? 
 
-**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
+**YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
 The underlying software with additional documentation and background can be found [here](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 See the [module Documentation](https://slds-lmu.github.io/yahpo_gym/) for more info.
 
 - **Problem Variety**: Optimization problems in YAHPO Gym stem from diverse Hyperparameter Optimization scenarios on tabular as well as image data
 - **Multi-Fidelity**: Allows for simulating low-fidelity approximations to the real target values to simulate multi-fidelity HPO.
-- **Multi-Objective**: Benchmarks usually contain multiple objectives: performance metrics, runtime and memory consumption allowing for multi-objective and ressource aware HPO.
+- **Multi-Objective**: Benchmarks usually contain multiple objectives: performance metrics, runtime and memory consumption allowing for multi-objective and resource aware HPO.
 
 YAHPO Gym distinguishes between `scenarios` and `instances`.
 A `scenario` is a collection of `instances` that share the same hyperparameter space. In practice, a `scenario` usually consists of a single algorithm fitted on a variety of datasets (= `instances`).
 
 This repository contains three modules/packages:
 
-- `yahpo_gym` (python): The core package allowing for  inference on the surrogates
+- `yahpo_gym` (python): The core package allowing for inference on the surrogates
 - `yahpo_train` (python): Module for training surrogate models used in `yahpo_gym`.
-- `yahpo_gym_r`(R): An R wrapper for  `yahpo gym`.
+- `yahpo_gym_r`(R): An R wrapper for `yahpo gym`.
 
 
 ### Why should I use it?
 
-**YAHPO GYM** (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+**YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) provides blazing fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
 across a large variety of problems.
 
-![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/results.png?raw=true)
+![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/anytime_average_rank_mf.jpg?raw=true)
 
 <br><br>
 ---
 
 **Overview over benchmark instances**
 
-|Scenario     | #HPs| #Targets| #Instances|Space      |Fidelity |
-|:------------|----:|--------:|----------:|:----------|:--------|
-|rbv2_svm     |    6|        9|        106|Mixed      |frac     |
-|rbv2_ranger  |    8|        9|        119|Mixed      |frac     |
-|rbv2_rpart   |    5|        9|        117|Mixed      |frac     |
-|rbv2_glmnet  |    3|        9|        115|Mixed      |frac     |
-|rbv2_xgboost |   14|        9|        119|Mixed      |frac     |
-|rbv2_aknn    |    6|        9|        118|Mixed      |frac     |
-|rbv2_super   |   38|        9|        103|Mixed      |frac     |
-|nb301        |   33|        2|          1|Mixed+Deps |epoch    |
-|lcbench      |    7|        6|         34|Continuous |epoch    |
-|iaml_ranger  |    8|       12|          4|Mixed+Deps |frac     |
-|iaml_rpart   |    4|       12|          4|Continuous |frac     |
-|iaml_glmnet  |    2|       12|          4|Continuous |frac     |
-|iaml_xgboost |   13|       12|          4|Mixed+Deps |frac     |
-|iaml_super   |   28|       12|          4|Mixed+Deps |frac     |
+|Scenario    |Search Space    |# Instances|Target Metrics                       |Fidelity| H|
+|:-----------|---------------:|----------:|------------------------------------:|:-------|:-|
+|rbv2_super  |38D: Mixed      |        103| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_svm    | 6D: Mixed      |        106| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_rpart  | 5D: Mixed      |        117| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_aknn   | 6D: Mixed      |        118| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_glmnet | 3D: Mixed      |        115| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_ranger | 8D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_xgboost|14D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|nb301       |34D: Categorical|          1| 2: perf(1) + rt(1)                  |epoch   | ✓|
+|lcbench     | 7D: Numeric    |         34| 6: perf(5) + rt(1)                  |epoch   |  |
+|iaml_super  |28D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
+|iaml_rpart  | 4D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
+|iaml_glmnet | 2D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
+|iaml_ranger | 8D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
+|iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
 
-with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
-The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
-Search spaces can be continuous, mixed and have dependencies (Deps). 
-
+The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
+Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
 
 <br><br>
+
 ### What does this repository contain?
 
 This repository contains two modules: `yahpo_gym` and `yahpo_train`. 
 While we mainly focus on `yahpo_gym`, as it is provides an interface to the benchmark described in our [paper](https://arxiv.org/abs/2109.03670),
 we also provide the full reproducible codebase used to generate the underlying surrogate neural networks in `yahpo_train`.
 
-#### YAHPO GYM
+#### YAHPO Gym
 
-YAHPO GYM is the module for inference and allows for evaluating a HPC configuration on a given benchmark instance.
+YAHPO Gym is the module for inference and allows for evaluating a HPC configuration on a given benchmark instance.
 
 Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtained [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
-An example for evaluation and running HPO methods is given in the README of the [YAHPO GYM Module](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
+An example for evaluation and running HPO methods is given in the README of the [YAHPO Gym Module](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 
 A quick introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
 
@@ -104,4 +103,4 @@ We want to add several features to **yahpo gym** in future versions:
 #### Related Software:
 
 - [rbv2](https://github.com/slds-lmu/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
-- [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench): can be used to reproduce several other scenarios in a real setting. Furthermroe, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
+- [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench): can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.

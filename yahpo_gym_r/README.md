@@ -1,10 +1,10 @@
-# YAHPO GYM (R)
+# YAHPO Gym (R)
 [![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
 [![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
-R Interface for the YAHPO GYM python module. Documentation for the python module is available via the [module handbook](https://slds-lmu.github.io/yahpo_gym/)
+R Interface for the YAHPO Gym python module. Documentation for the python module is available via the [module handbook](https://slds-lmu.github.io/yahpo_gym/)
 while the R module builds its own documentation with the package.
 ## Installation
 
@@ -17,7 +17,7 @@ remotes::install_github("slds-lmu/yahpo_gym/yahpo_gym_r")
 
 ### Setup
 
-YAHPO GYM requires a one-time setup to install the required python dependencies.
+YAHPO Gym requires a one-time setup to install the required python dependencies.
 Here we install all packages into the `yahpo_gym` conda environment.
 
 ```r
@@ -83,27 +83,25 @@ p$optimize(ois)
 
 **Overview over benchmark instances**
 
-|Scenario     | #HPs| #Targets| #Instances|Space      |Fidelity |
-|:------------|----:|--------:|----------:|:----------|:--------|
-|rbv2_svm     |    6|        9|        106|Mixed      |frac     |
-|rbv2_ranger  |    8|        9|        119|Mixed      |frac     |
-|rbv2_rpart   |    5|        9|        117|Mixed      |frac     |
-|rbv2_glmnet  |    3|        9|        115|Mixed      |frac     |
-|rbv2_xgboost |   14|        9|        119|Mixed      |frac     |
-|rbv2_aknn    |    6|        9|        118|Mixed      |frac     |
-|rbv2_super   |   38|        9|        103|Mixed      |frac     |
-|nb301        |   33|        2|          1|Mixed+Deps |epoch    |
-|lcbench      |    7|        6|         34|Continuous |epoch    |
-|iaml_ranger  |    8|       12|          4|Mixed+Deps |frac     |
-|iaml_rpart   |    4|       12|          4|Continuous |frac     |
-|iaml_glmnet  |    2|       12|          4|Continuous |frac     |
-|iaml_xgboost |   13|       12|          4|Mixed+Deps |frac     |
-|iaml_super   |   28|       12|          4|Mixed+Deps |frac     |
+|Scenario    |Search Space    |# Instances|Target Metrics                       |Fidelity| H|
+|:-----------|---------------:|----------:|------------------------------------:|:-------|:-|
+|rbv2_super  |38D: Mixed      |        103| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_svm    | 6D: Mixed      |        106| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_rpart  | 5D: Mixed      |        117| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_aknn   | 6D: Mixed      |        118| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_glmnet | 3D: Mixed      |        115| 9: perf(6) + rt(2) + mem            |fraction|  |
+|rbv2_ranger | 8D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|rbv2_xgboost|14D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
+|nb301       |34D: Categorical|          1| 2: perf(1) + rt(1)                  |epoch   | ✓|
+|lcbench     | 7D: Numeric    |         34| 6: perf(5) + rt(1)                  |epoch   |  |
+|iaml_super  |28D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
+|iaml_rpart  | 4D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
+|iaml_glmnet | 2D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
+|iaml_ranger | 8D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
+|iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
 
-with "#HPs" hyperparameter, "#Targets" output metrics available across "#Instances" different instances.
-The fidelity is given either as the dataset fraction `frac` or the number of epochs `epoch`.
-Search spaces can be continuous, mixed and have dependencies (Deps).
-
+The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
+Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
@@ -119,7 +117,6 @@ and available instances in a `Benchmark`:
 ```r
 b$instances
 ```
-  
 
 ## Technical Questions:
 
