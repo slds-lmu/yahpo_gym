@@ -24,7 +24,7 @@ To query meta information, use https://www.openml.org/t/<task_id>.
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space and can thus be seamlessly integrated into many existing projects (e.g. [HpBandSter](https://github.com/automl/HpBandSter)).
 
-![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/results.png?raw=true)
+![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/anytime_average_rank_mf.jpg?raw=true)
 
 **Overview over benchmark instances**
 
