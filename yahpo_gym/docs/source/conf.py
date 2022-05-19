@@ -199,5 +199,3 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 autoclass_content = 'both'
 
-
-

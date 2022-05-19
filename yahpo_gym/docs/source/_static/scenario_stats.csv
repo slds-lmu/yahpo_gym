@@ -1,15 +1,15 @@
-,scenario,n_targets,n_categorical,n_numeric,fidelity,n_instances, min(task), median(task), max(task)
-0,lcbench,6,0,8,epoch,35,104000,104000,104000
-1,nb301,2,34,1,epoch,1,5578142,5578142,5578142
-2,rbv2_svm,6,2,6,"trainsize,repl",96,1470,156135,402150
-3,rbv2_ranger,6,3,7,"trainsize,repl",114,3570,66465,138918
-4,rbv2_rpart,6,1,6,"trainsize,repl",101,3570,21000,38430
-5,rbv2_glmnet,6,1,4,"trainsize,repl",98,1680,28914,47250
-6,rbv2_xgboost,6,2,14,"trainsize,repl",109,14760,100000,100000
-7,rbv2_aknn,6,2,6,"trainsize,repl",99,1680,22436,85451
-8,rbv2_super,6,7,33,"trainsize,repl",89,126880,309213,431204
-9,iaml_ranger,12,3,6,trainsize,4,402417,418943,419790
-10,iaml_rpart,12,0,5,trainsize,4,52146,107754,137248
-11,iaml_glmnet,12,0,3,trainsize,4,7000,7000,7000
-12,iaml_xgboost,12,1,13,trainsize,4,839055,839910,840000
-13,iaml_super,12,5,24,trainsize,4,1301405,1373224,1404019
+"Scenario","Search Space","# Instances","Target Metrics","Fidelity","H"
+"rbv2_super","38D: Mixed","103","9: perf(6) + rt(2) + mem","fraction","✓"
+"rbv2_svm","6D: Mixed","106","9: perf(6) + rt(2) + mem","fraction","✓"
+"rbv2_rpart","5D: Mixed","117","9: perf(6) + rt(2) + mem","fraction",""
+"rbv2_aknn","6D: Mixed","118","9: perf(6) + rt(2) + mem","fraction",""
+"rbv2_glmnet","3D: Mixed","115","9: perf(6) + rt(2) + mem","fraction",""
+"rbv2_ranger","8D: Mixed","119","9: perf(6) + rt(2) + mem","fraction","✓"
+"rbv2_xgboost","14D: Mixed","119","9: perf(6) + rt(2) + mem","fraction","✓"
+"nb301","34D: Categorical","1","2: perf(1) + rt(1)","epoch","✓"
+"lcbench","7D: Numeric","34","6: perf(5) + rt(1)","epoch",""
+"iaml_super","28D: Mixed","4","12: perf(4) + inp(3) + rt(2) + mem(3)","fraction","✓"
+"iaml_rpart","4D: Numeric","4","12: perf(4) + inp(3) + rt(2) + mem(3)","fraction",""
+"iaml_glmnet","2D: Numeric","4","12: perf(4) + inp(3) + rt(2) + mem(3)","fraction",""
+"iaml_ranger","8D: Mixed","4","12: perf(4) + inp(3) + rt(2) + mem(3)","fraction","✓"
+"iaml_xgboost","13D: Mixed","4","12: perf(4) + inp(3) + rt(2) + mem(3)","fraction","✓"

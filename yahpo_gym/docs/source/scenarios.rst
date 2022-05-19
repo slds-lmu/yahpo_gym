@@ -1,4 +1,3 @@
-
 Scenarios \& Instances
 ************************
 
@@ -6,19 +5,21 @@ Scenarios \& Instances
 Scenarios
 =======================
 
-The following table provides an overview over **Scenarios** included in **YAHPO GYM** and included instances:
-
-* `scenario`: The name of the scenario.
-* `n_targets`: Numer of objectives (if multi-objective)
-* `n_cat`, `n_num`: Number of categorical and continuous hyperparameters.
-* `fidelity`: Available fidelity parameters
-* `n_instances`: Number of instances (global).
-* `min(task)`, ...,  `max(task)`: Statistics on the number of samples used to fit surrogate models for each task.
+The following table provides an overview over **Scenarios** included in **YAHPO Gym** and included **Instances**:
 
 .. csv-table:: Scenario Overview
    :file: _static/scenario_stats.csv
    :header-rows: 1
    :stub-columns: 1
+
+* mixed = numeric and categorical hyperparameters
+* perf = performance measures
+* rt = train/predict time
+* mem = memory consumption
+* inp = interpretability measures
+* H = Hierarchical search space
+
+Note that the fidelity parameter is not included in the search space dimensionality.
 
 In `yahpo_gym`, there is a `Configuration` object for each **scenario**. 
 
@@ -29,13 +30,15 @@ A list of all available scenarios can be obtained as follows:
    from yahpo_gym.configuration import cfg
    print(cfg())
 
-
 Instances
 =======================
 
-YAHPO GYM **instances** are evaluations of an ML algorithm (**scenario**) with a given set of hyperparameters on a specific task. 
-We list **OpenML Task IDs** from openml.org as instance names to obtain a cleary defined setting that allows for reproducibility.
-To provide an example, instance `168868` defines the `Task` a supervised classification task on the `APSFailure` dataset using `10-fold CV` (https://www.openml.org/t/168868).
+YAHPO Gym **instances** are evaluations of an ML algorithm (**scenario**) with a given set of hyperparameters on a specific dataset. 
+Currently, the `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
+For `rbv2_*` and `iaml_*` scenarios, the `task_id` parameter of the `ConfigSpace` corresponds to the OpenML **dataset** identifier (i.e., this is the **dataset** id and **not** the task id).
+To query meta information, use https://www.openml.org/d/<dataset_id>.
+For the `lcbench` scenario, the `OpenML_task_id` parameter of the `ConfigSpace` directly corresponds to OpenML **tasks** identifier (i.e., this is the **task** id and **not** the dataset id).
+To query meta information, use https://www.openml.org/t/<task_id>.
 
 .. csv-table:: Scenario Overview
    :file: _static/instances.csv

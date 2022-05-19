@@ -4,25 +4,27 @@
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
-
 ### What is YAHPO Gym?
-
----
 
 **YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problems to benchmark hyperparameter optimization (HPO) methods described in [our paper](https://arxiv.org/abs/2109.03670).
 
-YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a collection of benchmark instances with the same underlying hyperparameter optimization task (e.g., optimizing the hyperparameters of a neural network) on different datasets taken from [OpenML](https://www.openml.org/). 
+YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a collection of benchmark instances with the same underlying hyperparameter optimization task (e.g., optimizing the hyperparameters of a neural network) on different datasets (usually taken from [OpenML](https://www.openml.org/)).
 
+### A note on OpenML IDs
+
+Currently, the `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
+For `rbv2_*` and `iaml_*` scenarios, the `task_id` parameter of the `ConfigSpace` corresponds to the OpenML **dataset** identifier (i.e., this is the **dataset** id and **not** the task id).
+To query meta information, use https://www.openml.org/d/<dataset_id>.
+For the `lcbench` scenario, the `OpenML_task_id` parameter of the `ConfigSpace` directly corresponds to OpenML **tasks** identifier (i.e., this is the **task** id and **not** the dataset id).
+To query meta information, use https://www.openml.org/t/<task_id>.
 
 ### Why should I use it?
 
 **YAHPO Gym** provides blazing fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
-Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks
-across a large variety of problems.
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks across a large variety of problems.
 Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space and can thus be seamlessly integrated into many existing projects (e.g. [HpBandSter](https://github.com/automl/HpBandSter)).
 
 ![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/results.png?raw=true)
-
 
 **Overview over benchmark instances**
 
@@ -47,8 +49,6 @@ The fidelity is given either as the dataset fraction `fraction` or the number of
 Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
-
----
 
 ### Installation
 
@@ -76,7 +76,6 @@ local_config.set_data_path("path-to-data")
 This example showcases the simplicity of YAHPO Gym's API.
 A longer introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
 
-
 ```py
 from yahpo_gym import benchmark_set
 import yahpo_gym.benchmarks.lcbench
@@ -91,7 +90,6 @@ config = bench.get_opt_space().sample_configuration(1).get_dictionary()
 # Evaluate
 print(bench.objective_function(config))
 ```
-
 
 ### Example: Tuning an instance using HPBandSter
 

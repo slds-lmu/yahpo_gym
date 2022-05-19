@@ -2,7 +2,7 @@
 Extending YAHPO Gym
 ************************
 
-This document describes how to extend yahpo gym with new configurations and scenarios.
+This document describes how to extend YAHPO Gym with new configurations and scenarios.
 PR's with new problems are welcome! See below on how to add new problem sets.
 
 There are two main steps that need to be added for a new `scenario` locally.
@@ -38,18 +38,17 @@ This includes fitted surrogates and parameter spaces that we'll add to our ``dat
 For an example on how the final data looks like implemented models
 and hyperparameters see https://github.com/slds-lmu/yahpo_data.
 
-
 - Add a folder using the benchmark's `<ID>` to your ``data_path``.
 - Add the data required to train the surrogate model as `data.csv`.
 - Add the `ConfigSpace.ConfigSpace` in the `.json` format as `config_space.json`.
   This defines all hyperparameters and instances used throughout the optimization.
 - The `yahpo_train` module can now be used to train a new surrogate. See the `notebooks` folder
   for training code. This produces the `encoding.json` and `model.onnx` files required for prediction.
-- For compability with the `R` package, a `paradox::ParamSet` similar to the `ConfigSpace` is requried.
+- For compatibility with the `R` package, a `paradox::ParamSet` similar to the `ConfigSpace` is required.
   Create a file `param_set.R` containing the `ParamSet`.
 
 
-Include your bencmark in `yahpo_gym`
+Include your benchmark in `yahpo_gym`
 ====================================
 
 Once you have tested your benchmark, you can create a `PR` to the `yahpo_gym` and `yahpo_data` 

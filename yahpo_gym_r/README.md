@@ -4,12 +4,11 @@
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 
-R Interface for the YAHPO Gym python module. Documentation for the python module is available via the [module handbook](https://slds-lmu.github.io/yahpo_gym/)
-while the R module builds its own documentation with the package.
+R Interface for the YAHPO Gym python module. Documentation for the python module is available via the [module handbook](https://slds-lmu.github.io/yahpo_gym/) while the R module builds its own documentation with the package.
+
 ## Installation
 
 The package can be installed from GitHub via
-
 
 ```r
 remotes::install_github("slds-lmu/yahpo_gym/yahpo_gym_r")
@@ -40,7 +39,6 @@ library("yahpogym")
 init_local_config(data_path = "~/multifidelity_data")
 ```
 
-
 ## Usage
 
 We first load the package and the required conda environment:
@@ -66,8 +64,6 @@ ois = OptimInstanceMultiCrit$new(obj, search_space = b$get_search_space(drop_fid
 p$optimize(ois)
 ```
 
-
-
 ### or with Hyperband using (`mlr3hyperband`)
 
 ```r
@@ -77,7 +73,6 @@ ois = OptimInstanceMultiCrit$new(obj, search_space = b$get_search_space(), termi
 p = opt("hyperband")
 p$optimize(ois)
 ```
-
 
 ### Available Problems
 
@@ -105,8 +100,7 @@ Search spaces can be numeric, mixed and have dependencies (as indicated in the `
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
-
-We can list all available benchmark problems
+We can list all available benchmark problems:
 
 ```r
 list_benchmarks()
@@ -118,19 +112,26 @@ and available instances in a `Benchmark`:
 b$instances
 ```
 
+### A note on OpenML IDs
+
+Currently, the `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
+For `rbv2_*` and `iaml_*` scenarios, the `task_id` parameter of the `ParamSet` corresponds to the OpenML **dataset** identifier (i.e., this is the **dataset** id and **not** the task id).
+To query meta information, use https://www.openml.org/d/<dataset_id>.
+For the `lcbench` scenario, the `OpenML_task_id` parameter of the `ParamSet` directly corresponds to OpenML **tasks** identifier (i.e., this is the **task** id and **not** the dataset id).
+To query meta information, use https://www.openml.org/t/<task_id>.
+
 ## Technical Questions:
 
 ### Single-Crit Optimization
 
-We can use `subset_codomain` to obtain a single-crit optimization instance by
-specifying the target to keep:
+We can use `subset_codomain` to obtain a single-crit optimization instance by specifying the target to keep:
 
 ```r
 b$subset_codomain("auc")
 obj = b$get_objective("40981", multifidelity = FALSE)
 ```
 
-### Using yahpogym with `future`:
+### Using yahpogym with `future`
 
 Parallelization with `future` and `reticulate` does not always work out of the box.
 The following configurations allow to use `yahpogym` together with `future`.
@@ -156,5 +157,5 @@ The following configurations allow to use `yahpogym` together with `future`.
 
 ### Radian
 
-Since `yahpogym` relies on `reticulate`, interoperability with e.g. radian does sometimes not work. 
+Since `yahpogym` relies on `reticulate`, interoperability with e.g. `radian` does sometimes not work. 
 See [here](https://github.com/randy3k/radian#i-cant-specify-python-runtime-in-reticulate) for more information.

@@ -12,7 +12,7 @@
 The underlying software with additional documentation and background can be found [here](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 See the [module Documentation](https://slds-lmu.github.io/yahpo_gym/) for more info.
 
-- **Problem Variety**: Optimization problems in YAHPO Gym stem from diverse Hyperparameter Optimization scenarios on tabular as well as image data
+- **Problem Variety**: Optimization problems in YAHPO Gym stem from diverse Hyperparameter Optimization scenarios on tabular as well as image data.
 - **Multi-Fidelity**: Allows for simulating low-fidelity approximations to the real target values to simulate multi-fidelity HPO.
 - **Multi-Objective**: Benchmarks usually contain multiple objectives: performance metrics, runtime and memory consumption allowing for multi-objective and resource aware HPO.
 
@@ -21,10 +21,9 @@ A `scenario` is a collection of `instances` that share the same hyperparameter s
 
 This repository contains three modules/packages:
 
-- `yahpo_gym` (python): The core package allowing for inference on the surrogates
+- `yahpo_gym` (python): The core package allowing for inference on the surrogates.
 - `yahpo_train` (python): Module for training surrogate models used in `yahpo_gym`.
-- `yahpo_gym_r`(R): An R wrapper for `yahpo gym`.
-
+- `yahpo_gym_r`(R): An R wrapper for `yahpo_gym`.
 
 ### Why should I use it?
 
@@ -33,9 +32,6 @@ Since all our benchmarks are based on surrogate models that approximate the unde
 across a large variety of problems.
 
 ![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/anytime_average_rank_mf.jpg?raw=true)
-
-<br><br>
----
 
 **Overview over benchmark instances**
 
@@ -59,8 +55,6 @@ across a large variety of problems.
 The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
 Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
 
-<br><br>
-
 ### What does this repository contain?
 
 This repository contains two modules: `yahpo_gym` and `yahpo_train`. 
@@ -75,7 +69,7 @@ Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtai
 
 An example for evaluation and running HPO methods is given in the README of the [YAHPO Gym Module](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 
-A quick introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
+A quick introduction is given in the accompanying [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb).
 
 #### YAHPO Train
 
@@ -83,10 +77,9 @@ YAHPO Train is the module for training new surrogate models.
 
 YAHPO Train is still in a preliminary state but can already be used to reproduce and refit models introduced in our [paper](https://arxiv.org/abs/2109.03670).
 
-
 #### Roadmap
 
-We want to add several features to **yahpo gym** in future versions:
+We want to add several features to **yahpo_gym** in future versions:
 
 - **Asynchronous Evaluation**
   We would like to allow for faster-than-realtime asynchronous evaluation in future versions. This is currently available as an experimental feature via `objective_function_timed`, but requires additional (experimental) evaluation for release. 
@@ -102,5 +95,5 @@ We want to add several features to **yahpo gym** in future versions:
 
 #### Related Software:
 
-- [rbv2](https://github.com/slds-lmu/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
+- [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
 - [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench): can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
