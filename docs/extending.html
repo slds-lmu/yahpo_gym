@@ -53,7 +53,7 @@
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Extending YAHPO Gym</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#include-your-bencmark-in-yahpo-gym">Include your bencmark in <cite>yahpo_gym</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#include-your-benchmark-in-yahpo-gym">Include your benchmark in <cite>yahpo_gym</cite></a></li>
 </ul>
 </li>
 </ul>
@@ -84,7 +84,7 @@
              
   <section id="extending-yahpo-gym">
 <h1>Extending YAHPO Gym<a class="headerlink" href="#extending-yahpo-gym" title="Permalink to this headline"></a></h1>
-<p>This document describes how to extend yahpo gym with new configurations and scenarios.
+<p>This document describes how to extend YAHPO Gym with new configurations and scenarios.
 PR’s with new problems are welcome! See below on how to add new problem sets.</p>
 <p>There are two main steps that need to be added for a new <cite>scenario</cite> locally.</p>
 <ol class="arabic simple">
@@ -120,11 +120,11 @@ and hyperparameters see <a class="reference external" href="https://github.com/s
 This defines all hyperparameters and instances used throughout the optimization.</p></li>
 <li><p>The <cite>yahpo_train</cite> module can now be used to train a new surrogate. See the <cite>notebooks</cite> folder
 for training code. This produces the <cite>encoding.json</cite> and <cite>model.onnx</cite> files required for prediction.</p></li>
-<li><p>For compability with the <cite>R</cite> package, a <cite>paradox::ParamSet</cite> similar to the <cite>ConfigSpace</cite> is requried.
+<li><p>For compatibility with the <cite>R</cite> package, a <cite>paradox::ParamSet</cite> similar to the <cite>ConfigSpace</cite> is required.
 Create a file <cite>param_set.R</cite> containing the <cite>ParamSet</cite>.</p></li>
 </ul>
-<section id="include-your-bencmark-in-yahpo-gym">
-<h2>Include your bencmark in <cite>yahpo_gym</cite><a class="headerlink" href="#include-your-bencmark-in-yahpo-gym" title="Permalink to this headline"></a></h2>
+<section id="include-your-benchmark-in-yahpo-gym">
+<h2>Include your benchmark in <cite>yahpo_gym</cite><a class="headerlink" href="#include-your-benchmark-in-yahpo-gym" title="Permalink to this headline"></a></h2>
 <p>Once you have tested your benchmark, you can create a <cite>PR</cite> to the <cite>yahpo_gym</cite> and <cite>yahpo_data</cite>
 repositories.
 Note that the <cite>yahpo_data</cite> PR should not include the data, but instead only the model (<cite>.onnx</cite>) and parameter

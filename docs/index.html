@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YAHPO GYM &mdash; yahpo_gym 0.1.0 documentation</title>
+  <title>YAHPO Gym &mdash; yahpo_gym 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -69,7 +69,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>YAHPO GYM</li>
+      <li>YAHPO Gym</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,16 +80,20 @@
            <div itemprop="articleBody">
              
   <section id="yahpo-gym">
-<h1>YAHPO GYM<a class="headerlink" href="#yahpo-gym" title="Permalink to this headline"></a></h1>
-<p><strong>YAHPO GYM</strong> (Yet Another Hyperparameter Optimization GYM) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in here: &lt;<a class="reference external" href="https://arxiv.org/abs/2109.03670">https://arxiv.org/abs/2109.03670</a>&gt;.</p>
-<p>YAHPO GYM consists of several <cite>scenarios</cite>, e.g. the collection of all benchmark instances in <cite>lcbench</cite> is a <cite>scenario</cite>.
-Here, an <code class="docutils literal notranslate"><span class="pre">instance</span></code> is the concrete task of optimizing hyperparameters of a neural network on a given dataset from OpenML.</p>
+<h1>YAHPO Gym<a class="headerlink" href="#yahpo-gym" title="Permalink to this headline"></a></h1>
+<p><strong>YAHPO Gym</strong> (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in here: <a class="reference external" href="https://arxiv.org/abs/2109.03670">https://arxiv.org/abs/2109.03670</a>.</p>
+<p>YAHPO Gym consists of several <cite>scenarios</cite>, e.g., the collection of all benchmark instances in <cite>lcbench</cite> is a <cite>scenario</cite>.
+Here, an <cite>instance</cite> is the concrete task of optimizing hyperparameters of a neural network on a given dataset from OpenML.</p>
+<p><strong>A note on OpenML IDs</strong></p>
+<p>Currently, the <code class="docutils literal notranslate"><span class="pre">rbv2_*</span></code>, <code class="docutils literal notranslate"><span class="pre">lcbench</span></code>, and <code class="docutils literal notranslate"><span class="pre">iaml_*</span></code> scenarios contain instances based on OpenML datasets.
+For <code class="docutils literal notranslate"><span class="pre">rbv2_*</span></code> and <code class="docutils literal notranslate"><span class="pre">iaml_*</span></code> scenarios, the <cite>task_id</cite> parameter of the <cite>ConfigSpace</cite> corresponds to the OpenML <strong>dataset</strong> identifier (i.e., this is the <strong>dataset</strong> id and <strong>not</strong> the task id).
+To query meta information, use <a class="reference external" href="https://www.openml.org/d">https://www.openml.org/d</a>/&lt;dataset_id&gt;.
+For the <code class="docutils literal notranslate"><span class="pre">lcbench</span></code> scenario, the <cite>OpenML_task_id</cite> parameter of the <cite>ConfigSpace</cite> directly corresponds to OpenML <strong>tasks</strong> identifier (i.e., this is the <strong>task</strong> id and <strong>not</strong> the dataset id).
+To query meta information, use <a class="reference external" href="https://www.openml.org/t">https://www.openml.org/t</a>/&lt;task_id&gt;.</p>
 <p><strong>Why should I use it?</strong></p>
-<p><strong>YAHPO GYM</strong> (Yet Another Hyperparameter Optimization GYM) provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
-Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks
-across a large variety of problems.
-Our library makes use of ConfigSpace(<a class="reference external" href="https://automl.github.io/ConfigSpace/">https://automl.github.io/ConfigSpace/</a>&gt; to describe the hyperparameter space to optimize and can thus be seamlessly integrated into
-many existing projects e.g. HpBandSter(<a class="reference external" href="https://github.com/automl/HpBandSter">https://github.com/automl/HpBandSter</a>).</p>
+<p><strong>YAHPO Gym</strong> provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks across a large variety of problems.
+Our library makes use of ConfigSpace(<a class="reference external" href="https://automl.github.io/ConfigSpace/">https://automl.github.io/ConfigSpace/</a>) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g. HpBandSter(<a class="reference external" href="https://github.com/automl/HpBandSter">https://github.com/automl/HpBandSter</a>).</p>
 <a class="reference internal image-reference" href="_images/anytime_average_rank_mf.jpg"><img alt="alternate text" class="align-center" src="_images/anytime_average_rank_mf.jpg" style="width: 800px;" /></a>
 <section id="module-documentation">
 <h2>Module Documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline"></a></h2>
