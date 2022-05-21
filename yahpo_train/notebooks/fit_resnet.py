@@ -94,6 +94,9 @@ if __name__ == "__main__":
         l = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), export=False, device="cuda:0", bs=bs)
         l.export_onnx(cfg(key), device="cuda:0", suffix="resnet")
 
+        # NOTE: for rbv2_super _get_idx replaced manually by simply sampling at random due to otherwise constant, see fit_config_resnet and dl_from_config
+        train_ids = df.sample(frac=train_frac, random_state=10).index
+        valid_idx = df_train.sample(frac=0.25, random_state=10).index
         l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0", bs = bs)
         l_noisy.export_onnx(cfg(key), device="cuda:0", suffix="resnet_noisy")
 

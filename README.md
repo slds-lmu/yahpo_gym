@@ -65,7 +65,7 @@ we also provide the full reproducible codebase used to generate the underlying s
 
 YAHPO Gym is the module for inference and allows for evaluating a HPC configuration on a given benchmark instance.
 
-Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtained [here](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
+Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtained [here (Github)](https://github.com/slds-lmu/yahpo_data) or [here (Syncshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
 An example for evaluation and running HPO methods is given in the README of the [YAHPO Gym module](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 
@@ -93,7 +93,7 @@ We want to add several features to **yahpo_gym** in future versions:
 
   We welcome input, discussion or additions by the broader community. Get in touch via issues or emails if you have questions, comments or would like to collaborate!
 
-#### Related Software:
+#### Related Software
 
 - [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
-- [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench): can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
+- [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench) can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
