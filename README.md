@@ -95,5 +95,6 @@ We want to add several features to **yahpo_gym** in future versions:
 
 #### Related Software
 
-- [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_***` in a real setting.
-- [HPOBench](https://github.com/automl/HPOBench/tree/master/hpobench) can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
+- [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_*` in a real setting.
+- [iaml](https://github.com/sumny/iaml) (R-Package) can be used to reproduce runs from all `iaml_*` in a real setting.
+- [HPOBench](https://github.com/automl/HPOBench) can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
