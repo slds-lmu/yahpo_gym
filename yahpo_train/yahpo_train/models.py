@@ -71,7 +71,9 @@ class AbstractSurrogate(nn.Module):
         Export model to an ONNX file. We can safely ignore tracing errors with respect to lambda since lambda will be constant during inference.
         """
         self.eval()
-        model_path = config_dict.get_path("model").replace('.onnx', "_"+suffix+'.onnx')
+        model_path = config_dict.get_path("model")
+        if suffix != '':
+            model_path = config_dict.get_path("model").replace('.onnx', "_" + suffix + '.onnx')
         torch.onnx.export(self,
             # touple of x_cat followed by x_cont
             (torch.ones(1, len(config_dict.cat_names), dtype=torch.int, device=device), torch.randn(1, len(config_dict.cont_names), device=device)),

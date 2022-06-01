@@ -70,16 +70,39 @@ if __name__ == "__main__":
 
     tfms_fcnet = {}  # FIXME:
     tfms_list.update({"fcnet":tfms_fcnet})
-    
-    keys = ["lcbench", "nb301", "rbv2_super", "rbv2_xgboost", "rbv2_ranger", "rbv2_rpart", "rbv2_glmnet", "rbv2_aknn", "rbv2_svm", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet"]
+
+    tfms_fair_fgrrm = {}
+    tfms_fair_fgrrm.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_fgrrm":tfms_fair_fgrrm})
+
+    tfms_fair_rpart = {}
+    tfms_fair_rpart.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_rpart":tfms_fair_rpart})
+
+    tfms_fair_ranger = {}
+    tfms_fair_ranger.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_ranger":tfms_fair_ranger})
+
+    tfms_fair_xgboost = {}
+    tfms_fair_xgboost.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_xgboost":tfms_fair_xgboost})
+
+    tfms_fair_super = {}
+    tfms_fair_super.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_super":tfms_fair_super})
+
+    #keys = ["lcbench", "nb301", "rbv2_super", "rbv2_xgboost", "rbv2_ranger", "rbv2_rpart", "rbv2_glmnet", "rbv2_aknn", "rbv2_svm", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet", "fair_fgrrm", "fair_rpart", "fair_ranger", "fair_xgboost", "fair_super"]
+    keys = ["fair_fgrrm", "fair_rpart", "fair_ranger", "fair_xgboost", "fair_super"]
     for key in keys:
         torch.manual_seed(0)
         random.seed(0)
         np.random.seed(0)
-        bs = 10240
+        bs = 1024
         if key == "iaml_glmnet":
             bs = 128
-        bench = benchmark_set.BenchmarkSet(key)
+        if key == "fair_fgrrm":
+            bs = 64
+        cc = cfg(key)
         cuda_available = torch.cuda.is_available()
         if not cuda_available:
             raise ValueError("No cuda device available. You probably do not want to fit on CPUs.")
@@ -87,21 +110,20 @@ if __name__ == "__main__":
         storage_name = "sqlite:///{}.db".format(study_path + "tune_" + key + "_resnet_test")
         study = optuna.load_study("tune_" + key + "_resnet_test", storage_name)
         best_params = study.best_params
-        with open(bench.config.config_path + "/best_params_resnet.json", "w") as f:
+        with open(cc.config_path + "/best_params_resnet.json", "w") as f:
             json.dump(best_params, f)
+
+        dls_train = dl_from_config(cfg(key), bs=bs, frac=1., save_df_test=True, save_encoding=True)
         
         # tfms see tfms_list above
-        l = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), export=False, device="cuda:0", bs=bs)
-        l.export_onnx(cfg(key), device="cuda:0", suffix="resnet")
+        l = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), export=False, device="cuda:0", dls_train = dls_train)
+        l.export_onnx(cfg(key), device="cuda:0")
 
-        # NOTE: for rbv2_super _get_idx replaced manually by simply sampling at random due to otherwise constant, see fit_config_resnet and dl_from_config
-        train_ids = df.sample(frac=train_frac, random_state=10).index
-        valid_idx = df_train.sample(frac=0.25, random_state=10).index
-        l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0", bs = bs)
-        l_noisy.export_onnx(cfg(key), device="cuda:0", suffix="resnet_noisy")
+        l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0", dls_train = dls_train)
+        l_noisy.export_onnx(cfg(key), device="cuda:0", suffix="noisy")
 
-    #keys = ["lcbench", "nb301", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet"]
+    #keys = ["fair_fgrrm", "fair_rpart", "fair_ranger", "fair_xgboost", "fair_super"]
     #for key in keys:
-    #    dl_from_config(cfg(key), bs=10240, frac=1., save_df_test=True, save_encoding=True)
-    #    generate_all_test_set_metrics(key, model="new_model_resnet.onnx", save_to_csv=True)
-        
+    #    dl_from_config(cfg(key), bs=1024, frac=1., save_df_test=True, save_encoding=True)
+    #    generate_all_test_set_metrics(key, model="model.onnx", save_to_csv=True)
+

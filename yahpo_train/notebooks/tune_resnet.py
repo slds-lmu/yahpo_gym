@@ -4,14 +4,14 @@ from yahpo_train.learner import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
 from yahpo_gym import benchmark_set
-from yahpo_gym.benchmarks import lcbench, rbv2, nb301, fcnet, taskset, iaml
+from yahpo_gym.benchmarks import lcbench, rbv2, nb301, fcnet, taskset, iaml, fair
 from yahpo_gym.configuration import cfg
 from fastai.callback.wandb import *
 from functools import partial
 import wandb
 import argparse
 
-def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=10240, frac=1., mixup=True, export=False, cbs=[], device="cuda:0"):
+def fit_config_resnet(key, noisy=False, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, d=256, d_hidden_factor=2., n_layers=4, hidden_dropout=0., residual_dropout=.2, bs=1024, frac=1., mixup=True, export=False, cbs=[], device="cuda:0"):
     """
     Fit function with hyperparameters for resnet.
     """
@@ -74,7 +74,11 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
     study = optuna.create_study(study_name=name, storage=storage_name, direction="minimize", pruner=pruner, load_if_exists=True)
 
     cc = cfg(key)
-    dls_train = dl_from_config(cc, bs=10240, frac=1.0)  # set data loader up once, also save dls_train and encoding
+    if key == "iaml_glmnet":
+        bs = 128
+    if key == "fair_fgrrm":
+        bs = 64
+    dls_train = dl_from_config(cc, bs=bs, frac=1.0)  # set data loader up once, also save dls_test and encoding
 
     trange = ContTransformerRange
     tlog = ContTransformerLogRange
@@ -227,6 +231,26 @@ if __name__ == "__main__":
 
     tfms_fcnet = {}  # FIXME:
     tfms_list.update({"fcnet":tfms_fcnet})
+
+    tfms_fair_fgrrm = {}
+    tfms_fair_fgrrm.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_fgrrm":tfms_fair_fgrrm})
+
+    tfms_fair_rpart = {}
+    tfms_fair_rpart.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_rpart":tfms_fair_rpart})
+
+    tfms_fair_ranger = {}
+    tfms_fair_ranger.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_ranger":tfms_fair_ranger})
+
+    tfms_fair_xgboost = {}
+    tfms_fair_xgboost.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_xgboost":tfms_fair_xgboost})
+
+    tfms_fair_super = {}
+    tfms_fair_super.update({"fpp":ContTransformerRange})
+    tfms_list.update({"fair_super":tfms_fair_super})
 
     parser = argparse.ArgumentParser(description="Args for resnet tuning")
     parser.add_argument("--key", type=str, default="iaml_glmnet", help='Key of benchmark scenario, e.g., "iaml_glmnet"')
