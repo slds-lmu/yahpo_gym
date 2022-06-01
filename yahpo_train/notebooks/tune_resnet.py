@@ -74,6 +74,7 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
     study = optuna.create_study(study_name=name, storage=storage_name, direction="minimize", pruner=pruner, load_if_exists=True)
 
     cc = cfg(key)
+    bs = 1024
     if key == "iaml_glmnet":
         bs = 128
     if key == "fair_fgrrm":
