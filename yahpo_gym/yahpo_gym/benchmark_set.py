@@ -281,8 +281,8 @@ class BenchmarkSet():
         """
         props = []
     
-        cat = length(self.config.cat_names) > 1
-        cont = length(self.config.cont_names) >= 1
+        cat = len(self.config.cat_names) > 1
+        cont = len(self.config.cont_names) >= 1
         props += ["mixed" if cat & cont else "categorical" if cat else "continuous"]
         if self.config.hierarchical:
             props += ["hierarchical"]
