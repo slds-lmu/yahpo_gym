@@ -128,6 +128,6 @@ if __name__ == "__main__":
             bs = 128
         if key == "fair_fgrrm":
             bs = 64
-        #dl_from_config(cfg(key), bs=1024, frac=1., save_df_test=True, save_encoding=True)
+        #dl_from_config(cfg(key), bs=bs, frac=1., save_df_test=True, save_encoding=True)
         generate_all_test_set_metrics(key, model="model.onnx", save_to_csv=True)
 
