@@ -91,7 +91,6 @@ if __name__ == "__main__":
     tfms_fair_super.update({"fpp":ContTransformerRange})
     tfms_list.update({"fair_super":tfms_fair_super})
 
-    #keys = ["lcbench", "nb301", "rbv2_super", "rbv2_xgboost", "rbv2_ranger", "rbv2_rpart", "rbv2_glmnet", "rbv2_aknn", "rbv2_svm", "iaml_super", "iaml_xgboost", "iaml_ranger", "iaml_rpart", "iaml_glmnet", "fcnet", "fair_fgrrm", "fair_rpart", "fair_ranger", "fair_xgboost", "fair_super"]
     keys = ["fair_fgrrm", "fair_rpart", "fair_ranger", "fair_xgboost", "fair_super"]
     for key in keys:
         torch.manual_seed(0)
@@ -107,8 +106,8 @@ if __name__ == "__main__":
         if not cuda_available:
             raise ValueError("No cuda device available. You probably do not want to fit on CPUs.")
         
-        storage_name = "sqlite:///{}.db".format(study_path + "tune_" + key + "_resnet_test")
-        study = optuna.load_study("tune_" + key + "_resnet_test", storage_name)
+        storage_name = "sqlite:///{}.db".format(study_path + "tune_" + key + "_resnet")
+        study = optuna.load_study("tune_" + key + "_resnet", storage_name)
         best_params = study.best_params
         with open(cc.config_path + "/best_params_resnet.json", "w") as f:
             json.dump(best_params, f)
@@ -122,8 +121,13 @@ if __name__ == "__main__":
         l_noisy = fit_from_best_params_resnet(key, best_params=best_params, tfms_fixed=tfms_list.get(key), noisy=True, export=False, device="cuda:0", dls_train = dls_train)
         l_noisy.export_onnx(cfg(key), device="cuda:0", suffix="noisy")
 
-    #keys = ["fair_fgrrm", "fair_rpart", "fair_ranger", "fair_xgboost", "fair_super"]
-    #for key in keys:
-    #    dl_from_config(cfg(key), bs=1024, frac=1., save_df_test=True, save_encoding=True)
-    #    generate_all_test_set_metrics(key, model="model.onnx", save_to_csv=True)
+    keys = ["fair_fgrrm", "fair_rpart", "fair_ranger", "fair_xgboost", "fair_super"]
+    for key in keys:
+        bs = 1024
+        if key == "iaml_glmnet":
+            bs = 128
+        if key == "fair_fgrrm":
+            bs = 64
+        #dl_from_config(cfg(key), bs=1024, frac=1., save_df_test=True, save_encoding=True)
+        generate_all_test_set_metrics(key, model="model.onnx", save_to_csv=True)
 
