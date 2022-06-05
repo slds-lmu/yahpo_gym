@@ -234,23 +234,23 @@ if __name__ == "__main__":
     tfms_list.update({"fcnet":tfms_fcnet})
 
     tfms_fair_fgrrm = {}
-    tfms_fair_fgrrm.update({"fpp":ContTransformerRange})
+    #tfms_fair_fgrrm.update({"fpp":ContTransformerRange})
     tfms_list.update({"fair_fgrrm":tfms_fair_fgrrm})
 
     tfms_fair_rpart = {}
-    tfms_fair_rpart.update({"fpp":ContTransformerRange})
+    #tfms_fair_rpart.update({"fpp":ContTransformerRange})
     tfms_list.update({"fair_rpart":tfms_fair_rpart})
 
     tfms_fair_ranger = {}
-    tfms_fair_ranger.update({"fpp":ContTransformerRange})
+    #tfms_fair_ranger.update({"fpp":ContTransformerRange})
     tfms_list.update({"fair_ranger":tfms_fair_ranger})
 
     tfms_fair_xgboost = {}
-    tfms_fair_xgboost.update({"fpp":ContTransformerRange})
+    #tfms_fair_xgboost.update({"fpp":ContTransformerRange})
     tfms_list.update({"fair_xgboost":tfms_fair_xgboost})
 
     tfms_fair_super = {}
-    tfms_fair_super.update({"fpp":ContTransformerRange})
+    #tfms_fair_super.update({"fpp":ContTransformerRange})
     tfms_list.update({"fair_super":tfms_fair_super})
 
     parser = argparse.ArgumentParser(description="Args for resnet tuning")
