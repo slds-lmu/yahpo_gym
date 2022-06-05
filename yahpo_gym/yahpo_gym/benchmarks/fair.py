@@ -3,11 +3,12 @@ from yahpo_gym.configuration import config_dict, cfg
 # Default dict, holds for all 'fair_' benchmarks
 # Note fpp (Calders-Wevers gap) exlcuded for now
 _fair_dict = {
-    'y_names' : ['mmce', 'f1', 'feo', 'fpredp', 'facc', 'ftpr', 'ffomr', 'ffnr', 'timetrain'],
+    'y_names' : ['mmce', 'f1', 'feo', 'fpredp', 'facc', 'ftpr', 'ffomr', 'ffnr', 'rammodel', 'timetrain'],
     'y_minimize' : [True, False, True, True, True, True, True, True, True],
     'fidelity_params': ['trainsize'],
     'instance_names': 'task_id',
-    'runtime_name': 'timetrain'
+    'runtime_name': 'timetrain',
+    'memory_name': 'rammodel'
 }
 
 ## Fgrrm
