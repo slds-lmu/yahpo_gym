@@ -52,7 +52,7 @@ g = ggplot(aes(x = cumbudget_scaled, y = mean_hvi, colour = method, fill = metho
   facet_wrap(~ scenario + instance + targets, scales = "free") +
   theme_minimal() +
   theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
-ggsave("plots/anytime_mo.png", plot = g, device = "png", width = 12, height = 15)
+ggsave("plots/anytime_mo.pdf", plot = g, device = "pdf", width = 12, height = 15)
 
 methods = unique(agg$method)
 ranks = map_dtr(unique(agg$scenario), function(scenario_) {
@@ -80,14 +80,14 @@ g = ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), 
   labs(x = "Fraction of Budget Used", y = "Mean Rank", colour = "Optimizer", fill = "Optimizer") +
   theme_minimal() +
   theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
-ggsave("plots/anytime_average_rank_mo.png", plot = g, device = "png", width = 6, height = 4)
+ggsave("plots/anytime_average_rank_mo.pdf", plot = g, device = "pdf", width = 6, height = 4)
 
 library(scmamp)  # 0.3.2
 best_agg = agg[cumbudget_scaled == 0.25]
 best_agg[, problem := paste0(scenario, "_", instance, "_", targets)]
 tmp = - as.matrix(dcast(best_agg, problem ~ method, value.var = "mean_hvi")[, -1])
 friedmanTest(tmp) # 0.25: chi(6) 48.103, p < 0.001
-png("plots/cd_025_mo.png", width = 6, height = 4, units = "in", res = 300, pointsize = 10)
+pdf("plots/cd_025_mo.pdf", width = 6, height = 4, pointsize = 10)
 plotCD(tmp, cex = 1)
 dev.off()
 
@@ -95,7 +95,7 @@ best_agg = agg[cumbudget_scaled == 1]
 best_agg[, problem := paste0(scenario, "_", instance, "_", targets)]
 tmp = - as.matrix(dcast(best_agg, problem ~ method, value.var = "mean_hvi")[, -1])
 friedmanTest(tmp) # 1: chi(6) 41.091,, p < 0.001
-png("plots/cd_1_mo.png", width = 6, height = 4, units = "in", res = 300, pointsize = 10)
+pdf("plots/cd_1_mo.pdf", width = 6, height = 4, pointsize = 10)
 plotCD(tmp, cex = 1)
 dev.off()
 

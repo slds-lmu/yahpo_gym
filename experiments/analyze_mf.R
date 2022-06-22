@@ -51,7 +51,7 @@ g = ggplot(aes(x = nr, y = ecdf, colour = method), data = ecdf_res) +
   facet_wrap(~ problem, scales = "free", ncol = 4) +
   scale_x_reverse()
 
-ggsave("plots/ecdf.png", plot = g, device = "png", width = 9, height = 11.25, scale = 1.2)
+ggsave("plots/ecdf.pdf", plot = g, device = "pdf", width = 9, height = 11.25, scale = 1.2)
 
 agg_budget = dat_budget[, .(mean = mean(incumbent_budget), se = sd(incumbent_budget) / sqrt(.N)), by = .(cumbudget_scaled, method, scenario, instance)]
 agg_budget[, method := factor(method, levels = c("random", "smac4hpo", "hb", "bohb", "dehb", "smac4mf", "optuna"), labels = c("Random", "SMAC", "HB", "BOHB", "DEHB", "SMAC-HB", "optuna"))]
@@ -66,7 +66,7 @@ g = ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), 
   facet_wrap(~ scenario + instance, scales = "free", ncol = 4) +
   theme_minimal() +
   theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
-ggsave("plots/anytime_mf.png", plot = g, device = "png", width = 12, height = 15)
+ggsave("plots/anytime_mf.pdf", plot = g, device = "pdf", width = 12, height = 15)
 
 overall_budget = agg_budget[, .(mean = mean(mean), se = sd(mean) / sqrt(.N)), by = .(method, cumbudget_scaled)]
 
@@ -79,7 +79,7 @@ g = ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), 
   labs(x = "Fraction of Budget Used", y = "Mean Normalized Regret", colour = "Optimizer", fill = "Optimizer") +
   theme_minimal() +
   theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
-ggsave("plots/anytime_average_mf.png", plot = g, device = "png", width = 6, height = 4)
+ggsave("plots/anytime_average_mf.pdf", plot = g, device = "pdf", width = 6, height = 4)
 
 methods = unique(agg_budget$method)
 ranks = map_dtr(unique(agg_budget$scenario), function(scenario_) {
@@ -105,14 +105,14 @@ g = ggplot(aes(x = cumbudget_scaled, y = mean, colour = method, fill = method), 
   labs(x = "Fraction of Budget Used", y = "Mean Rank", colour = "Optimizer", fill = "Optimizer") +
   theme_minimal() +
   theme(legend.position = "bottom", legend.title = element_text(size = rel(0.75)), legend.text = element_text(size = rel(0.75)))
-ggsave("plots/anytime_average_rank_mf.png", plot = g, device = "png", width = 6, height = 4)
+ggsave("plots/anytime_average_rank_mf.pdf", plot = g, device = "pdf", width = 6, height = 4)
 
 library(scmamp)  # 0.3.2
 best_agg = agg_budget[cumbudget_scaled == 0.25]  # switch to 1 for final
 best_agg[, problem := paste0(scenario, "_", instance)]
 tmp = - as.matrix(dcast(best_agg, problem ~ method, value.var = "mean")[, -1])
 friedmanTest(tmp) # 0.25: chi(6) 69.664, p < 0.001
-png("plots/cd_025_mf.png", width = 6, height = 4, units = "in", res = 300, pointsize = 10)
+pdf("plots/cd_025_mf.pdf", width = 6, height = 4, pointsize = 10)
 plotCD(tmp, cex = 1)
 dev.off()
 
@@ -120,7 +120,7 @@ best_agg = agg_budget[cumbudget_scaled == 1]  # switch to 1 for final
 best_agg[, problem := paste0(scenario, "_", instance)]
 tmp = - as.matrix(dcast(best_agg, problem ~ method, value.var = "mean")[, -1])
 friedmanTest(tmp) # 1: chi(6) 83.957, p < 0.001
-png("plots/cd_1_mf.png", width = 6, height = 4, units = "in", res = 300, pointsize = 10)
+pdf("plots/cd_1_mf.pdf", width = 6, height = 4, pointsize = 10)
 plotCD(tmp, cex = 1)
 dev.off()
 
