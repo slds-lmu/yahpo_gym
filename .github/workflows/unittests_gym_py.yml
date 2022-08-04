@@ -26,7 +26,7 @@ jobs:
     - name: "Prepare [R]"
       run: |
         cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym_r
-        sudo apt install libcurl4-openssl-dev libgit2-dev
+        sudo apt install libcurl4-openssl-dev libgit2-dev libharfbuzz-dev libfribidi-dev
         Rscript -e "if (!requireNamespace('remotes')) install.packages('remotes', type = 'source')"
         Rscript -e "if (getRversion() < '3.2' && !requireNamespace('curl')) install.packages('curl', type = 'source')"
         Rscript -e "install.packages('devtools')"
