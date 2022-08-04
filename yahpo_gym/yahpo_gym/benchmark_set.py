@@ -3,6 +3,7 @@ import onnxruntime as rt
 import time
 import json
 import copy
+import os
 
 from pathlib import Path
 from typing import Union, Dict, List
@@ -10,6 +11,7 @@ import numpy as np
 from ConfigSpace.read_and_write import json as CS_json
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
+import pandas as pd
 
 class BenchmarkSet():
 
@@ -264,7 +266,14 @@ class BenchmarkSet():
         if self.config.instance_names is None:
             return self.config.config['instances']
         return [*self.config_space.get_hyperparameter(self.config.instance_names).choices]
-    
+
+    @property
+    def instance(self):
+        """
+        The selected instance. Returns none if no instance was selected.
+        """
+        return self.constants.get(self.config.instance_names)
+
     @property
     def targets(self):
         """
@@ -272,6 +281,28 @@ class BenchmarkSet():
         """
         return self.config.y_names
     
+    @property
+    def target_stats(self):
+        """
+        Empirical minimum and maximum of the target. 
+        Obtained through random search with 0.5M points.
+        
+        Returns a data.frame with the following columns:
+            * metric :: target
+            * statistic :: min or max
+            * value :: value of minimum/maximum
+            * scenario :: the scenario
+            " instance :: the instance
+        If no instance is set, all instances for a given scenario are returned.
+        """
+        df = pd.read_csv(os.path.join(self.config.config['basedir'],'global_statistics', 'instance_target_statistics.csv'))
+        df = df[(df.scenario == self.config.config_id)]
+        if self.instance is not None:
+            df = df[(df.instance == self.instance)]
+        return df
+
+    
+
     @property
     def properties(self):
         """

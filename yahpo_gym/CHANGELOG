@@ -1,0 +1,8 @@
+# Version 1.0.1
+* BenchmarkSet got two new properties
+    * instance : returns the selected instance if available
+    * target_stats : returns (empirically obtained) minimum and maximum for each target
+* Improved unit tests 
+
+# Version 1.0.0
+* First major release together with publication

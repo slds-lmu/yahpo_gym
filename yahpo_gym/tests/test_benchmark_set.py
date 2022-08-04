@@ -28,6 +28,9 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
 
   # Properties
   assert (type(b.instances) == list) & (len(b.instances) > 0)
+  
+  if b.instance is not None:
+    assert b.instance == test_instance
 
   # Setters
   b.set_constant(b.config.instance_names, test_instance)
@@ -79,6 +82,11 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
   assert type(out) == dict
   assert [k for k in out.keys()] == b.config.y_names
 
+  # Statistics
+  statdf = b.target_stats
+  assert len(statdf.columns) == 5
+  assert len(statdf) > 0
+
   return b
 
 def test_benchmarkset_lcbench():
@@ -127,3 +135,33 @@ def test_benchmarkset_rbv2_rpart():
   fidelity_config = {"trainsize" : .5, "repl":9}
   test_instance = "15"
   b = test_benchmarkset_abstract("rbv2_rpart", test_instance, fidelity_config)
+
+def test_benchmarkset_rbv2_xgboost():
+  fidelity_config = {"trainsize" : .5, "repl":9}
+  test_instance = "15"
+  b = test_benchmarkset_abstract("rbv2_xgboost", test_instance, fidelity_config)
+
+def test_benchmarkset_iaml_rpart():
+  fidelity_config = {"trainsize" : .5, "repl":9}
+  test_instance = "40981"
+  b = test_benchmarkset_abstract("iaml_rpart", test_instance, fidelity_config)
+
+def test_benchmarkset_iaml_ranger():
+  fidelity_config = {"trainsize" : .5, "repl":9}
+  test_instance = "40981"
+  b = test_benchmarkset_abstract("iaml_ranger", test_instance, fidelity_config)
+
+def test_benchmarkset_iaml_glmnet():
+  fidelity_config = {"trainsize" : .5, "repl":9}
+  test_instance = "40981"
+  b = test_benchmarkset_abstract("iaml_glmnet", test_instance, fidelity_config)
+  
+def test_benchmarkset_iaml_xgboost():
+  fidelity_config = {"trainsize" : .5, "repl":9}
+  test_instance = "40981"
+  b = test_benchmarkset_abstract("iaml_xgboost", test_instance, fidelity_config)
+
+def test_benchmarkset_iaml_super():
+  fidelity_config = {"trainsize" : .5, "repl":9}
+  test_instance = "15"
+  b = test_benchmarkset_abstract("rbv2_super", test_instance, fidelity_config)
