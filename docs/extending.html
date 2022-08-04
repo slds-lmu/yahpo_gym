@@ -14,6 +14,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -83,7 +84,7 @@
            <div itemprop="articleBody">
              
   <section id="extending-yahpo-gym">
-<h1>Extending YAHPO Gym<a class="headerlink" href="#extending-yahpo-gym" title="Permalink to this headline"></a></h1>
+<h1>Extending YAHPO Gym<a class="headerlink" href="#extending-yahpo-gym" title="Permalink to this heading"></a></h1>
 <p>This document describes how to extend YAHPO Gym with new configurations and scenarios.
 PR’s with new problems are welcome! See below on how to add new problem sets.</p>
 <p>There are two main steps that need to be added for a new <cite>scenario</cite> locally.</p>
@@ -124,7 +125,7 @@ for training code. This produces the <cite>encoding.json</cite> and <cite>model.
 Create a file <cite>param_set.R</cite> containing the <cite>ParamSet</cite>.</p></li>
 </ul>
 <section id="include-your-benchmark-in-yahpo-gym">
-<h2>Include your benchmark in <cite>yahpo_gym</cite><a class="headerlink" href="#include-your-benchmark-in-yahpo-gym" title="Permalink to this headline"></a></h2>
+<h2>Include your benchmark in <cite>yahpo_gym</cite><a class="headerlink" href="#include-your-benchmark-in-yahpo-gym" title="Permalink to this heading"></a></h2>
 <p>Once you have tested your benchmark, you can create a <cite>PR</cite> to the <cite>yahpo_gym</cite> and <cite>yahpo_data</cite>
 repositories.
 Note that the <cite>yahpo_data</cite> PR should not include the data, but instead only the model (<cite>.onnx</cite>) and parameter

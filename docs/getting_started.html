@@ -14,6 +14,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -86,16 +87,16 @@
            <div itemprop="articleBody">
              
   <section id="getting-started">
-<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
 <section id="installation-python">
-<h2>Installation (Python)<a class="headerlink" href="#installation-python" title="Permalink to this headline"></a></h2>
+<h2>Installation (Python)<a class="headerlink" href="#installation-python" title="Permalink to this heading"></a></h2>
 <p>YAHPO Gym can be installed directly from GitHub using <cite>pip</cite>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">&quot;git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&amp;subdirectory=yahpo_gym&quot;</span>
 </pre></div>
 </div>
 </section>
 <section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline"></a></h2>
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this heading"></a></h2>
 <p>To run a benchmark you need to obatin the ONNX model (<cite>model.onnx</cite>), <a class="reference external" href="https://automl.github.io/ConfigSpace">ConfigSpace</a> (<cite>config_space.json</cite>) and some encoding info (<cite>encoding.json</cite>).</p>
 <p>You can download all files for all scenarios in a single folder <a class="reference external" href="https://github.com/slds-lmu/yahpo_data">here (Github)</a>.</p>
 <p>You should pertain the folder structure as on the hosting site (i.e., create a <cite>“path-to-data”</cite> directory, for example named <cite>“multifidelity_data”</cite>, containing the individual, e.g., <cite>“lcench”</cite>, directories).</p>
@@ -107,7 +108,7 @@
 </div>
 </section>
 <section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
 <p>This example showcases the simplicity of YAHPO Gym’s API.
 Additional, more in-depth examples can be found in the <a class="reference external" href="https://slds-lmu.github.io/yahpo_gym/examples.html">Examples</a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym</span> <span class="kn">import</span> <span class="n">benchmark_set</span>
