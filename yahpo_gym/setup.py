@@ -9,8 +9,7 @@ pypi_operations = frozenset(['register', 'upload']) & frozenset([x.lower() for x
 if pypi_operations:
     raise ValueError('Command(s) {} disabled in this example.'.format(', '.join(pypi_operations)))
 
-with open(path.join(here, 'README.md'), encoding='utf-8') as fh:
-    long_description = fh.read()
+long_description = "YAHPO Gym (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problems to benchmark hyperparameter optimization (HPO) methods described in https://arxiv.org/abs/2109.03670."
 
 __version__ = None
 exec(open(path.join(here, 'yahpo_gym/about.py')).read())

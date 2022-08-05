@@ -53,7 +53,7 @@ The **full, up-to-date overview** can be obtained from the [Documentation](https
 ### Installation
 
 ```console
-pip install "git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym"
+pip install yahpo-gym==1.0.1
 ```
 
 ### Setup
