@@ -10,13 +10,12 @@
 
 YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a collection of benchmark instances with the same underlying hyperparameter optimization task (e.g., optimizing the hyperparameters of a neural network) on different datasets (usually taken from [OpenML](https://www.openml.org/)).
 
-### A note on OpenML IDs
+**NEWS:**
 
-Currently, the `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
-For `rbv2_*` and `iaml_*` scenarios, the `task_id` parameter of the `ConfigSpace` corresponds to the OpenML **dataset** identifier (i.e., this is the **dataset** id and **not** the task id).
-To query meta information, use https://www.openml.org/d/<dataset_id>.
-For the `lcbench` scenario, the `OpenML_task_id` parameter of the `ConfigSpace` directly corresponds to OpenML **tasks** identifier (i.e., this is the **task** id and **not** the dataset id).
-To query meta information, use https://www.openml.org/t/<task_id>.
+- The [paper](https://arxiv.org/abs/2109.03670) acompanying `YAHPO Gym` was accepted at the First Conference on AutoML 2022!
+- YAHPO (Python) can now be installed via `pip install yahpo-gym`
+- YAHPO is now available in [HPOBench](https://github.com/automl/HPOBench/)
+- We are working on integrating YAHPO Gym with [syne-tune](https://github.com/awslabs/syne-tune) for asynchronous benchmarking!
 
 ### Why should I use it?
 
@@ -90,6 +89,15 @@ config = bench.get_opt_space().sample_configuration(1).get_dictionary()
 # Evaluate
 print(bench.objective_function(config))
 ```
+
+### A note on OpenML Task IDs
+
+Currently, the `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
+For `rbv2_*` and `iaml_*` scenarios, the `task_id` parameter of the `ConfigSpace` corresponds to the OpenML **dataset** identifier (i.e., this is the **dataset** id and **not** the task id).
+To query meta information, use https://www.openml.org/d/<dataset_id>.
+For the `lcbench` scenario, the `OpenML_task_id` parameter of the `ConfigSpace` directly corresponds to OpenML **tasks** identifier (i.e., this is the **task** id and **not** the dataset id).
+To query meta information, use https://www.openml.org/t/<task_id>.
+
 
 ### Example: Tuning an instance using HPBandSter
 

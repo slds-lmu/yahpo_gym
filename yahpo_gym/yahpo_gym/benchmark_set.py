@@ -262,6 +262,12 @@ class BenchmarkSet():
     def instances(self):
         """
         A list of valid instances for the scenario.
+        This usually refers to the dataset the selected ML algorithm (=`scenario`) the model
+        should be fit on.
+        Note: The `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
+        Parameters of the `ConfigSpace` correspond to the `dataset` identifier, not the `task` identifier even though the
+        `instance_name` is `OpenMLTaskId`.
+
         """
         if self.config.instance_names is None:
             return self.config.config['instances']
