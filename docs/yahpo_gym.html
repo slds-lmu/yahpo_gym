@@ -174,7 +174,12 @@ Sets ‘instance’ as a constant instance and removes all fidelity parameters i
 <dl class="py property">
 <dt class="sig sig-object py" id="yahpo_gym.benchmark_set.BenchmarkSet.instances">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instances</span></span><a class="headerlink" href="#yahpo_gym.benchmark_set.BenchmarkSet.instances" title="Permalink to this definition"></a></dt>
-<dd><p>A list of valid instances for the scenario.</p>
+<dd><p>A list of valid instances for the scenario.
+This usually refers to the dataset the selected ML algorithm (=`scenario`) the model
+should be fit on.
+Note: The <cite>rbv2_*</cite>, <cite>lcbench</cite>, and <cite>iaml_*</cite> scenarios contain instances based on OpenML datasets.
+Parameters of the <cite>ConfigSpace</cite> correspond to the <cite>dataset</cite> identifier, not the <cite>task</cite> identifier even though the
+<cite>instance_name</cite> is <cite>OpenMLTaskId</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
