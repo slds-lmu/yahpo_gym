@@ -64,6 +64,9 @@ ois = OptimInstanceMultiCrit$new(obj, search_space = b$get_search_space(drop_fid
 p$optimize(ois)
 ```
 
+Note that specifying `multifidelity = FALSE` in the `$get_objective()` method of a `BenchmarkSet` always also requires
+to specify `drop_fidelity_params = TRUE` when getting the search space via `$get_search_space()`.
+
 ### or with Hyperband using (`mlr3hyperband`)
 
 ```r
