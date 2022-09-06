@@ -12,6 +12,8 @@ YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a coll
 
 **NEWS:**
 
+- We are working on integrating `yahpo_gym` with [`syne-tune`](https://github.com/awslabs/syne-tune).
+- `yahpo_gym` is now integrated into [`HPOBench`](https://github.com/automl/LCBench)'s `development` branch!
 - The [paper](https://arxiv.org/abs/2109.03670) acompanying `YAHPO Gym` was accepted at the First Conference on AutoML 2022!
 - YAHPO (Python) can now be installed via `pip install yahpo-gym`
 - YAHPO is now available in [HPOBench](https://github.com/automl/HPOBench/)
@@ -45,7 +47,7 @@ Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to
 |iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
 
 The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
-Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
+Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column).
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
@@ -89,6 +91,22 @@ config = bench.get_opt_space().sample_configuration(1).get_dictionary()
 # Evaluate
 print(bench.objective_function(config))
 ```
+
+#### Using YAHPO with `HPOBench`
+
+`yahpo_gym` is now integrated into `HPOBench`'s `development` branch.
+
+```py
+from hpobench.container.benchmarks.surrogates.yahpo_gym import YAHPOGymMOBenchmark
+b = YAHPOGymMOBenchmark(scenario="lcbench", rng=1)
+config = b.get_configuration_space(seed=1).sample_configuration()
+result_dict = b.objective_function(configuration=config, fidelity={"epoch": 50}, rng=1)
+```
+
+#### Using YAHPO with `syne-tune`
+
+We are currently working on integrating `yahpo_gym` with `syne-tune`.
+See [here](https://github.com/awslabs/syne-tune/pull/337) for progress on this issue.
 
 ### A note on OpenML Task IDs
 

@@ -1,12 +1,12 @@
 # YAHPO Gym
 [![Unittests](https://github.com/slds-lmu/yahpo_gym/actions/workflows/unittests_gym_py.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
 [![Docs](https://github.com/slds-lmu/yahpo_gym/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/slds-lmu/yahpo_gym/actions)
-[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/) 
+[![Module Handbook](https://img.shields.io/badge/Website-Documentation-blue)](https://slds-lmu.github.io/yahpo_gym/)
 [![Paper](https://img.shields.io/badge/arXiv-Paper-blue)](https://arxiv.org/abs/2109.03670)
 [![Software (Python)](https://img.shields.io/badge/Software-Python-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym)
 [![Software (R)](https://img.shields.io/badge/Software-R-green)](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym_r)
 
-### What is YAHPO Gym? 
+### What is YAHPO Gym?
 
 **YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
 The underlying software with additional documentation and background can be found [here](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
@@ -28,6 +28,8 @@ This repository contains three modules/packages:
 
 **NEWS:**
 
+- We are working on integrating `yahpo_gym` with [`syne-tune`](https://github.com/awslabs/syne-tune).
+- `yahpo_gym` is now integrated into [`HPOBench`](https://github.com/automl/LCBench)'s `development` branch!
 - The [paper](https://arxiv.org/abs/2109.03670) acompanying `YAHPO Gym` was accepted at the First Conference on AutoML 2022!
 - YAHPO (Python) can now be installed via `pip install yahpo-gym`
 - YAHPO is now available in [HPOBench](https://github.com/automl/HPOBench/)
@@ -36,7 +38,7 @@ This repository contains three modules/packages:
 ### Why should I use it?
 
 **YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) provides blazing fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
-Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks 
+Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks
 across a large variety of problems.
 
 ![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/anytime_average_rank_mf.jpg?raw=true)
@@ -61,11 +63,11 @@ across a large variety of problems.
 |iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
 
 The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
-Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
+Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column).
 
 ### What does this repository contain?
 
-This repository contains two modules: `yahpo_gym` and `yahpo_train`. 
+This repository contains two modules: `yahpo_gym` and `yahpo_train`.
 While we mainly focus on `yahpo_gym`, as it is provides an interface to the benchmark described in our [paper](https://arxiv.org/abs/2109.03670),
 we also provide the full reproducible codebase used to generate the underlying surrogate neural networks in `yahpo_train`.
 
@@ -90,12 +92,12 @@ YAHPO Train is still in a preliminary state but can already be used to reproduce
 We want to add several features to **yahpo_gym** in future versions:
 
 - **Asynchronous Evaluation**
-  We would like to allow for faster-than-realtime asynchronous evaluation in future versions. This is currently available as an experimental feature via `objective_function_timed`, but requires additional (experimental) evaluation for release. 
+  We would like to allow for faster-than-realtime asynchronous evaluation in future versions. This is currently available as an experimental feature via `objective_function_timed`, but requires additional (experimental) evaluation for release.
 - **Noisy Surrogate Models**
   We would like to allow for surrogates that more closely reflect the underlying (noisy) nature of real HPO experiments. Currently, noisy evaluation are available using `noisy = True` during instantiation, but this feature is considered experimental and
   requires additional evaluation for release.
 - **Integration with HPO-Bench**
-  HPO-Bench is a robust and mature library for benchmarking HPO Problems. Due to similarity in structure and scope, it would make sense to integrate YAHPO Gym with HPO, extending the number of scenarios available in HPO-Bench. 
+  HPO-Bench is a robust and mature library for benchmarking HPO Problems. Due to similarity in structure and scope, it would make sense to integrate YAHPO Gym with HPO, extending the number of scenarios available in HPO-Bench.
 - **Additional Scenarios**
   We are always happy to include additional (interesting) scenarios. If you know of (or want to add) an additional scenario, get in touch!
 
