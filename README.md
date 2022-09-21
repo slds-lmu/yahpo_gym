@@ -25,12 +25,9 @@ This repository contains three modules/packages:
 - `yahpo_train` (python): Module for training surrogate models used in `yahpo_gym`.
 - `yahpo_gym_r`(R): An R wrapper for `yahpo_gym`.
 
-
 **NEWS:**
 
-- We are working on integrating `yahpo_gym` with [`syne-tune`](https://github.com/awslabs/syne-tune).
-- `yahpo_gym` is now integrated into [`HPOBench`](https://github.com/automl/LCBench)'s `development` branch!
-- The [paper](https://arxiv.org/abs/2109.03670) acompanying `YAHPO Gym` was accepted at the First Conference on AutoML 2022!
+- The [paper](https://arxiv.org/abs/2109.03670) accompanying `YAHPO Gym` was accepted at the 1st International Conference on Automated Machine Learning!
 - YAHPO (Python) can now be installed via `pip install yahpo-gym`
 - YAHPO is now available in [HPOBench](https://github.com/automl/HPOBench/)
 - We are working on integrating YAHPO Gym with [syne-tune](https://github.com/awslabs/syne-tune) for asynchronous benchmarking!
