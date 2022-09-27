@@ -22,7 +22,7 @@ setup(name='yahpo_train',
       author='Florian Pfisterer, Lennart Schneider',
       description='Train surrogate models for the yahpo gym',
       long_description=long_description,
-      license='LGPLv3',
+      license='Apache-2.0',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
       include_package_data=True,
       install_requires=[
