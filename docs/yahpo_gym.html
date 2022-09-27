@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -48,9 +49,51 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-yahpo_gym.benchmark_set">yahpo_gym.benchmark_set module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-yahpo_gym.configuration">yahpo_gym.configuration module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-yahpo_gym.local_config">yahpo_gym.local_config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-yahpo_gym.benchmark_set">yahpo_gym.benchmark_set module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.get_fidelity_space"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.get_fidelity_space()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.get_opt_space"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.get_opt_space()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.instance"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.instance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.instances"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.instances</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.objective_function"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.objective_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.objective_function_timed"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.objective_function_timed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.properties"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.properties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.set_constant"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.set_constant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.set_instance"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.set_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.set_session"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.set_session()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.target_stats"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.target_stats</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.benchmark_set.BenchmarkSet.targets"><code class="docutils literal notranslate"><span class="pre">BenchmarkSet.targets</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-yahpo_gym.configuration">yahpo_gym.configuration module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#yahpo_gym.configuration.ConfigDict"><code class="docutils literal notranslate"><span class="pre">ConfigDict</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.configuration.ConfigDict.get_item"><code class="docutils literal notranslate"><span class="pre">ConfigDict.get_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.configuration.ConfigDict.update"><code class="docutils literal notranslate"><span class="pre">ConfigDict.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#yahpo_gym.configuration.Configuration"><code class="docutils literal notranslate"><span class="pre">Configuration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.configuration.Configuration.config_path"><code class="docutils literal notranslate"><span class="pre">Configuration.config_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.configuration.Configuration.data"><code class="docutils literal notranslate"><span class="pre">Configuration.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.configuration.Configuration.get_path"><code class="docutils literal notranslate"><span class="pre">Configuration.get_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.configuration.Configuration.hp_names"><code class="docutils literal notranslate"><span class="pre">Configuration.hp_names</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#yahpo_gym.configuration.cfg"><code class="docutils literal notranslate"><span class="pre">cfg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#yahpo_gym.configuration.list_scenarios"><code class="docutils literal notranslate"><span class="pre">list_scenarios()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-yahpo_gym.local_config">yahpo_gym.local_config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#yahpo_gym.local_config.LocalConfiguration"><code class="docutils literal notranslate"><span class="pre">LocalConfiguration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.local_config.LocalConfiguration.config"><code class="docutils literal notranslate"><span class="pre">LocalConfiguration.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.local_config.LocalConfiguration.data_path"><code class="docutils literal notranslate"><span class="pre">LocalConfiguration.data_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.local_config.LocalConfiguration.init_config"><code class="docutils literal notranslate"><span class="pre">LocalConfiguration.init_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yahpo_gym.local_config.LocalConfiguration.set_data_path"><code class="docutils literal notranslate"><span class="pre">LocalConfiguration.set_data_path()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-yahpo_gym">Module contents</a></li>
 </ul>
 </li>
