@@ -38,6 +38,13 @@ reticulate::use_condaenv("yahpo_gym", required=TRUE)
 library("yahpogym")
 init_local_config(data_path = "~/multifidelity_data")
 ```
+you can download the multifidelity data using 
+
+```sh
+git clone https://github.com/slds-lmu/yahpo_data.git
+```
+
+or from this URL: (https://github.com/slds-lmu/yahpo_data.git).
 
 ## Usage
 

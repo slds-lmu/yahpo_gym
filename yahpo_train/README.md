@@ -6,3 +6,5 @@
 
 
 Train and evaluate surrogates for HPO problems.
+
+Code for tuning and training the surrogates can be found in the `notebooks` folder https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_train/notebooks/tune_resnet.py
