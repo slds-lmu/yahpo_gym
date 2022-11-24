@@ -17,7 +17,9 @@ Currently, the ``rbv2_*``, ``lcbench``, and ``iaml_*`` scenarios contain instanc
 For ``rbv2_*`` and ``iaml_*`` scenarios, the `task_id` parameter of the `ConfigSpace` corresponds to the OpenML **dataset** identifier (i.e., this is the **dataset** id and **not** the task id).
 To query meta information, use https://www.openml.org/d/<dataset_id>.
 For the ``lcbench`` scenario, the `OpenML_task_id` parameter of the `ConfigSpace` directly corresponds to OpenML **tasks** identifier (i.e., this is the **task** id and **not** the dataset id).
-To query meta information, use https://www.openml.org/t/<task_id>.
+To query meta information, use https://www.openml.org/t/<task_id>. 
+
+For other questions, see the *frequently asked questions* section.
 
 **Why should I use it?**
 
@@ -46,6 +48,7 @@ Getting Started
    :maxdepth: 1
 
    getting_started
+   frequently_asked
 
 Scenarios & Instances
 ***********************
