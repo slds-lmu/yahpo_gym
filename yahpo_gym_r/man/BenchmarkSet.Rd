@@ -55,6 +55,9 @@ Should the ONNX session be allowed to leverage multithreading capabilities?}
 \item{\code{check}}{`logical` \cr
 Check whether values coincide with `domain`.}
 
+\item{\code{check_codomain}}{`logical` \cr
+Check whether returned values coincide with `codomain`.}
+
 \item{\code{noisy}}{`logical` \cr
 Whether noisy surrogates should be used.}
 }
@@ -92,18 +95,18 @@ A python `yahpo_gym.BenchmarkSet`.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{BenchmarkSet$new()}}
-\item \href{#method-print}{\code{BenchmarkSet$print()}}
-\item \href{#method-get_objective}{\code{BenchmarkSet$get_objective()}}
-\item \href{#method-get_search_space}{\code{BenchmarkSet$get_search_space()}}
-\item \href{#method-get_opt_space_py}{\code{BenchmarkSet$get_opt_space_py()}}
-\item \href{#method-subset_codomain}{\code{BenchmarkSet$subset_codomain()}}
-\item \href{#method-clone}{\code{BenchmarkSet$clone()}}
+\item \href{#method-BenchmarkSet-new}{\code{BenchmarkSet$new()}}
+\item \href{#method-BenchmarkSet-print}{\code{BenchmarkSet$print()}}
+\item \href{#method-BenchmarkSet-get_objective}{\code{BenchmarkSet$get_objective()}}
+\item \href{#method-BenchmarkSet-get_search_space}{\code{BenchmarkSet$get_search_space()}}
+\item \href{#method-BenchmarkSet-get_opt_space_py}{\code{BenchmarkSet$get_opt_space_py()}}
+\item \href{#method-BenchmarkSet-subset_codomain}{\code{BenchmarkSet$subset_codomain()}}
+\item \href{#method-BenchmarkSet-clone}{\code{BenchmarkSet$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-BenchmarkSet-new"></a>}}
+\if{latex}{\out{\hypertarget{method-BenchmarkSet-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize a new object
 \subsection{Usage}{
@@ -114,7 +117,8 @@ Initialize a new object
   active_session = FALSE,
   multithread = FALSE,
   check = FALSE,
-  noisy = FALSE
+  noisy = FALSE,
+  check_codomain = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -142,13 +146,16 @@ Check inputs for validity before passing to surrogate model? Default `FALSE`.}
 
 \item{\code{noisy}}{`logical` \cr
 Should noisy surrogates be used instead of deterministic ones?}
+
+\item{\code{check_codomain}}{`logical` \cr
+Check outputs of surrogate model for validity? Default `FALSE`.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-BenchmarkSet-print"></a>}}
+\if{latex}{\out{\hypertarget{method-BenchmarkSet-print}{}}}
 \subsection{Method \code{print()}}{
 Printer with some additional information.
 \subsection{Usage}{
@@ -157,8 +164,8 @@ Printer with some additional information.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_objective"></a>}}
-\if{latex}{\out{\hypertarget{method-get_objective}{}}}
+\if{html}{\out{<a id="method-BenchmarkSet-get_objective"></a>}}
+\if{latex}{\out{\hypertarget{method-BenchmarkSet-get_objective}{}}}
 \subsection{Method \code{get_objective()}}{
 Get the objective function
 \subsection{Usage}{
@@ -169,7 +176,8 @@ Get the objective function
   timed = FALSE,
   logging = FALSE,
   multithread = FALSE,
-  seed = NULL
+  seed = NULL,
+  check_codomain = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -197,6 +205,9 @@ Should the ONNX session be allowed to leverage multithreading capabilities? Defa
 
 \item{\code{seed}}{`integer` \cr
 Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `NULL` (no seed).}
+
+\item{\code{check_codomain}}{`logical` \cr
+Check outputs of surrogate model for validity? Default `FALSE`.}
 }
 \if{html}{\out{</div>}}
 }
@@ -206,8 +217,8 @@ A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_search_space"></a>}}
-\if{latex}{\out{\hypertarget{method-get_search_space}{}}}
+\if{html}{\out{<a id="method-BenchmarkSet-get_search_space"></a>}}
+\if{latex}{\out{\hypertarget{method-BenchmarkSet-get_search_space}{}}}
 \subsection{Method \code{get_search_space()}}{
 Get Optimization Search Space
 
@@ -238,8 +249,8 @@ A [`paradox::ParamSet`] containing the search space to optimize over.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_opt_space_py"></a>}}
-\if{latex}{\out{\hypertarget{method-get_opt_space_py}{}}}
+\if{html}{\out{<a id="method-BenchmarkSet-get_opt_space_py"></a>}}
+\if{latex}{\out{\hypertarget{method-BenchmarkSet-get_opt_space_py}{}}}
 \subsection{Method \code{get_opt_space_py()}}{
 Get Optimization ConfigSpace
 \subsection{Usage}{
@@ -259,8 +270,8 @@ A configspace containing the search space to optimize over.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-subset_codomain"></a>}}
-\if{latex}{\out{\hypertarget{method-subset_codomain}{}}}
+\if{html}{\out{<a id="method-BenchmarkSet-subset_codomain"></a>}}
+\if{latex}{\out{\hypertarget{method-BenchmarkSet-subset_codomain}{}}}
 \subsection{Method \code{subset_codomain()}}{
 Subset the codomain. Sets a new domain.
 \subsection{Usage}{
@@ -280,8 +291,8 @@ A [`paradox::ParamSet`] containing the output space (codomain).
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-BenchmarkSet-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-BenchmarkSet-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

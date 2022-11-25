@@ -5,14 +5,17 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
     logging = NULL,
     multithread = NULL,
     seed = NULL,
+    check_codomain = NULL,
 
-    initialize = function(instance, multifidelity = TRUE, py_instance_args, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = 0L) {
+    initialize = function(instance, multifidelity = TRUE, py_instance_args, domain, codomain = NULL, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = 0L, check_codomain = FALSE) {
       assert_flag(multifidelity)
       assert_flag(check_values)
       self$timed = assert_flag(timed)
       self$logging = assert_flag(logging)
       self$multithread = assert_flag(multithread)
       self$seed = assert_int(seed, null.ok = TRUE)
+      self$check_codomain = assert_flag(check_codomain)
+
       if (is.null(codomain)) {
         codomain = ps(y = p_dbl(tags = "minimize"))
       }
@@ -61,7 +64,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       }
       res = invoke(private$.fun, list(xs), .args = self$constants$values)
       res = res[[1]][self$codomain$ids()]
-      if (self$check_values) self$codomain$assert(as.list(res)[self$codomain$ids()])
+      if (self$check_codomain) self$codomain$assert(as.list(res)[self$codomain$ids()])
       return(res)
     },
     export = function() {

@@ -47,6 +47,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @field check `logical` \cr
     #'   Check whether values coincide with `domain`.
     check = NULL,
+
+    #' @field check_codomain `logical` \cr
+    #'   Check whether returned values coincide with `codomain`.
+    check_codomain = NULL,
     
     #' @field noisy `logical` \cr
     #'   Whether noisy surrogates should be used.
@@ -70,7 +74,9 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Check inputs for validity before passing to surrogate model? Default `FALSE`.
     #' @param noisy `logical` \cr
     #'   Should noisy surrogates be used instead of deterministic ones?
-    initialize = function(scenario, instance = NULL, onnx_session = NULL, active_session = FALSE, multithread = FALSE, check = FALSE, noisy = FALSE) {
+    #' @param check_codomain `logical` \cr
+    #'   Check outputs of surrogate model for validity? Default `FALSE`.
+    initialize = function(scenario, instance = NULL, onnx_session = NULL, active_session = FALSE, multithread = FALSE, check = FALSE, noisy = FALSE, check_codomain = FALSE) {
       self$id = assert_string(scenario)
       self$instance = assert_string(instance, null.ok = TRUE)
       self$onnx_session = onnx_session
@@ -78,6 +84,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
       self$multithread = assert_flag(multithread)
       self$check = assert_flag(check)
       self$noisy = assert_flag(noisy)
+      self$check_codomain = assert_flag(check_codomain)
     },
     #' @description
     #' Printer with some additional information.
@@ -109,13 +116,16 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @param seed `integer` \cr
     #'   Initial seed for the `onnxruntime.runtime`. Only relevant if `noisy = TRUE`. Default `NULL` (no seed).
+    #' @param check_codomain `logical` \cr
+    #'   Check outputs of surrogate model for validity? Default `FALSE`.
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = NULL) {
+    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = NULL, check_codomain = NULL) {
       assert_choice(instance, self$instances)
       assert_flag(check_values)
       assert_int(seed, null.ok = TRUE)
+      assert_flag(check_codomain)
       ObjectiveYAHPO$new(
         instance,
         multifidelity,
@@ -133,7 +143,8 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         timed = timed,
         logging = logging,
         multithread = multithread,
-        seed = seed
+        seed = seed,
+        check_codomain = check_codomain
       )
     },
     #' @description
