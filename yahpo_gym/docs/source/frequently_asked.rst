@@ -48,3 +48,17 @@ However, it does not seem to work if the goal, e.g. is to measure memory consump
 In this setting, we often observe constant memory consumption across a full learning curve. 
 We therefore discourage using memory metrics in this setting.
 In addition, memory estimation was not always logged properly resulting in memory consumption imputed with `0`, which might lead to problems on some instances.
+
+
+Noisy Surrogates
+=======================
+
+`YAHPO Gym` allows using *noisy* surrogates, this means that surrogates will predict targets from a distribution conditional on hyperparameters.
+This internally works as follows: 
+1. Given 3 neural networks f_1-f_3 that predict targets from hyperparameters, run the prediction step 
+2. Sample a vector alpha of length 3, such that each alpha_i is in [0,1] and they sum to 1.
+3. The noisy prediction is given by the sum of neural network predictions weighted by the respective alpha.
+
+While this works well in theory, this was not tested thoroughly and the use of surrogates is therefore discouraged at the moment.
+Furthermore, we have not extensively tested whether all surrogates indeed correctly return noisy surrogates.
+We will improve this in a future version of `YAHPO Gym`.
