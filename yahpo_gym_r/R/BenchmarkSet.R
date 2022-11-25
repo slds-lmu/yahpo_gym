@@ -120,15 +120,20 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         instance,
         multifidelity,
         list(
-          scenario = self$id, session = self$onnx_session, active_session = self$active_session, 
-          check = self$check, mulltithread = self$multithread, noisy = self$noisy
+          scenario = self$id, 
+          session = self$onnx_session,
+          active_session = self$active_session, 
+          check = self$check, 
+          multithread = self$multithread,
+          noisy = self$noisy
         ),
         self$domain,
         self$codomain,
         check_values = check_values,
         timed = timed,
         logging = logging,
-        multithread = multithread
+        multithread = multithread,
+        seed = seed
       )
     },
     #' @description
