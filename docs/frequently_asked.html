@@ -53,6 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#rbv2-data-source">rbv2_* data source</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-f1-scores-for-rbv2-and-iaml">Using F1 scores for rbv2_* and iaml_*</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#memory-estimation-for-rbv2">Memory estimation for rbv2_*</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#noisy-surrogates">Noisy Surrogates</a></li>
 </ul>
 </li>
 </ul>
@@ -131,6 +132,17 @@ However, it does not seem to work if the goal, e.g. is to measure memory consump
 In this setting, we often observe constant memory consumption across a full learning curve.
 We therefore discourage using memory metrics in this setting.
 In addition, memory estimation was not always logged properly resulting in memory consumption imputed with <cite>0</cite>, which might lead to problems on some instances.</p>
+</section>
+<section id="noisy-surrogates">
+<h2>Noisy Surrogates<a class="headerlink" href="#noisy-surrogates" title="Permalink to this heading"></a></h2>
+<p><cite>YAHPO Gym</cite> allows using <em>noisy</em> surrogates, this means that surrogates will predict targets from a distribution conditional on hyperparameters.
+This internally works as follows:
+1. Given 3 neural networks f_1-f_3 that predict targets from hyperparameters, run the prediction step
+2. Sample a vector alpha of length 3, such that each alpha_i is in [0,1] and they sum to 1.
+3. The noisy prediction is given by the sum of neural network predictions weighted by the respective alpha.</p>
+<p>While this works well in theory, this was not tested thoroughly and the use of surrogates is therefore discouraged at the moment.
+Furthermore, we have not extensively tested whether all surrogates indeed correctly return noisy surrogates.
+We will improve this in a future version of <cite>YAHPO Gym</cite>.</p>
 </section>
 </section>
 
