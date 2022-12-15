@@ -6,7 +6,7 @@ Getting Started
 Installation (Python)
 =======================
 
-YAHPO Gym can be installed directly from GitHub using `pip`:
+`YAHPO Gym` can be installed directly from GitHub using `pip`:
 
 .. code-block:: bash
 
@@ -33,7 +33,7 @@ You should pertain the folder structure as on the hosting site (i.e., create a `
 Usage
 =======================
 
-This example showcases the simplicity of YAHPO Gym's API.
+This example showcases the simplicity of `YAHPO Gym`'s API.
 Additional, more in-depth examples can be found in the `Examples <https://slds-lmu.github.io/yahpo_gym/examples.html>`_.
 
 .. code-block:: python

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frequently asked questions &mdash; yahpo_gym 0.1.0 documentation</title>
+  <title>Frequently Asked Questions &mdash; yahpo_gym 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -47,12 +47,14 @@
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Frequently asked questions</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Frequently Asked Questions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#openml-task-id-and-dataset-id">OpenML task_id and dataset_id</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reproducbility">Reproducbility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reproducibility">Reproducibility</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rbv2-data-source">rbv2_* data source</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-f1-scores-for-rbv2-and-iaml">Using F1 scores for rbv2_* and iaml_*</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#memory-estimation-for-rbv2">Memory estimation for rbv2_*</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-f1-scores-for-rbv2">Using F1 scores for rbv2_*</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#memory-estimation-for-rbv2">Memory Estimation for rbv2_*</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-objective-benchmarking">Multi-Objective Benchmarking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-metrics-for-rbv2-xgboost">Performance Metrics for rbv2_xgboost</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#noisy-surrogates">Noisy Surrogates</a></li>
 </ul>
 </li>
@@ -81,7 +83,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Frequently asked questions</li>
+      <li class="breadcrumb-item active">Frequently Asked Questions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/frequently_asked.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -92,57 +94,78 @@
            <div itemprop="articleBody">
              
   <section id="frequently-asked-questions">
-<h1>Frequently asked questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this heading"></a></h1>
-<p>In the following, we will try to keep a list of frequently asked questions.</p>
+<h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this heading"></a></h1>
+<p>In the following, we maintain a list of frequently asked questions.</p>
 <section id="openml-task-id-and-dataset-id">
 <h2>OpenML task_id and dataset_id<a class="headerlink" href="#openml-task-id-and-dataset-id" title="Permalink to this heading"></a></h2>
-<p>Currently, the <code class="docutils literal notranslate"><span class="pre">rbv2_*</span></code>, <code class="docutils literal notranslate"><span class="pre">lcbench</span></code>, and <code class="docutils literal notranslate"><span class="pre">iaml_*</span></code> scenarios contain instances based on OpenML datasets.
-For <code class="docutils literal notranslate"><span class="pre">rbv2_*</span></code> and <code class="docutils literal notranslate"><span class="pre">iaml_*</span></code> scenarios, the <cite>task_id</cite> parameter of the <cite>ConfigSpace</cite> corresponds to the OpenML <strong>dataset</strong> identifier (i.e., this is the <strong>dataset</strong> id and <strong>not</strong> the task id).
+<p>Currently, the <cite>rbv2_*</cite>, <cite>lcbench</cite>, and <cite>iaml_*</cite> scenarios contain instances based on OpenML datasets.
+For <cite>rbv2_*</cite> and <cite>iaml_*</cite> scenarios, the <cite>task_id</cite> parameter of the <cite>ConfigSpace</cite> corresponds to the OpenML <strong>dataset</strong> identifier (i.e., this is the <strong>dataset</strong> id and <strong>not</strong> the task id).
 To query meta information, use <a class="reference external" href="https://www.openml.org/d">https://www.openml.org/d</a>/&lt;dataset_id&gt;.
-For the <code class="docutils literal notranslate"><span class="pre">lcbench</span></code> scenario, the <cite>OpenML_task_id</cite> parameter of the <cite>ConfigSpace</cite> directly corresponds to OpenML <strong>tasks</strong> identifier (i.e., this is the <strong>task</strong> id and <strong>not</strong> the dataset id).
+For the <cite>lcbench</cite> scenario, the <cite>OpenML_task_id</cite> parameter of the <cite>ConfigSpace</cite> directly corresponds to OpenML <strong>tasks</strong> identifier (i.e., this is the <strong>task</strong> id and <strong>not</strong> the dataset id).
 To query meta information, use <a class="reference external" href="https://www.openml.org/t">https://www.openml.org/t</a>/&lt;task_id&gt;.</p>
 </section>
-<section id="reproducbility">
-<h2>Reproducbility<a class="headerlink" href="#reproducbility" title="Permalink to this heading"></a></h2>
+<section id="reproducibility">
+<h2>Reproducibility<a class="headerlink" href="#reproducibility" title="Permalink to this heading"></a></h2>
 <p><cite>YAHPO Gym</cite> relies on static neural networks compiled via <cite>ONNX</cite>.
 This should result in reproducible results given equal hardware and software versions.
-Unfortunately, <a href="#id1"><span class="problematic" id="id2">`</span></a>ONNX`models do not always yield reproducible results across different hardware.
+Unfortunately, <cite>ONNX</cite> models do not always yield reproducible results across different hardware.
 This is, e.g. discussed in <a class="reference external" href="https://github.com/microsoft/onnxruntime/issues/12086">https://github.com/microsoft/onnxruntime/issues/12086</a>.</p>
 <p>In practice, we have not observed relevant differences between different hardware versions, but this might help to explain observations
-regarding a lack of exact reproducbility.</p>
+regarding a lack of exact reproducibility.</p>
 </section>
 <section id="rbv2-data-source">
 <h2>rbv2_* data source<a class="headerlink" href="#rbv2-data-source" title="Permalink to this heading"></a></h2>
-<p>The rbv2_* data and data collection method is described in Binder et al., 2020 Collecting Empirical Data about Hyperparameters &lt;<a class="reference external" href="https://www.automl.org/wp-content/uploads/2020/07/AutoML_2020_paper_63.pdf">https://www.automl.org/wp-content/uploads/2020/07/AutoML_2020_paper_63.pdf</a>&gt;.
-Benchmarks with the <a href="#id3"><span class="problematic" id="id4">`</span></a>iaml_*`prefix are largely based on the same methodology.
-Additional details for all benchmarks can be found in the YAHPO Gym paper’s supplementary material.</p>
+<p>The <cite>rbv2_*</cite> data and data collection method is described in Binder et al., 2020 Collecting Empirical Data about Hyperparameters &lt;<a class="reference external" href="https://www.automl.org/wp-content/uploads/2020/07/AutoML_2020_paper_63.pdf">https://www.automl.org/wp-content/uploads/2020/07/AutoML_2020_paper_63.pdf</a>&gt;.
+Benchmarks with the <cite>iaml_*</cite> prefix are largely based on the same methodology.
+Additional details for all benchmarks can be found in the <cite>YAHPO Gym</cite> paper’s supplementary material.</p>
 </section>
-<section id="using-f1-scores-for-rbv2-and-iaml">
-<h2>Using F1 scores for rbv2_* and iaml_*<a class="headerlink" href="#using-f1-scores-for-rbv2-and-iaml" title="Permalink to this heading"></a></h2>
-<p>F1 scores in the rbv2_* scenarios are only available for binary class datasets.
-On multiclass datasets, the corresponding F1 score is imputed with <cite>0</cite> and returned by the surrogate model.
+<section id="using-f1-scores-for-rbv2">
+<h2>Using F1 scores for rbv2_*<a class="headerlink" href="#using-f1-scores-for-rbv2" title="Permalink to this heading"></a></h2>
+<p><cite>F1</cite> scores in the <cite>rbv2_*</cite> scenarios are only available for binary classification datasets.
+On multiclass datasets, the corresponding <cite>F1</cite> score is imputed with <cite>0</cite> and returned by the surrogate model.
 The information on which <cite>id</cite> corresponds to a multiclass dataset can be obtained from the entry <cite>is_multicrit</cite> in <cite>BenchmarkSet.config.config</cite>.</p>
 </section>
 <section id="memory-estimation-for-rbv2">
-<h2>Memory estimation for rbv2_*<a class="headerlink" href="#memory-estimation-for-rbv2" title="Permalink to this heading"></a></h2>
-<p>For the rbv2_* settings, memory consumption was estimated by observing the memory consumption during training via <cite>/usr/bin/time</cite>.
-This estimates the <cite>Maximum resident size</cite>.
-In general, we assume that this is provides a coarse estimation of the processes memory consumption.
-However, it does not seem to work if the goal, e.g. is to measure memory consumption across <em>learning curves</em>.
+<h2>Memory Estimation for rbv2_*<a class="headerlink" href="#memory-estimation-for-rbv2" title="Permalink to this heading"></a></h2>
+<p>For the <cite>rbv2_*</cite> settings, memory consumption was estimated by observing the memory consumption during training via <cite>/usr/bin/time</cite>.
+This estimates the <cite>maximum resident size</cite>.
+In general, we assume that this provides a coarse estimation of the processes memory consumption.
+However, it does not seem to work if the goal, is to, e.g., measure memory consumption across <em>learning curves</em>.
 In this setting, we often observe constant memory consumption across a full learning curve.
 We therefore discourage using memory metrics in this setting.
 In addition, memory estimation was not always logged properly resulting in memory consumption imputed with <cite>0</cite>, which might lead to problems on some instances.</p>
+</section>
+<section id="multi-objective-benchmarking">
+<h2>Multi-Objective Benchmarking<a class="headerlink" href="#multi-objective-benchmarking" title="Permalink to this heading"></a></h2>
+<p>We observed that one some multi-objective benchmark problems, Pareto fronts can collapse, i.e., although we initially
+assume that objectives are in competition we can find a single best point that optimizes all objectives simultaneously
+and optimizers can then proceed to only further optimize a subset of all objectives because the other ones have
+become irrelevant.</p>
+<p>While we believe that this is still a well defined multi-objective optimization problem and multi-objective quality
+indicators can still be computed (even if the resulting Pareto set contains only a single point) we want to note that
+such problems can introduce some biases, i.e., favouring optimizers that explore the extreme regions of the Pareto front.</p>
+<p>This mostly affects <cite>rbv2_*</cite> scenarios (mostly <cite>rbv2_xgboost</cite> and <cite>rbv2_ranger</cite>) and hardware metrics like <cite>memory</cite> but
+can sometimes also be observed for <cite>iaml_*</cite> scenarios (e.g., if <cite>nf</cite> is included as an objective).</p>
+<p>For <cite>rbv2_*</cite> problems, this is a result of the memory estimation (see above), but in general, this effect is intensified
+by the extrapolation behavior of the surrogate.</p>
+<p>We will try to address this issue in upcoming versions of <cite>YAHPO Gym</cite>.</p>
+</section>
+<section id="performance-metrics-for-rbv2-xgboost">
+<h2>Performance Metrics for rbv2_xgboost<a class="headerlink" href="#performance-metrics-for-rbv2-xgboost" title="Permalink to this heading"></a></h2>
+<p>We observed that our surrogate for the <cite>rbv2_xgboost</cite> scenarios tends to predict very good performance (e.g., <cite>acc</cite>, <cite>auc</cite>) for most <cite>instances</cite> for a large amount of hyperparameter configurations.
+While XGBoost can be considered state-of-the art on tabular data and very good performance can be expected, this might also be a result of an unaccounted ceiling effect within the surrogate.</p>
+<p>We are looking into this issue and will try to address it in upcoming versions of <cite>YAHPO Gym</cite>.</p>
 </section>
 <section id="noisy-surrogates">
 <h2>Noisy Surrogates<a class="headerlink" href="#noisy-surrogates" title="Permalink to this heading"></a></h2>
 <p><cite>YAHPO Gym</cite> allows using <em>noisy</em> surrogates, this means that surrogates will predict targets from a distribution conditional on hyperparameters.
 This internally works as follows:
-1. Given 3 neural networks f_1-f_3 that predict targets from hyperparameters, run the prediction step
-2. Sample a vector alpha of length 3, such that each alpha_i is in [0,1] and they sum to 1.
-3. The noisy prediction is given by the sum of neural network predictions weighted by the respective alpha.</p>
-<p>While this works well in theory, this was not tested thoroughly and the use of surrogates is therefore discouraged at the moment.
-Furthermore, we have not extensively tested whether all surrogates indeed correctly return noisy surrogates.
-We will improve this in a future version of <cite>YAHPO Gym</cite>.</p>
+1. Given 3 neural networks <cite>f_1</cite> - <cite>f_3</cite> that predict targets from hyperparameters, run the prediction step
+2. Sample a vector alpha of length 3, such that each <cite>alpha_i</cite> is in <cite>[0, 1]</cite> and they sum to 1
+3. The noisy prediction is given by the sum of neural network predictions weighted by the respective alpha</p>
+<p>While this works well in theory, this was not tested thoroughly and the use of noisy surrogates is therefore discouraged at the moment.
+Furthermore, we have not extensively tested whether all noisy surrogates indeed correctly return noisy predictions.
+We will improve this in upcoming versions of <cite>YAHPO Gym</cite>.</p>
 </section>
 </section>
 
