@@ -7,25 +7,7 @@
 ### What is YAHPO Gym?
 
 **YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problems to benchmark hyperparameter optimization (HPO) methods described in [our paper](https://arxiv.org/abs/2109.03670).
-
 YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a collection of benchmark instances with the same underlying hyperparameter optimization task (e.g., optimizing the hyperparameters of a neural network) on different datasets (usually taken from [OpenML](https://www.openml.org/)).
-
-**NEWS:**
-
-- We are working on integrating `yahpo_gym` with [`syne-tune`](https://github.com/awslabs/syne-tune).
-- `yahpo_gym` is now integrated into [`HPOBench`](https://github.com/automl/LCBench)'s `development` branch!
-- The [paper](https://arxiv.org/abs/2109.03670) acompanying `YAHPO Gym` was accepted at the First Conference on AutoML 2022!
-- YAHPO (Python) can now be installed via `pip install yahpo-gym`
-- YAHPO is now available in [HPOBench](https://github.com/automl/HPOBench/)
-- We are working on integrating YAHPO Gym with [syne-tune](https://github.com/awslabs/syne-tune) for asynchronous benchmarking!
-
-### Why should I use it?
-
-**YAHPO Gym** provides blazing fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
-Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks across a large variety of problems.
-Our library makes use of [ConfigSpace](https://automl.github.io/ConfigSpace/) to describe the hyperparameter space and can thus be seamlessly integrated into many existing projects (e.g. [HpBandSter](https://github.com/automl/HpBandSter)).
-
-![image](https://github.com/slds-lmu/yahpo_gym/blob/main/assets/anytime_average_rank_mf.jpg?raw=true)
 
 **Overview over benchmark instances**
 
@@ -127,4 +109,4 @@ We include a full example for optimization using **BOHB** on a YAHPO Gym instanc
 - [Code Samples](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/code_sample.ipynb)
 - [Tuning with HpBandSter on Yahpo Gym](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb)
 - [Transfer HPO](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
-- [Paper experiments](https://github.com/slds-lmu/yahpo_exps/tree/main/paper)
+- [Paper Experiments](https://github.com/slds-lmu/yahpo_exps/tree/main/paper)
