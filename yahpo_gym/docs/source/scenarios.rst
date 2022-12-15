@@ -5,7 +5,7 @@ Scenarios \& Instances
 Scenarios
 =======================
 
-The following table provides an overview over **Scenarios** included in **YAHPO Gym** and included **Instances**:
+The following table provides an overview over **Scenarios** included in `YAHPO Gym` and included **Instances**:
 
 .. csv-table:: Scenario Overview
    :file: _static/scenario_stats.csv
@@ -33,7 +33,7 @@ A list of all available scenarios can be obtained as follows:
 Instances
 =======================
 
-YAHPO Gym **instances** are evaluations of an ML algorithm (**scenario**) with a given set of hyperparameters on a specific dataset. 
+`YAHPO Gym` **instances** are evaluations of an ML algorithm (**scenario**) with a given set of hyperparameters on a specific dataset. 
 Currently, the `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
 For `rbv2_*` and `iaml_*` scenarios, the `task_id` parameter of the `ConfigSpace` corresponds to the OpenML **dataset** identifier (i.e., this is the **dataset** id and **not** the task id).
 To query meta information, use https://www.openml.org/d/<dataset_id>.

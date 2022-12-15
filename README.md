@@ -25,6 +25,8 @@ This repository contains three modules/packages:
 - `yahpo_train` (python): Module for training surrogate models used in `yahpo_gym`.
 - `yahpo_gym_r`(R): An R wrapper for `yahpo_gym`.
 
+We also maintain a list of [frequently asked questions](https://slds-lmu.github.io/yahpo_gym/frequently_asked.html).
+
 **NEWS:**
 
 - The [paper](https://arxiv.org/abs/2109.03670) accompanying `YAHPO Gym` was accepted at the 1st International Conference on Automated Machine Learning!

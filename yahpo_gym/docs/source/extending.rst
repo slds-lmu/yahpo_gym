@@ -2,7 +2,7 @@
 Extending YAHPO Gym
 ************************
 
-This document describes how to extend YAHPO Gym with new configurations and scenarios.
+This document describes how to extend `YAHPO Gym` with new configurations and scenarios.
 PR's with new problems are welcome! See below on how to add new problem sets.
 
 There are two main steps that need to be added for a new `scenario` locally.
@@ -48,7 +48,7 @@ and hyperparameters see https://github.com/slds-lmu/yahpo_data.
   Create a file `param_set.R` containing the `ParamSet`.
 
 
-Include your benchmark in `yahpo_gym`
+Include your benchmark in YAHPO Gym
 ====================================
 
 Once you have tested your benchmark, you can create a `PR` to the `yahpo_gym` and `yahpo_data` 

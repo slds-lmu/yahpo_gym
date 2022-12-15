@@ -106,7 +106,7 @@ p$optimize(ois)
 |iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
 
 The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
-Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column). 
+Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column).
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
