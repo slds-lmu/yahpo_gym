@@ -144,7 +144,7 @@ become irrelevant.</p>
 <p>While we believe that this is still a well defined multi-objective optimization problem and multi-objective quality
 indicators can still be computed (even if the resulting Pareto set contains only a single point) we want to note that
 such problems can introduce some biases, i.e., favouring optimizers that explore the extreme regions of the Pareto front.</p>
-<p>This mostly affects <cite>rbv2_*</cite> scenarios (mostly <cite>rbv2_xgboost</cite> and <cite>rbv2_ranger</cite>) and hardware metrics like <cite>memory</cite> but
+<p>This mostly affects <cite>rbv2_*</cite> scenarios (mostly <cite>rbv2_xgboost</cite> and <cite>rbv2_super</cite>) and hardware metrics like <cite>memory</cite> but
 can sometimes also be observed for <cite>iaml_*</cite> scenarios (e.g., if <cite>nf</cite> is included as an objective).</p>
 <p>For <cite>rbv2_*</cite> problems, this is a result of the memory estimation (see above), but in general, this effect is intensified
 by the extrapolation behavior of the surrogate.</p>
