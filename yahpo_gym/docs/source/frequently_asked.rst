@@ -61,7 +61,7 @@ While we believe that this is still a well defined multi-objective optimization 
 indicators can still be computed (even if the resulting Pareto set contains only a single point) we want to note that
 such problems can introduce some biases, i.e., favouring optimizers that explore the extreme regions of the Pareto front.
 
-This mostly affects `rbv2_*` scenarios (mostly `rbv2_xgboost` and `rbv2_ranger`) and hardware metrics like `memory` but
+This mostly affects `rbv2_*` scenarios (mostly `rbv2_xgboost` and `rbv2_super`) and hardware metrics like `memory` but
 can sometimes also be observed for `iaml_*` scenarios (e.g., if `nf` is included as an objective).
 
 For `rbv2_*` problems, this is a result of the memory estimation (see above), but in general, this effect is intensified
