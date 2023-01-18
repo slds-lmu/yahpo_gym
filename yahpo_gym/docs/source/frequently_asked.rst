@@ -24,6 +24,14 @@ This is, e.g. discussed in https://github.com/microsoft/onnxruntime/issues/12086
 In practice, we have not observed relevant differences between different hardware versions, but this might help to explain observations
 regarding a lack of exact reproducibility.
 
+Monotonicity in Runtime
+=======================
+
+Currently, `YAHPO Gym` surrogates do **not** enforce runtime predictions to be monotone increasing with respect to the fidelity parameter.
+This is mainly due to most of our scenarios not involving the training of neural networks (except for `nb301` and `lcbench`) and in the case of, e.g., the fidelity parameter being `trainsize`, it is not necessary meaningful to assume a monotone increasing relationship between runtime and fidelity.
+As we are using the same surrogate architecture for all scenarios, monotonicity is therefore also not enforced for the `lcbench` and `nb301` scenarios.
+We plan to incorporate surrogates that enforce a monotone increasing relationship between runtime and and the fidelity parameter for the `lcbench` and `nb301` scenarios in upcoming versions of `YAHPO Gym`.
+
 rbv2_* data source
 =======================
 
