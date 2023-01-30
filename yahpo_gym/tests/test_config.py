@@ -1,4 +1,5 @@
 import pytest
+import os
 
 def test_config():
   import yahpo_gym.configuration as cfg
@@ -30,3 +31,16 @@ def test_config():
 def test_print_cfg_table():
   from yahpo_gym.configuration import cfg
   print(cfg())
+  
+
+def test_local_config():
+  tmp_local_config_path = os.environ.get("YAHPO_LOCAL_CONFIG", None)
+  os.environ["YAHPO_LOCAL_CONFIG"] = "/tmp/yahpo_conf"
+  
+  from yahpo_gym.local_config import LocalConfiguration
+  local_config = LocalConfiguration()
+
+  assert str(local_config.settings_path) == os.environ["YAHPO_LOCAL_CONFIG"]
+
+  if tmp_local_config_path is not None:
+      os.environ["YAHPO_LOCAL_CONFIG"] = tmp_local_config_path

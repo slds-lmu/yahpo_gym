@@ -4,7 +4,7 @@ import os
 import yaml
 
 class LocalConfiguration():
-    def __init__(self, settings_path: str ="~/.config/yahpo_gym"):
+    def __init__(self, settings_path: str =None):
         """
         Interface for setting up a local configuration.
         This reads from and writes to a configuration file in the YAML format,
@@ -18,12 +18,11 @@ class LocalConfiguration():
             Path to the local configuration file.
             The default is "~/.config/yahpo_gym".
         """
-        def __init__(self, settings_path: Optional[str] =None):
-            if settings_path is None: 
-                if 'YAHPO_LOCAL_CONFIG' in os.environ:
-                    settings_path = os.environ['YAHPO_LOCAL_CONFIG']
-                else: 
-                    settings_path = "~/.config/yahpo_gym"
+        if settings_path is None: 
+            if 'YAHPO_LOCAL_CONFIG' in os.environ:
+                settings_path = os.environ['YAHPO_LOCAL_CONFIG']
+            else: 
+                settings_path = "~/.config/yahpo_gym"
         self.settings_path = Path(settings_path).expanduser().absolute()
         self._config = None
     
