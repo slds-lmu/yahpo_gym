@@ -86,6 +86,13 @@ YAHPO Train is the module for training new surrogate models.
 
 YAHPO Train is still in a preliminary state but can already be used to reproduce and refit models introduced in our [paper](https://arxiv.org/abs/2109.03670).
 
+
+#### Docker
+
+A `docker` image that allows accessing `yahpo-gym` is available from `DockerHub` at [pfistfl/yahpo](https://hub.docker.com/repository/docker/pfistfl/yahpo/general). This adds additional overhead but simplifies use and installation. 
+The corresponding Dockerfile to get you started can be found in `docker/`.
+
+
 #### Roadmap
 
 We want to add several features to **yahpo_gym** in future versions:
