@@ -11,7 +11,6 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -52,6 +51,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Frequently Asked Questions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#openml-task-id-and-dataset-id">OpenML task_id and dataset_id</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reproducibility">Reproducibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lcbench-and-epochs">lcbench and epochs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monotonicity-in-runtime">Monotonicity in Runtime</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rbv2-data-source">rbv2_* data source</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-f1-scores-for-rbv2">Using F1 scores for rbv2_*</a></li>
@@ -116,6 +116,15 @@ This is, e.g. discussed in <a class="reference external" href="https://github.co
 <p>In practice, we have not observed relevant differences between different hardware versions, but this might help to explain observations
 regarding a lack of exact reproducibility.</p>
 </section>
+<section id="lcbench-and-epochs">
+<h2>lcbench and epochs<a class="headerlink" href="#lcbench-and-epochs" title="Permalink to this heading"></a></h2>
+<p>The original LCBench data includes 52 epochs.
+The surrogates of <cite>YAHPO Gym</cite> v1.0 were trained on this data.
+Note, however, that the first epoch in the LCBench data refers to the models only being initialized (i.e., not trained).
+Usually, it is therefore best to exclude this first epoch for learning curve purposes or when doing multi-fidelity HPO.
+Moreover, the last epoch in the original LCBench data mostly contains exactly the same performance metrics as the penultimate epoch.
+Often, a sensible epoch range for the <cite>lcbench</cite> scenario in <cite>YAHPO Gym</cite> is therefore given by 2 to 51.</p>
+</section>
 <section id="monotonicity-in-runtime">
 <h2>Monotonicity in Runtime<a class="headerlink" href="#monotonicity-in-runtime" title="Permalink to this heading"></a></h2>
 <p>Currently, <cite>YAHPO Gym</cite> surrogates do <strong>not</strong> enforce runtime predictions to be monotone increasing with respect to the fidelity parameter.
@@ -141,7 +150,7 @@ The information on which <cite>id</cite> corresponds to a multiclass dataset can
 This estimates the <cite>maximum resident size</cite>.
 In general, we assume that this provides a coarse estimation of the processes memory consumption.
 However, it does not seem to work if the goal, is to, e.g., measure memory consumption across <em>learning curves</em>.
-In this setting, we often observe constant memory consumption across a full learning curve.
+In this setting, we often observe constant memory consumption across a full learning curve and also very low memory estimates close to <cite>0</cite>.
 We therefore discourage using memory metrics in this setting.
 In addition, memory estimation was not always logged properly resulting in memory consumption imputed with <cite>0</cite>, which might lead to problems on some instances.</p>
 </section>
