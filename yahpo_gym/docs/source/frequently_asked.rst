@@ -24,6 +24,16 @@ This is, e.g. discussed in https://github.com/microsoft/onnxruntime/issues/12086
 In practice, we have not observed relevant differences between different hardware versions, but this might help to explain observations
 regarding a lack of exact reproducibility.
 
+lcbench and epochs
+==================
+
+The original LCBench data includes 52 epochs.
+The surrogates of `YAHPO Gym` v1.0 were trained on this data.
+Note, however, that the first epoch in the LCBench data refers to the models only being initialized (i.e., not trained).
+Usually, it is therefore best to exclude this first epoch for learning curve purposes or when doing multi-fidelity HPO.
+Moreover, the last epoch in the original LCBench data mostly contains exactly the same performance metrics as the penultimate epoch.
+Often, a sensible epoch range for the `lcbench` scenario in `YAHPO Gym` is therefore given by 2 to 51.
+
 Monotonicity in Runtime
 =======================
 
@@ -53,7 +63,7 @@ For the `rbv2_*` settings, memory consumption was estimated by observing the mem
 This estimates the `maximum resident size`.
 In general, we assume that this provides a coarse estimation of the processes memory consumption.
 However, it does not seem to work if the goal, is to, e.g., measure memory consumption across *learning curves*. 
-In this setting, we often observe constant memory consumption across a full learning curve. 
+In this setting, we often observe constant memory consumption across a full learning curve and also very low memory estimates close to `0`. 
 We therefore discourage using memory metrics in this setting.
 In addition, memory estimation was not always logged properly resulting in memory consumption imputed with `0`, which might lead to problems on some instances.
 
