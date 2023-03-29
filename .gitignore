@@ -139,3 +139,4 @@ notes
 *.toml
 
 experiments/
+.idea
