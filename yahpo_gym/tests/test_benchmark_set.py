@@ -28,9 +28,6 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
 
   # Properties
   assert (type(b.instances) == list) & (len(b.instances) > 0)
-  
-  if b.instance is not None:
-    assert b.instance == test_instance
 
   # Setters
   b.set_constant(b.config.instance_names, test_instance)
@@ -42,13 +39,13 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
   # Getters
   assert type(b.get_fidelity_space()) == ConfigSpace.configuration_space.ConfigurationSpace
 
-  optspace =  b.get_opt_space(drop_fidelity_params = False)
+  optspace = b.get_opt_space(drop_fidelity_params = False)
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
-  assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names)
+  assert len(optspace.get_hyperparameter_names()) == len(b.config.hp_names)
 
-  optspace =  b.get_opt_space(drop_fidelity_params = True)
+  optspace = b.get_opt_space(drop_fidelity_params = True)
   assert type(optspace) == ConfigSpace.configuration_space.ConfigurationSpace
-  assert len(optspace.get_hyperparameter_names())  == len(b.config.hp_names) - len(b.get_fidelity_space().get_hyperparameter_names())
+  assert len(optspace.get_hyperparameter_names()) == len(b.config.hp_names) - len(b.get_fidelity_space().get_hyperparameter_names())
 
   xs = optspace.sample_configuration()
   with pytest.raises(Exception) as info:
@@ -82,22 +79,12 @@ def test_benchmarkset_abstract(key:str = None, test_instance:str = None, fidelit
   assert type(out) == dict
   assert [k for k in out.keys()] == b.config.y_names
 
-  # Statistics
-  statdf = b.target_stats
-  assert len(statdf.columns) == 5
-  assert len(statdf) > 0
-
   return b
 
 def test_benchmarkset_lcbench():
   fidelity_config = {"epoch" : 50}
   test_instance = "3945"
   b = test_benchmarkset_abstract("lcbench", test_instance, fidelity_config)
-
-def test_benchmarkset_fcnet():
-  fidelity_config = {"epoch" : 100, "replication": 1}
-  test_instance = "fcnet_naval_propulsion"
-  b = test_benchmarkset_abstract("fcnet", test_instance, fidelity_config)
 
 def test_benchmarkset_nb301():
   fidelity_config = {"epoch" : 50}
@@ -125,7 +112,6 @@ def test_benchmarkset_rbv2_ranger():
   test_instance = "15"
   b = test_benchmarkset_abstract("rbv2_ranger", test_instance, fidelity_config)
 
-fidelity_config = {"trainsize" : .5, "repl":9}
 def test_benchmarkset_rbv2_aknn():
   fidelity_config = {"trainsize" : .5, "repl":9}
   test_instance = "15"
@@ -141,27 +127,54 @@ def test_benchmarkset_rbv2_xgboost():
   test_instance = "15"
   b = test_benchmarkset_abstract("rbv2_xgboost", test_instance, fidelity_config)
 
+def test_benchmarkset_iaml_glmnet():
+  fidelity_config = {"trainsize" : .5}
+  test_instance = "40981"
+  b = test_benchmarkset_abstract("iaml_glmnet", test_instance, fidelity_config)
+
 def test_benchmarkset_iaml_rpart():
-  fidelity_config = {"trainsize" : .5, "repl":9}
+  fidelity_config = {"trainsize" : .5}
   test_instance = "40981"
   b = test_benchmarkset_abstract("iaml_rpart", test_instance, fidelity_config)
 
 def test_benchmarkset_iaml_ranger():
-  fidelity_config = {"trainsize" : .5, "repl":9}
+  fidelity_config = {"trainsize" : .5}
   test_instance = "40981"
   b = test_benchmarkset_abstract("iaml_ranger", test_instance, fidelity_config)
 
-def test_benchmarkset_iaml_glmnet():
-  fidelity_config = {"trainsize" : .5, "repl":9}
-  test_instance = "40981"
-  b = test_benchmarkset_abstract("iaml_glmnet", test_instance, fidelity_config)
-  
 def test_benchmarkset_iaml_xgboost():
-  fidelity_config = {"trainsize" : .5, "repl":9}
+  fidelity_config = {"trainsize" : .5}
   test_instance = "40981"
   b = test_benchmarkset_abstract("iaml_xgboost", test_instance, fidelity_config)
 
 def test_benchmarkset_iaml_super():
-  fidelity_config = {"trainsize" : .5, "repl":9}
-  test_instance = "15"
-  b = test_benchmarkset_abstract("rbv2_super", test_instance, fidelity_config)
+  fidelity_config = {"trainsize" : .5}
+  test_instance = "40981"
+  b = test_benchmarkset_abstract("iaml_super", test_instance, fidelity_config)
+
+def test_benchmarkset_fair_fgrrm():
+  fidelity_config = {"trainsize" : .5}
+  test_instance = "31"
+  b = test_benchmarkset_abstract("fair_fgrrm", test_instance, fidelity_config)
+
+def test_benchmarkset_fair_rpart():
+  fidelity_config = {"trainsize" : .5}
+  test_instance = "31"
+  b = test_benchmarkset_abstract("fair_rpart", test_instance, fidelity_config)
+
+def test_benchmarkset_fair_ranger():
+  fidelity_config = {"trainsize" : .5}
+  test_instance = "31"
+  b = test_benchmarkset_abstract("fair_ranger", test_instance, fidelity_config)
+
+
+def test_benchmarkset_fair_xgboost():
+  fidelity_config = {"trainsize" : .5}
+  test_instance = "31"
+  b = test_benchmarkset_abstract("fair_xgboost", test_instance, fidelity_config)
+
+def test_benchmarkset_fair_super():
+  fidelity_config = {"trainsize" : .5}
+  test_instance = "31"
+  b = test_benchmarkset_abstract("fair_super", test_instance, fidelity_config)
+

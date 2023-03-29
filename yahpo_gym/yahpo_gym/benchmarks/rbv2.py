@@ -67,7 +67,7 @@ _rbv2_aknn.update({
 config_dict.update({'rbv2_aknn' : _rbv2_aknn})
 
 
-# Superset Model Multiplexer for SVM, RF, DT, XGB  #FIXME: UNFINISHED
+# Superset Model Multiplexer
 _rbv2_super = _rbv2_dict.copy()
 _rbv2_super.update({
     'config_id' : 'rbv2_super',
