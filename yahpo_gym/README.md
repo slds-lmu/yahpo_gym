@@ -45,7 +45,7 @@ To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [Config
 
 You can download these [here (Github)](https://github.com/slds-lmu/yahpo_data) or [here (Syncshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
-You should pertain the folder structure as on the hosting site (i.e., create a `"path-to-data"` directory, for example named `"multifidelity_data"`, containing the individual, e.g., `"lcench"`, directories).
+You should pertain the folder structure as on the hosting site (i.e., create a `"path-to-data"` directory, for example named `"multifidelity_data"`, containing the individual, e.g., `"lcbench"`, directories).
 
 ```py
 # Initialize the local config & set path for surrogates and metadata
