@@ -52,11 +52,10 @@ def dl_from_config(config, bs=1024, skipinitialspace=True, save_df_test=True, sa
 def _get_idx(df, config, frac=.2, rng_seed=10):
     """
     Include or exclude blocks of hyperparameters with differing fidelity
-    The goal here is to not sample from the dataframe randomly, but instead either keep a hyperparameter group
-    or drop it. 
+    The goal here is to not sample from the dataframe randomly, but instead either keep a hyperparameter group or drop it.
     (By group I mean one config trained e.g. at epochs 1, ..., 50 )..
     """
-    # All hyperpars excluding fidelity params
+    # All hyperparameters excluding fidelity params
     hpars = config.cont_names+config.cat_names
     [hpars.remove(fp) for fp in config.fidelity_params]
 
@@ -123,9 +122,9 @@ class SurrogateTabularLearner(Learner):
 if __name__ == '__main__':
     import torch.nn as nn
     from yahpo_gym.configuration import cfg
-    from yahpo_gym.benchmarks import fcnet
-    from yahpo_train.models import FFSurrogateModel, ResNet
-    cfg = cfg("fcnet")
+    from yahpo_gym.benchmarks import lcbench
+    from yahpo_train.models import ResNet
+    cfg = cfg("lcbench")
     dls = dl_from_config(cfg)
 
     print('Resnet:')
@@ -134,10 +133,3 @@ if __name__ == '__main__':
     l.add_cb(MixHandler)
     l.fit_one_cycle(5, 1e-4)
     l.export_onnx(cfg, 'cuda:0', suffix='resnet')
-
-    # print('Feed Forward:')
-    # f = FFSurrogateModel(dls, layers=[512,512], deeper = [], lin_first=False)
-    # l = SurrogateTabularLearner(dls, f, loss_func=nn.MSELoss(reduction='mean'), metrics=nn.MSELoss)
-    # l.add_cb(MixHandler)
-    # l.fit_one_cycle(5, 1e-4)
-    # l.export_onnx(cfg, 'cuda:0', suffix='ff')

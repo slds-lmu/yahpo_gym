@@ -89,60 +89,6 @@ class AbstractSurrogate(nn.Module):
 
 
 
-class FFSurrogateModel(AbstractSurrogate):
-    def __init__(self, dls, layers = [400, 400], deeper = [400, 400, 400], wide = True, use_bn = False, ps=0.1, act_cls=nn.SELU(inplace=True), final_act = nn.Sigmoid(), lin_first=False, embds_dbl=None, embds_tgt=None, emb_szs=None) -> None:
-        super().__init__()
-        self._build_embeddings(dls=dls, embds_dbl=embds_dbl, embds_tgt=embds_tgt, emb_szs=emb_szs)
-
-        if not (len(layers) | len(deeper) | wide):
-            raise Exception("One of layers, deeper or wide has to be set!")
-
-        self.sizes = [self.n_inputs] + layers + [dls.ys.shape[1]]
-        self.deep, self.deeper, self.wide = nn.Sequential(), nn.Sequential(), nn.Sequential()
-    
-        # Deep Part
-        if len(layers):
-            ps1 = [ps for i in layers]
-            self.sizes = [self.n_emb + self.n_cont] + layers + [dls.ys.shape[1]]
-            actns = [act_cls for _ in range(len(self.sizes)-2)] + [None]
-            _layers_deep = [LinBnDrop(self.sizes[i], self.sizes[i+1], bn=use_bn and i!=len(actns)-1, p=p, act=a, lin_first=lin_first)
-                        for i,(p,a) in enumerate(zip(ps1+[0.],actns))]
-            self.deep = nn.Sequential(*_layers_deep)
-
-        # Deeper part
-        if len(deeper):
-            ps2 = [ps for i in deeper]
-            self.deeper_sizes = [self.n_emb + self.n_cont] + deeper + [dls.ys.shape[1]]
-            deeper_actns = [act_cls for _ in range(len(deeper))] + [None]
-            _layers_deeper = [LinBnDrop(self.deeper_sizes[i], self.deeper_sizes[i+1], bn=use_bn and i!=len(deeper_actns)-1, p=p, act=a, lin_first=lin_first) for i,(p,a) in enumerate(zip(ps2+[0.],deeper_actns))]
-            self.deeper = nn.Sequential(*_layers_deeper)
-
-        if wide:
-            self.wide = nn.Sequential(nn.Linear(self.sizes[0], self.sizes[-1]))
-
-        self.final_act = final_act
-        
-    def forward(self, x_cat, x_cont=None, invert_ytrafo=True):
-
-        x = self._embed_features(x_cat, x_cont)
-
-        xs = torch.zeros(x.shape[0], self.sizes[-1], device = x.device)
-        if len(self.wide):
-            xs = xs.add(self.wide(x))
-        if len(self.deep):
-            xs = xs.add(self.deep(x))
-        if len(self.deeper):
-            xs = xs.add(self.deeper(x))
-
-        y = self.final_act(xs)
-        if invert_ytrafo:
-            return self.inv_trafo_ys(y)
-        else:
-            return y
-            
-
-
-
 ### ResNet
 class ResNet(AbstractSurrogate):
     def __init__(self, dls, embds_dbl=None, embds_tgt=None, emb_szs=None, d: int = 256, d_hidden_factor: float =2,
