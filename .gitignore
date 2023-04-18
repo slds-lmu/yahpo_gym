@@ -139,3 +139,6 @@ notes
 *.toml
 
 experiments/
+
+.idea/
+yahpo_train/.idea/
