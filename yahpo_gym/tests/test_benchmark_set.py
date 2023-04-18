@@ -178,5 +178,5 @@ def test_benchmarkset_iaml_xgboost():
 
 def test_benchmarkset_iaml_super():
     fidelity_config = {"trainsize": 0.5}
-    test_instance = "15"
-    b = test_benchmarkset_abstract("rbv2_super", test_instance, fidelity_config)
+    test_instance = "40981"
+    b = test_benchmarkset_abstract("iaml_super", test_instance, fidelity_config)
