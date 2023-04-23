@@ -11,27 +11,37 @@ YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a coll
 
 **Overview over benchmark instances**
 
-|Scenario    |Search Space    |# Instances|Target Metrics                       |Fidelity| H|
-|:-----------|---------------:|----------:|------------------------------------:|:-------|:-|
-|rbv2_super  |38D: Mixed      |        103| 9: perf(6) + rt(2) + mem            |fraction| ✓|
-|rbv2_svm    | 6D: Mixed      |        106| 9: perf(6) + rt(2) + mem            |fraction| ✓|
-|rbv2_rpart  | 5D: Mixed      |        117| 9: perf(6) + rt(2) + mem            |fraction|  |
-|rbv2_aknn   | 6D: Mixed      |        118| 9: perf(6) + rt(2) + mem            |fraction|  |
-|rbv2_glmnet | 3D: Mixed      |        115| 9: perf(6) + rt(2) + mem            |fraction|  |
-|rbv2_ranger | 8D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
-|rbv2_xgboost|14D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|
-|nb301       |34D: Categorical|          1| 2: perf(1) + rt(1)                  |epoch   | ✓|
-|lcbench     | 7D: Numeric    |         34| 6: perf(5) + rt(1)                  |epoch   |  |
-|iaml_super  |28D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
-|iaml_rpart  | 4D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
-|iaml_glmnet | 2D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |
-|iaml_ranger | 8D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
-|iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|
+|Scenario    |Search Space    |# Instances|Target Metrics                       |Fidelity| H|     Source|
+|:-----------|---------------:|----------:|------------------------------------:|:-------|-:|----------:|
+|rbv2_super  |38D: Mixed      |        103| 9: perf(6) + rt(2) + mem            |fraction| ✓|        [1]|
+|rbv2_svm    | 6D: Mixed      |        106| 9: perf(6) + rt(2) + mem            |fraction| ✓|        [1]|
+|rbv2_rpart  | 5D: Mixed      |        117| 9: perf(6) + rt(2) + mem            |fraction|  |        [1]|
+|rbv2_aknn   | 6D: Mixed      |        118| 9: perf(6) + rt(2) + mem            |fraction|  |        [1]|
+|rbv2_glmnet | 3D: Mixed      |        115| 9: perf(6) + rt(2) + mem            |fraction|  |        [1]|
+|rbv2_ranger | 8D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|        [1]|
+|rbv2_xgboost|14D: Mixed      |        119| 9: perf(6) + rt(2) + mem            |fraction| ✓|        [1]|
+|nb301       |34D: Categorical|          1| 2: perf(1) + rt(1)                  |epoch   | ✓|   [2], [3]|
+|lcbench     | 7D: Numeric    |         34| 6: perf(5) + rt(1)                  |epoch   |  |   [4], [5]|
+|iaml_super  |28D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|        [6]|
+|iaml_rpart  | 4D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |        [6]|
+|iaml_glmnet | 2D: Numeric    |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction|  |        [6]|
+|iaml_ranger | 8D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|        [6]|
+|iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|        [6]|
 
+The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
 Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column).
 
-The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
+Original data sources are given by:
+
+- [1] Binder M., Pfisterer F. & Bischl B. (2020). Collecting Empirical Data About Hyperparameters for Data Driven AutoML. 7th ICML Workshop on Automated Machine Learning.
+- [2] Siems, J., Zimmer, L., Zela, A., Lukasik, J., Keuper, M., & Hutter, F. (2020). NAS-Bench-301 and the Case for Surrogate Benchmarks for Neural Architecture Search. arXiv preprint arXiv:2008.09777, 11.
+- [3] Zimmer, L. (2020). nasbench301_full_data. figshare. Dataset. https://doi.org/10.6084/m9.figshare.13286105.v1, Apache License, Version 2.0.
+- [4] Zimmer, L., Lindauer, M., & Hutter, F. (2021). Auto-Pytorch: Multi-Fidelity Metalearning for Efficient and Robust AutoDL. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(9), 3079-3090.
+- [5] Zimmer, L. (2020). data_2k_lw.zip. figshare. Dataset. https://doi.org/10.6084/m9.figshare.11662422.v1, Apache License, Version 2.0.
+- [6] None, simply cite Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.
+
+**Please make sure to always also cite the original data sources as YAHPO Gym would not have been possible without them!**
 
 ### Installation
 
@@ -98,7 +108,6 @@ To query meta information, use https://www.openml.org/d/<dataset_id>.
 For the `lcbench` scenario, the `OpenML_task_id` parameter of the `ConfigSpace` directly corresponds to OpenML **tasks** identifier (i.e., this is the **task** id and **not** the dataset id).
 To query meta information, use https://www.openml.org/t/<task_id>.
 
-
 ### Example: Tuning an instance using HPBandSter
 
 We include a full example for optimization using **BOHB** on a YAHPO Gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
@@ -110,3 +119,24 @@ We include a full example for optimization using **BOHB** on a YAHPO Gym instanc
 - [Tuning with HpBandSter on Yahpo Gym](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb)
 - [Transfer HPO](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
 - [Paper Experiments](https://github.com/slds-lmu/yahpo_exps/tree/main/paper)
+
+### Citation
+
+If you use YAHPO Gym, please cite the following paper:
+
+- Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.
+
+Moreover, certain `scenarios` built upon previous work, e.g., the `lcbench` scenario uses data from:
+
+- Zimmer, L., Lindauer, M., & Hutter, F. (2021). Auto-Pytorch: Multi-Fidelity Metalearning for Efficient and Robust AutoDL. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(9), 3079-3090.
+- Zimmer, L. (2020). data_2k_lw.zip. figshare. Dataset. https://doi.org/10.6084/m9.figshare.11662422.v1, Apache License, Version 2.0.
+
+**Please make sure to always also cite the original data sources as YAHPO Gym would not have been possible without them!**
+
+Original data sources of a scenario that should also be cited are provided via the `"citation"` key within the `config` dictionary of a scenario, e.g.:
+
+```py
+from yahpo_gym.configuration import cfg
+lcbench = cfg("lcbench")
+lcbench.config.get("citation")
+```
