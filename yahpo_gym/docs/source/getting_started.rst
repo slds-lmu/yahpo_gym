@@ -16,7 +16,7 @@ Installation (Python)
 Setup
 =======================
 
-To run a benchmark you need to obatin the ONNX model (`model.onnx`), `ConfigSpace <https://automl.github.io/ConfigSpace>`_ (`config_space.json`) and some encoding info (`encoding.json`).
+To run a benchmark you need to obtain the ONNX model (`model.onnx`), `ConfigSpace <https://automl.github.io/ConfigSpace>`_ (`config_space.json`) and some encoding info (`encoding.json`).
 
 You can download all files for all scenarios in a single folder `here (Github) <https://github.com/slds-lmu/yahpo_data>`_.
 
