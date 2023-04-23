@@ -61,6 +61,7 @@ across a large variety of problems.
 |iaml_ranger | 8D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|        [6]|
 |iaml_xgboost|13D: Mixed      |          4|12: perf(4) + inp(3) + rt(2) + mem(3)|fraction| ✓|        [6]|
 
+The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
 Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column).
 
@@ -74,7 +75,6 @@ Original data sources are given by:
 - [6] None, simply cite Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.
 
 **Please make sure to always also cite the original data sources as YAHPO Gym would not have been possible without them!**
-The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 
 ### What does this repository contain?
 
