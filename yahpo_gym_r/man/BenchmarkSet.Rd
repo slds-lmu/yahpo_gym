@@ -177,7 +177,7 @@ Get the objective function
   logging = FALSE,
   multithread = FALSE,
   seed = NULL,
-  check_codomain = NULL
+  check_codomain = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -189,7 +189,7 @@ A valid instance. See `instances`.}
 
 \item{\code{multifidelity}}{(`logical`) \cr
 Should the objective function respect multifidelity?
-If `FALSE`, fidelity params are set as constants with their max fidelity in the domain.}
+If `FALSE`, fidelity parameters are set as constants with their max fidelity in the domain.}
 
 \item{\code{check_values}}{(`logical`) \cr
 Should values be checked by bbotk? Initialized to `TRUE`.}
@@ -198,7 +198,7 @@ Should values be checked by bbotk? Initialized to `TRUE`.}
 Should function evaluation simulate runtime? Initialized to `FALSE`.}
 
 \item{\code{logging}}{(`logical`) \cr
-Should function evaluationd be logged? Initialized to `FALSE`.}
+Should function evaluation be logged? Initialized to `FALSE`.}
 
 \item{\code{multithread}}{`logical` \cr
 Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.}
