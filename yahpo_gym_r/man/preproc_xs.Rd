@@ -7,11 +7,11 @@
 preproc_xs(xss, ...)
 }
 \arguments{
-\item{...}{`any` \cr
-Named params, appended to `xs`.}
-
-\item{xs}{`list` of `list` \cr
+\item{xss}{`list` of `list` \cr
 List of hyperparams}
+
+\item{...}{`any` \cr
+Named params, appended to `xss`.}
 }
 \description{
 Preprocess r object for use with python's YAHPO Gym

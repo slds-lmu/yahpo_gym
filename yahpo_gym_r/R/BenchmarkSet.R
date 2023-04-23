@@ -105,13 +105,13 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'   A valid instance. See `instances`.
     #' @param multifidelity (`logical`) \cr
     #'   Should the objective function respect multifidelity?
-    #'   If `FALSE`, fidelity params are set as constants with their max fidelity in the domain.
+    #'   If `FALSE`, fidelity parameters are set as constants with their max fidelity in the domain.
     #' @param check_values (`logical`) \cr
     #'   Should values be checked by bbotk? Initialized to `TRUE`.
     #' @param timed (`logical`) \cr
     #'   Should function evaluation simulate runtime? Initialized to `FALSE`.
     #' @param logging (`logical`) \cr
-    #'   Should function evaluationd be logged? Initialized to `FALSE`.
+    #'   Should function evaluation be logged? Initialized to `FALSE`.
     #' @param multithread `logical` \cr
     #'   Should the ONNX session be allowed to leverage multithreading capabilities? Default `FALSE`.
     #' @param seed `integer` \cr
@@ -121,7 +121,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @return
     #'  A [`Objective`][bbotk::Objective] containing "domain", "codomain" and a
     #'  functionality to evaluate the surrogates.
-    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = NULL, check_codomain = NULL) {
+    get_objective = function(instance, multifidelity = TRUE, check_values = TRUE, timed = FALSE, logging = FALSE, multithread = FALSE, seed = NULL, check_codomain = FALSE) {
       assert_choice(instance, self$instances)
       assert_flag(check_values)
       assert_int(seed, null.ok = TRUE)

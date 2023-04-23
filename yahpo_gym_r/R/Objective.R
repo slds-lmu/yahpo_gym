@@ -110,7 +110,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
 
 
   active = list(
-    #' @field py_instance (`yahpogym.BenchmarkInstnace`)\cr
+    #' @field py_instance (`yahpogym.BenchmarkInstance`)\cr
     #' Python object.
     py_instance = function() {
       if (is.null(private$.py_instance) | is0x0ptr(private$.py_instance)) {
@@ -133,10 +133,10 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
 )
 
 #' @title Preprocess r object for use with python's YAHPO Gym
-#' @param xs `list` of `list` \cr
+#' @param xss `list` of `list` \cr
 #'   List of hyperparams
 #' @param ... `any` \cr
-#'   Named params, appended to `xs`.
+#'   Named params, appended to `xss`.
 #' @export
 preproc_xs = function(xss, ...) {
   csts = list(...)
