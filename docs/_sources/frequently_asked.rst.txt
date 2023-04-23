@@ -3,6 +3,18 @@ Frequently Asked Questions
 
 In the following, we maintain a list of frequently asked questions.
 
+Citation
+=======================
+
+If you use YAHPO Gym, please cite the following paper:
+
+* Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.
+
+Moreover, certain `scenarios` built upon previous work, e.g., the `lcbench` scenario uses data from:
+
+* Zimmer, L., Lindauer, M., & Hutter, F. (2021). Auto-Pytorch: Multi-Fidelity Metalearning for Efficient and Robust AutoDL. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(9), 3079-3090.
+
+* Zimmer, L. (2020). data_2k_lw.zip. figshare. Dataset. https://doi.org/10.6084/m9.figshare.11662422.v1, Apache License, Version 2.0.
 
 OpenML task_id and dataset_id
 =======================
@@ -41,13 +53,6 @@ Currently, `YAHPO Gym` surrogates do **not** enforce runtime predictions to be m
 This is mainly due to most of our scenarios not involving the training of neural networks (except for `nb301` and `lcbench`) and in the case of, e.g., the fidelity parameter being `trainsize`, it is not necessary meaningful to assume a monotone increasing relationship between runtime and fidelity.
 As we are using the same surrogate architecture for all scenarios, monotonicity is therefore also not enforced for the `lcbench` and `nb301` scenarios.
 We plan to incorporate surrogates that enforce a monotone increasing relationship between runtime and and the fidelity parameter for the `lcbench` and `nb301` scenarios in upcoming versions of `YAHPO Gym`.
-
-rbv2_* data source
-=======================
-
-The `rbv2_*` data and data collection method is described in Binder et al., 2020 Collecting Empirical Data about Hyperparameters <https://www.automl.org/wp-content/uploads/2020/07/AutoML_2020_paper_63.pdf>.
-Benchmarks with the `iaml_*` prefix are largely based on the same methodology. 
-Additional details for all benchmarks can be found in the `YAHPO Gym` paper's supplementary material.
 
 Using F1 scores for rbv2_*
 =======================

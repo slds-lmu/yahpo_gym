@@ -23,7 +23,7 @@ For other questions, see the *frequently asked questions* section.
 
 **Why should I use it?**
 
-`YAHPO Gym` provides blazingly fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
+`YAHPO Gym` provides blazing fast and simple access to a variety of interesting benchmark problems for hyperparameter optimization.
 Since all our benchmarks are based on surrogate models that approximate the underlying HPO problems with very high fidelity, function evaluations are fast and memory friendly allowing for fast benchmarks across a large variety of problems.
 Our library makes use of ConfigSpace(https://automl.github.io/ConfigSpace/) to describe the hyperparameter space to optimize and can thus be seamlessly integrated into many existing projects e.g. HpBandSter(https://github.com/automl/HpBandSter).
 
@@ -65,7 +65,7 @@ Examples
 
    examples
 
-Extending YAHO Gym
+Extending YAHPO Gym
 ***********************
 .. toctree::
    :maxdepth: 1

@@ -102,6 +102,7 @@
 <th class="head"><p>Target Metrics</p></th>
 <th class="head"><p>Fidelity</p></th>
 <th class="head"><p>H</p></th>
+<th class="head"><p>Source</p></th>
 </tr>
 </thead>
 <tbody>
@@ -111,6 +112,7 @@
 <td><p>9: perf(6) + rt(2) + mem</p></td>
 <td><p>fraction</p></td>
 <td><p>✓</p></td>
+<td><p>[1]</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>rbv2_svm</p></th>
 <td><p>6D: Mixed</p></td>
@@ -118,6 +120,7 @@
 <td><p>9: perf(6) + rt(2) + mem</p></td>
 <td><p>fraction</p></td>
 <td><p>✓</p></td>
+<td><p>[1]</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>rbv2_rpart</p></th>
 <td><p>5D: Mixed</p></td>
@@ -125,6 +128,7 @@
 <td><p>9: perf(6) + rt(2) + mem</p></td>
 <td><p>fraction</p></td>
 <td></td>
+<td><p>[1]</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>rbv2_aknn</p></th>
 <td><p>6D: Mixed</p></td>
@@ -132,6 +136,7 @@
 <td><p>9: perf(6) + rt(2) + mem</p></td>
 <td><p>fraction</p></td>
 <td></td>
+<td><p>[1]</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>rbv2_glmnet</p></th>
 <td><p>3D: Mixed</p></td>
@@ -139,6 +144,7 @@
 <td><p>9: perf(6) + rt(2) + mem</p></td>
 <td><p>fraction</p></td>
 <td></td>
+<td><p>[1]</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>rbv2_ranger</p></th>
 <td><p>8D: Mixed</p></td>
@@ -146,6 +152,7 @@
 <td><p>9: perf(6) + rt(2) + mem</p></td>
 <td><p>fraction</p></td>
 <td><p>✓</p></td>
+<td><p>[1]</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>rbv2_xgboost</p></th>
 <td><p>14D: Mixed</p></td>
@@ -153,6 +160,7 @@
 <td><p>9: perf(6) + rt(2) + mem</p></td>
 <td><p>fraction</p></td>
 <td><p>✓</p></td>
+<td><p>[1]</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>nb301</p></th>
 <td><p>34D: Categorical</p></td>
@@ -160,6 +168,7 @@
 <td><p>2: perf(1) + rt(1)</p></td>
 <td><p>epoch</p></td>
 <td><p>✓</p></td>
+<td><p>[2], [3]</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>lcbench</p></th>
 <td><p>7D: Numeric</p></td>
@@ -167,6 +176,7 @@
 <td><p>6: perf(5) + rt(1)</p></td>
 <td><p>epoch</p></td>
 <td></td>
+<td><p>[4], [5]</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>iaml_super</p></th>
 <td><p>28D: Mixed</p></td>
@@ -174,6 +184,7 @@
 <td><p>12: perf(4) + inp(3) + rt(2) + mem(3)</p></td>
 <td><p>fraction</p></td>
 <td><p>✓</p></td>
+<td><p>[6]</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>iaml_rpart</p></th>
 <td><p>4D: Numeric</p></td>
@@ -181,6 +192,7 @@
 <td><p>12: perf(4) + inp(3) + rt(2) + mem(3)</p></td>
 <td><p>fraction</p></td>
 <td></td>
+<td><p>[6]</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>iaml_glmnet</p></th>
 <td><p>2D: Numeric</p></td>
@@ -188,6 +200,7 @@
 <td><p>12: perf(4) + inp(3) + rt(2) + mem(3)</p></td>
 <td><p>fraction</p></td>
 <td></td>
+<td><p>[6]</p></td>
 </tr>
 <tr class="row-even"><th class="stub"><p>iaml_ranger</p></th>
 <td><p>8D: Mixed</p></td>
@@ -195,6 +208,7 @@
 <td><p>12: perf(4) + inp(3) + rt(2) + mem(3)</p></td>
 <td><p>fraction</p></td>
 <td><p>✓</p></td>
+<td><p>[6]</p></td>
 </tr>
 <tr class="row-odd"><th class="stub"><p>iaml_xgboost</p></th>
 <td><p>13D: Mixed</p></td>
@@ -202,6 +216,7 @@
 <td><p>12: perf(4) + inp(3) + rt(2) + mem(3)</p></td>
 <td><p>fraction</p></td>
 <td><p>✓</p></td>
+<td><p>[6]</p></td>
 </tr>
 </tbody>
 </table>
@@ -214,6 +229,16 @@
 <li><p>H = Hierarchical search space</p></li>
 </ul>
 <p>Note that the fidelity parameter is not included in the search space dimensionality.</p>
+<p>Original data sources are given by:</p>
+<ul class="simple">
+<li><p>[1] Binder M., Pfisterer F. &amp; Bischl B. (2020). Collecting Empirical Data About Hyperparameters for Data Driven AutoML. 7th ICML Workshop on Automated Machine Learning.</p></li>
+<li><p>[2] Siems, J., Zimmer, L., Zela, A., Lukasik, J., Keuper, M., &amp; Hutter, F. (2020). NAS-Bench-301 and the Case for Surrogate Benchmarks for Neural Architecture Search. arXiv preprint arXiv:2008.09777, 11.</p></li>
+<li><p>[3] Zimmer, L. (2020). nasbench301_full_data. figshare. Dataset. <a class="reference external" href="https://doi.org/10.6084/m9.figshare.13286105.v1">https://doi.org/10.6084/m9.figshare.13286105.v1</a>, Apache License, Version 2.0.</p></li>
+<li><p>[4] Zimmer, L., Lindauer, M., &amp; Hutter, F. (2021). Auto-Pytorch: Multi-Fidelity Metalearning for Efficient and Robust AutoDL. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(9), 3079-3090.</p></li>
+<li><p>[5] Zimmer, L. (2020). data_2k_lw.zip. figshare. Dataset. <a class="reference external" href="https://doi.org/10.6084/m9.figshare.11662422.v1">https://doi.org/10.6084/m9.figshare.11662422.v1</a>, Apache License, Version 2.0.</p></li>
+<li><p>[6] None, simply cite Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., &amp; Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.</p></li>
+</ul>
+<p>Please make sure to always also cite the original data sources as YAHPO Gym would not have been possible without them!</p>
 <p>In <cite>yahpo_gym</cite>, there is a <cite>Configuration</cite> object for each <strong>scenario</strong>.</p>
 <p>A list of all available scenarios can be obtained as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">yahpo_gym.configuration</span> <span class="kn">import</span> <span class="n">cfg</span>
