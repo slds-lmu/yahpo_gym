@@ -27,7 +27,12 @@ setup(name='yahpo_train',
       include_package_data=True,
       install_requires=[
           'torch>=1.0.0',
+          'numpy',
+          'pandas',
+          'scipy',
+          'scikit-learn',
           'fastai',
+          'optuna',
           'yahpo_gym @ git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym'
       ],
       keywords=['module', 'train', 'yahpo'],
