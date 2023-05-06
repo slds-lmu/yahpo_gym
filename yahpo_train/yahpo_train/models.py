@@ -15,9 +15,13 @@ class AbstractSurrogate(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def _build_embeddings(self, dls, embds_dbl=None, embds_tgt=None, emb_szs=None):
+    def _build_embeddings(
+        self, dls, embds_dbl=None, embds_tgt=None, emb_szs=None, instance_names=None
+    ):
         self._build_embeddings_xcont(dls=dls, embds_dbl=embds_dbl)
-        self._build_embeddings_y(dls=dls, embds_tgt=embds_tgt)
+        self._build_embeddings_y(
+            dls=dls, embds_tgt=embds_tgt, instance_names=instance_names
+        )
         self._build_embeddings_xcat(dls=dls, emb_szs=emb_szs)
         self.n_inputs = self.n_emb + self.n_cont
 
@@ -38,27 +42,51 @@ class AbstractSurrogate(nn.Module):
             )
         self.n_cont = len(dls.cont_names)
 
-    def _build_embeddings_y(self, dls, embds_tgt=None):
+    def _build_embeddings_y(self, dls, embds_tgt=None, instance_names=None):
         if embds_tgt is not None:
-            self.embds_tgt = nn.ModuleList(
-                [
-                    f(torch.from_numpy(cont[1].values).float())
-                    for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
-                ]
-            )
+            if instance_names is not None:
+                self.embds_tgt = nn.ModuleList(
+                    [
+                        f(
+                            torch.from_numpy(cont[1].values).float(),
+                            group=torch.from_numpy(dls.xs[instance_names].values).int(),
+                        )
+                        for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
+                    ]
+                )
+            else:
+                self.embds_tgt = nn.ModuleList(
+                    [
+                        f(torch.from_numpy(cont[1].values).float())
+                        for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
+                    ]
+                )
         else:
-            self.embds_tgt = nn.ModuleList(
-                [
-                    ContTransformerRange(torch.from_numpy(cont.values).float())
-                    for name, cont in dls.ys[dls.y_names].items()
-                ]
-            )
+            if instance_names is not None:
+                self.embds_tgt = nn.ModuleList(
+                    [
+                        ContTransformerStandardizeGroupedRange(
+                            torch.from_numpy(cont.values).float(),
+                            group=torch.from_numpy(dls.xs[instance_names].values).int(),
+                        )
+                        for name, cont in dls.ys[dls.y_names].items()
+                    ]
+                )
+            else:
+                self.embds_tgt = nn.ModuleList(
+                    [
+                        ContTransformerStandardizeRange(
+                            torch.from_numpy(cont.values).float()
+                        )
+                        for name, cont in dls.ys[dls.y_names].items()
+                    ]
+                )
 
     def _build_embeddings_xcat(self, dls, emb_szs):
         # Categorical Embeddings
         emb_szs = get_emb_sz(dls.train_ds, {} if emb_szs is None else emb_szs)
         self.embds_fct = nn.ModuleList([Embedding(ni, nf) for ni, nf in emb_szs])
-        # Init with Kaiming
+        # init with Kaiming
         [
             nn_init.kaiming_uniform_(embd.weight, a=math.sqrt(5))
             for embd in self.embds_fct
@@ -75,13 +103,18 @@ class AbstractSurrogate(nn.Module):
             x = torch.cat([x, xd], 1) if self.n_emb > 0 else xd
         return x
 
-    def trafo_ys(self, ys):
-        ys = [e(ys[:, i]).unsqueeze(1) for i, e in enumerate(self.embds_tgt)]
+    def trafo_ys(self, ys, group=None):
+        ys = [
+            e(ys[:, i], group=group).unsqueeze(1) for i, e in enumerate(self.embds_tgt)
+        ]
         ys = torch.cat(ys, 1)
         return ys
 
-    def inv_trafo_ys(self, ys):
-        ys = [e.invert(ys[:, i]).unsqueeze(1) for i, e in enumerate(self.embds_tgt)]
+    def inv_trafo_ys(self, ys, group=None):
+        ys = [
+            e.invert(ys[:, i], group=group).unsqueeze(1)
+            for i, e in enumerate(self.embds_tgt)
+        ]
         ys = torch.cat(ys, 1)
         return ys
 
@@ -144,6 +177,7 @@ class ResNet(AbstractSurrogate):
         embds_dbl=None,
         embds_tgt=None,
         emb_szs=None,
+        instance_names=None,
         d: int = 256,
         d_hidden_factor: float = 2,
         n_layers: int = 4,
@@ -160,6 +194,7 @@ class ResNet(AbstractSurrogate):
         embds_dbl :: Numeric Embeddings
         embds_tgt :: Target Embeddings
         embd_szs :: Embedding sizes
+        instance_names :: names of the instances id
         d :: dimensionality of the hidden space
         d_hidden_factor :: factor by which the hidden dimension is reduced
         n_layers :: number of layers
@@ -171,8 +206,14 @@ class ResNet(AbstractSurrogate):
         """
         super().__init__()
 
+        self.instance_names = instance_names
+
         self._build_embeddings(
-            dls=dls, embds_dbl=embds_dbl, embds_tgt=embds_tgt, emb_szs=emb_szs
+            dls=dls,
+            embds_dbl=embds_dbl,
+            embds_tgt=embds_tgt,
+            emb_szs=emb_szs,
+            instance_names=instance_names,
         )
 
         self.main_activation = get_activation_fn(activation)
@@ -220,7 +261,10 @@ class ResNet(AbstractSurrogate):
         x = self.head(x)
         y = self.final_act(x)
         if torch.tensor(invert_ytrafo):
-            return self.inv_trafo_ys(y)
+            if self.instance_names is not None:
+                return self.inv_trafo_ys(y, group=x_cat[:, 0])
+            else:
+                return self.inv_trafo_ys(y)
         else:
             return y
 
@@ -242,10 +286,10 @@ if __name__ == "__main__":
     device = "cpu"
 
     cfg = cfg("iaml_glmnet")
-    dls = dl_from_config(cfg)
+    dls = dl_from_config(cfg, pin_memory=True, device=device)
 
-    model = ResNet(dls)
+    model = ResNet(dls, instance_names=cfg.instance_names)
     surrogate = SurrogateTabularLearner(
-        dls, model, loss_func=MultiMaeLoss(), metrics=None
+        dls, model, loss_func=MultiMseLoss(), metrics=None
     )
     surrogate.fit_one_cycle(5, 1e-4)

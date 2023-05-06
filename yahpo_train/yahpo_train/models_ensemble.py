@@ -131,6 +131,6 @@ if __name__ == "__main__":
 
     ensemble = Ensemble(ResNet, n_models=3, dls=dls)
     surrogate = SurrogateEnsembleLearner(
-        dls, ensemble, loss_func=MultiMaeLoss(), metrics=None
+        dls, ensemble, loss_func=MultiMseLoss(), metrics=None
     )
     surrogate.fit_one_cycle(10, 1e-4)

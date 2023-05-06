@@ -393,6 +393,8 @@ class BenchmarkSet:
             if configuration.get(k) is not None
         }
 
+        # Make sure that if instance_names is not None that it is the first
+
         if self.check:
             self.config_space.check_configuration(
                 CS.Configuration(
@@ -415,11 +417,18 @@ class BenchmarkSet:
             )  # '#na#' for cats, see _integer_encode below
             configuration.update({hp: value})
 
+        # We have to make sure that the first categorical is always instance_names if it is not None
+        if self.config.instance_names is not None:
+            cat_names = [self.config.instance_names] + list(
+                set(self.config.cat_names) - {self.config.instance_names}
+            )
+        else:
+            cat_names = self.config.cat_names
         x_cat = (
             np.array(
                 [
                     self._integer_encode(configuration[x], x)
-                    for x in self.config.cat_names
+                    for x in cat_names
                     if x not in self.config.drop_predict
                 ]
             )

@@ -52,7 +52,11 @@ def fit_config_resnet(
         embds_tgt = [
             tfms.get(name)
             if tfms.get(name) is not None
-            else ContTransformerStandardizeRange
+            else (
+                ContTransformerStandardizeGroupedRange
+                if cc.instance_names is not None
+                else ContTransformerStandardizeRange
+            )
             for name, cont in dls_train.ys.items()
         ]
 
@@ -64,6 +68,7 @@ def fit_config_resnet(
             dls=dls_train,
             embds_dbl=embds_dbl,
             embds_tgt=embds_tgt,
+            instance_names=cc.instance_names,
             d=d,
             d_hidden_factor=d_hidden_factor,
             n_layers=n_layers,
@@ -71,7 +76,7 @@ def fit_config_resnet(
             residual_dropout=residual_dropout,
         )
         surrogate = SurrogateEnsembleLearner(
-            dls_train, ensemble=model, loss_func=MultiMaeLoss()
+            dls_train, ensemble=model, loss_func=MultiMseLoss()
         )
         # FIXME: this is ugly, we probably should overload the metric setter and getter for the SurrogateEnsembleLearner
         surrogate.metrics = [
@@ -94,6 +99,7 @@ def fit_config_resnet(
             dls_train,
             embds_dbl=embds_dbl,
             embds_tgt=embds_tgt,
+            instance_names=cc.instance_names,
             d=d,
             d_hidden_factor=d_hidden_factor,
             n_layers=n_layers,
@@ -101,7 +107,7 @@ def fit_config_resnet(
             residual_dropout=residual_dropout,
         )
         surrogate = SurrogateTabularLearner(
-            dls_train, model=model, loss_func=MultiMaeLoss()
+            dls_train, model=model, loss_func=MultiMseLoss()
         )
         surrogate.metrics = [
             AvgTfedMetric(mae),
@@ -112,7 +118,7 @@ def fit_config_resnet(
         ]
 
     # Fit
-    fit_cbs = [
+    cbs = [
         # EarlyStoppingCallback(patience=100),
         SaveModelCallback(
             monitor="valid_loss",
@@ -122,11 +128,11 @@ def fit_config_resnet(
             reset_on_fit=True,
         ),
     ]
-    fit_cbs += fit_cbs
+    cbs += fit_cbs
     if fit == "fit_flat_cos":
-        surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=fit_cbs)
+        surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=cbs)
     elif fit == "fit_one_cycle":
-        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, cbs=fit_cbs)
+        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, cbs=cbs)
 
     surrogate = surrogate.load("best")
 
@@ -136,7 +142,9 @@ def fit_config_resnet(
     return surrogate
 
 
-def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **kwargs):
+def tune_config_resnet(
+    key, name, device, tfms_fixed={}, trials=1000, walltime=86400, **kwargs
+):
     if trials == 0:
         trials = None
 
@@ -156,7 +164,9 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
     )
 
     cc = cfg(key)
-    dls_train = dl_from_config(cc, save_df_test=True, save_encoding=True)
+    dls_train = dl_from_config(
+        cc, pin_memory=True, device=device, save_df_test=True, save_encoding=True
+    )
 
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
     def objective(trial):
@@ -208,8 +218,6 @@ def tune_config_resnet(key, name, tfms_fixed={}, trials=1000, walltime=86400, **
 
 
 def fit_from_best_params_resnet(key, best_params, noisy=False, tfms_fixed={}, **kwargs):
-    cc = cfg(key)
-
     d = best_params.get("d")
     d_hidden_factor = best_params.get("d_hidden_factor")
     n_layers = best_params.get("n_layers")
@@ -270,24 +278,24 @@ if __name__ == "__main__":
     # tfms_list.update({"rbv2_aknn": tfms_rbv2_aknn})
 
     # tfms_iaml_super = {}
-    # tfms_iaml_super.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeRange])})
+    # tfms_iaml_super.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
     # tfms_list.update({"iaml_super": tfms_iaml_super})
 
     # tfms_iaml_xgboost = {}
-    # tfms_iaml_xgboost.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeRange])})
+    # tfms_iaml_xgboost.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
     # tfms_list.update({"iaml_xgboost": tfms_iaml_xgboost})
 
     # tfms_iaml_ranger = {}
-    # tfms_iaml_ranger.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeRange])})
+    # tfms_iaml_ranger.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
     # tfms_list.update({"iaml_ranger": tfms_iaml_ranger})
 
     # tfms_iaml_rpart = {}
-    # tfms_iaml_rpart.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeRange])})
+    # tfms_iaml_rpart.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
     # tfms_list.update({"iaml_rpart": tfms_iaml_rpart})
 
     tfms_iaml_glmnet = {}
     tfms_iaml_glmnet.update(
-        {"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeRange])}
+        {"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])}
     )
     tfms_list.update({"iaml_glmnet": tfms_iaml_glmnet})
 
@@ -336,16 +344,18 @@ if __name__ == "__main__":
     cuda_available = torch.cuda.is_available()
     if cuda_available:
         current_device = torch.cuda.current_device()
-        device_name = torch.cuda.get_device_name()
-        print("Using cuda device: " + device_name + " " + str(current_device))
+        device = torch.cuda.get_device_name()
+        print("Using cuda device: " + device + " " + str(current_device))
     else:
         warnings.warn(
             "No cuda device available. You probably do not want to tune on CPUs."
         )
+        device = "cpu"
 
     tune_config_resnet(
         args.key,
         name=args.name,
+        device=device,
         tfms_fixed=tfms_list.get(args.key),
         trials=args.trials,
         walltime=args.walltime,

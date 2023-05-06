@@ -37,9 +37,18 @@ def dl_from_config(
         usecols=list(dtypes.keys()),
         dtype=dtypes,
     ).sample(frac=1.0)
-    df.reindex(columns=config.cat_names + config.cont_names + config.y_names)
+    instance_names = config.instance_names
     # get rid of irrelevant columns
     df = df[config.cat_names + config.cont_names + config.y_names]
+    if instance_names is not None:
+        df.reindex(
+            columns=[config.instance_names]
+            + list(set(config.cat_names) - {config.instance_names})
+            + config.cont_names
+            + config.y_names
+        )  # make sure instance_names is the first column
+    else:
+        df.reindex(columns=config.cat_names + config.cont_names + config.y_names)
     # fill missing target with 0
     df[config.y_names] = df[config.y_names].fillna(0.0)
 
@@ -112,7 +121,7 @@ def _get_idx(
     df = df_shrink(df)
     df = df.apply(lambda hpar: pd.factorize(hpar.astype("category"))[0], axis=0)
     if len(hpars) > 10:
-        hpars = random.sample(hpars, k=10)
+        hpars = random.sample(hpars, k=k)
 
     idx = pd.Index([], dtype="int64")
     groups = df.groupby(hpars, sort=False)
@@ -133,7 +142,10 @@ class SurrogateTabularLearner(Learner):
 
         # for the training loss we train on untransformed scale
         self.pred = self.model(*self.xb, invert_ytrafo=False)
-        self.yb = [self.model.trafo_ys(*self.yb)]
+        if self.instance_names is not None:
+            self.yb = [self.model.trafo_ys(*self.yb, group=self.xb[0][:, 0])]
+        else:
+            self.yb = [self.model.trafo_ys(*self.yb)]
 
         self("after_pred")
         if len(self.yb):

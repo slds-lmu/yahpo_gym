@@ -50,7 +50,7 @@ def get_set_metrics(
             usecols=list(dtypes.keys()),
             dtype=dtypes,
         )
-    elif set == "all":
+    else:
         df = pd.read_csv(
             bench.config.get_path("dataset"), usecols=list(dtypes.keys()), dtype=dtypes
         )
