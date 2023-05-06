@@ -114,6 +114,10 @@ class ContTransformerStandardizeGrouped(nn.Module):
         """
         Batch-wise transform for x.
         """
+        current_device = x.device
+        group.to_device(current_device)
+        self.means.to_device(current_device)
+        self.sds.to_device(current_device)
         means = self.means.index_select(dim=0, index=group - 1)
         sds = self.sds.index_select(dim=0, index=group - 1)
         x = (x - means) / sds
@@ -123,6 +127,10 @@ class ContTransformerStandardizeGrouped(nn.Module):
         """
         Batch-wise inverse transform for x.
         """
+        current_device = x.device
+        group.to_device(current_device)
+        self.means.to_device(current_device)
+        self.sds.to_device(current_device)
         means = self.means.index_select(dim=0, index=group - 1)
         sds = self.sds.index_select(dim=0, index=group - 1)
         x = x * sds + means
