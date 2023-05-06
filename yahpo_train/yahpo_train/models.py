@@ -262,7 +262,9 @@ class ResNet(AbstractSurrogate):
         y = self.final_act(x)
         if torch.tensor(invert_ytrafo):
             if self.instance_names is not None:
-                return self.inv_trafo_ys(y, group=x_cat[:, 0])
+                current_device = y.device
+                group = x_cat[:, 0].to(current_device)
+                return self.inv_trafo_ys(y, group=group)
             else:
                 return self.inv_trafo_ys(y)
         else:

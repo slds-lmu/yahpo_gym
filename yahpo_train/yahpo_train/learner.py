@@ -143,7 +143,9 @@ class SurrogateTabularLearner(Learner):
         # for the training loss we train on untransformed scale
         self.pred = self.model(*self.xb, invert_ytrafo=False)
         if self.instance_names is not None:
-            self.yb = [self.model.trafo_ys(*self.yb, group=self.xb[0][:, 0])]
+            current_device = self.yb[0].device
+            group = self.xb[0][:, 0].to(current_device)
+            self.yb = [self.model.trafo_ys(*self.yb, group=group)]
         else:
             self.yb = [self.model.trafo_ys(*self.yb)]
 
