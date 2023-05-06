@@ -344,13 +344,14 @@ if __name__ == "__main__":
     cuda_available = torch.cuda.is_available()
     if cuda_available:
         current_device = torch.cuda.current_device()
-        device = torch.cuda.get_device_name()
-        print("Using cuda device: " + device + " " + str(current_device))
+        device_name = torch.cuda.get_device_name()
+        device = torch.device("cuda:0")
+        print("Using cuda device: " + device_name + " " + str(current_device))
     else:
         warnings.warn(
             "No cuda device available. You probably do not want to tune on CPUs."
         )
-        device = "cpu"
+        device = torch.device("cpu")
 
     tune_config_resnet(
         args.key,

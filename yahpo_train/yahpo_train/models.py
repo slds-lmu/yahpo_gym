@@ -283,7 +283,7 @@ if __name__ == "__main__":
     from yahpo_gym.benchmarks import iaml
     from yahpo_train.learner import SurrogateTabularLearner, dl_from_config
 
-    device = "cpu"
+    device = torch.device("cpu")
 
     cfg = cfg("iaml_glmnet")
     dls = dl_from_config(cfg, pin_memory=True, device=device)
