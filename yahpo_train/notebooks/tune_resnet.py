@@ -164,9 +164,10 @@ def tune_config_resnet(
     )
 
     cc = cfg(key)
-    dls_train = dl_from_config(
-        cc, pin_memory=True, device=device, save_df_test=True, save_encoding=True
-    )
+    # dls_train = dl_from_config(
+    #    cc, pin_memory=True, device=device, save_df_test=True, save_encoding=True
+    # )
+    dls_train = dl_from_config(cc, save_df_test=True, save_encoding=True)
 
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
     def objective(trial):
