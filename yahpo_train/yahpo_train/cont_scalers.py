@@ -114,12 +114,11 @@ class ContTransformerStandardizeGrouped(nn.Module):
         """
         Batch-wise transform for x.
         """
-        current_device = x.device
-        group.to(current_device)
-        self.means.to(current_device)
-        self.sds.to(current_device)
-        means = self.means.index_select(dim=0, index=group - 1)
-        sds = self.sds.index_select(dim=0, index=group - 1)
+        # FIXME: more efficient device handling
+        means = (
+            self.means.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        )
+        sds = self.sds.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
         x = (x - means) / sds
         return x.float()
 
@@ -127,12 +126,11 @@ class ContTransformerStandardizeGrouped(nn.Module):
         """
         Batch-wise inverse transform for x.
         """
-        current_device = x.device
-        group.to(current_device)
-        self.means.to(current_device)
-        self.sds.to(current_device)
-        means = self.means.index_select(dim=0, index=group - 1)
-        sds = self.sds.index_select(dim=0, index=group - 1)
+        # FIXME: more efficient device handling
+        means = (
+            self.means.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        )
+        sds = self.sds.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
         x = x * sds + means
         return x.float()
 
