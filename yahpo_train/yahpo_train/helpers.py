@@ -31,7 +31,7 @@ def get_set_metrics(
     """Get the metrics for a given benchmark scenario and set (test or all) for a given model."""
     # NOTE: this is somewhat slow because we first map the points to the right format for the onnx model and
     # then use the onnx model for prediction
-    bench = benchmark_set.BenchmarkSet(key, active_session=False)
+    bench = benchmark_set.BenchmarkSet(key, active_session=False, multithread=False)
     if model is not None:
         bench.config.config.update({"model": model})
     bench.check = False  # see note below
@@ -76,7 +76,9 @@ def get_set_metrics(
             )
             .tolist()
         )
-        result = pd.DataFrame(bench.objective_function(points)).values
+        result = pd.DataFrame(
+            bench.objective_function(points, multithread=False)
+        ).values
         response[indices[0] : indices[1]] = result
 
     truth_tensor = torch.tensor(truth.values)
