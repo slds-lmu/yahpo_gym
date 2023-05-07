@@ -37,7 +37,7 @@ def fit_config_resnet(
     fit="fit_flat_cos",
     lr=1e-4,
     wd=None,
-    epochs=5,
+    epochs=100,
     d=256,
     d_hidden_factor=2.0,
     n_layers=4,
