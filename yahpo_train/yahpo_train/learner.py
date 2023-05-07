@@ -13,12 +13,14 @@ def dl_from_config(
     save_encoding: bool = False,
     train_frac: float = 0.8,
     valid_frac: float = 0.25,
-    rng_seed: int = 10,
+    shuffle: bool = True,
+    device: str = "cpu",
+    seed: int = 10,
     **kwargs
 ) -> "fastai.tabular.data.TabularDataLoaders":
     """Create a fastai dataloader from a config file."""
-    np.random.seed(rng_seed)
-    random.seed(rng_seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
     # we shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
     # all relevant info is obtained from the 'config'
@@ -36,7 +38,7 @@ def dl_from_config(
         skipinitialspace=skipinitialspace,
         usecols=list(dtypes.keys()),
         dtype=dtypes,
-    ).sample(frac=1.0)
+    ).sample(frac=1.0, random_state=seed)
     instance_names = config.instance_names
     # get rid of irrelevant columns
     df = df[config.cat_names + config.cont_names + config.y_names]
@@ -53,7 +55,7 @@ def dl_from_config(
     df[config.y_names] = df[config.y_names].fillna(0.0)
 
     # if train_frac = 0.8 and validation frac is 0.25, we get 0.8/0.1/0.1 train/valid/test
-    test_ids = _get_idx(df, config, frac=1 - train_frac, rng_seed=rng_seed)
+    test_ids = _get_idx(df, config, frac=1 - train_frac, seed=seed)
     df_test = df[df.index.isin(test_ids)].reset_index(drop=True)
     df_train = df[~df.index.isin(test_ids)].reset_index(drop=True)
 
@@ -79,10 +81,11 @@ def dl_from_config(
             ),
         ],
         valid_idx=_get_idx(
-            df_train, config=config, frac=valid_frac, rng_seed=rng_seed
+            df_train, config=config, frac=valid_frac, seed=seed
         ),  # validation ids of size 0.25 * train_frac taken from train_ids
         bs=bs,
-        shuffle=True,
+        shuffle=shuffle,
+        device=device,
         **kwargs
     )
 
@@ -102,14 +105,14 @@ def _get_idx(
     df: "pd.core.frame.DataFrame",
     config: "yahpo_gym.configuration.Configuration",
     frac: float = 0.25,
-    rng_seed: int = 10,
+    seed: int = 10,
     k: int = 10,
 ):
     """
     Include or exclude blocks of hyperparameters with differing fidelity.
     """
-    np.random.seed(rng_seed)
-    random.seed(rng_seed)
+    np.random.seed(seed)
+    random.seed(seed)
     hpars = config.cont_names + config.cat_names
     hpars = list(set(hpars) - set(config.fidelity_params))
 

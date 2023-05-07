@@ -4,17 +4,27 @@ from yahpo_train.learner import *
 from yahpo_train.losses import *
 from yahpo_train.metrics import *
 from yahpo_train.cont_scalers import *
-from yahpo_gym import benchmark_set
-from yahpo_gym.benchmarks import lcbench, rbv2, nb301, iaml, fair
 from yahpo_gym.configuration import cfg
-from functools import partial
+from yahpo_train.helpers import generate_all_test_set_metrics
 import argparse
 import optuna
 from optuna.integration import FastAIPruningCallback
-from optuna.visualization import plot_optimization_history
-import torch.nn as nn
+import torch
+import random
+import numpy as np
 import logging
 import warnings
+
+
+def random_seed(seed, use_cuda):
+    np.random.seed(seed)  # cpu vars
+    torch.manual_seed(seed)  # cpu  vars
+    random.seed(seed)  # python
+    if use_cuda:
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # gpu vars
+        torch.backends.cudnn.deterministic = True  # needed
+        torch.backends.cudnn.benchmark = False
 
 
 def fit_config_resnet(
@@ -27,22 +37,25 @@ def fit_config_resnet(
     fit="fit_flat_cos",
     lr=1e-4,
     wd=None,
-    epochs=50,  # FIXME:
+    epochs=5,
     d=256,
     d_hidden_factor=2.0,
     n_layers=4,
     hidden_dropout=0.0,
     residual_dropout=0.2,
     fit_cbs=[],
-    export=False,
-    export_device="cuda:0",
+    seed=10,
+    use_cuda=False,
 ):
     """
     Fit function with hyperparameters for resnet.
     """
-    cc = cfg(key)
+    # set seed
+    random_seed(seed, use_cuda=use_cuda)
 
-    # Construct embds from tfms
+    config = cfg(key)
+
+    # construct embds from tfms
     # tfms overwrites emdbs_dbl, embds_tgt
     if tfms is not None:
         embds_dbl = [
@@ -54,13 +67,13 @@ def fit_config_resnet(
             if tfms.get(name) is not None
             else (
                 ContTransformerStandardizeGroupedRange
-                if cc.instance_names is not None
+                if config.instance_names is not None
                 else ContTransformerStandardizeRange
             )
             for name, cont in dls_train.ys.items()
         ]
 
-    # Instantiate learner
+    # instantiate learner
     if noisy:
         model = Ensemble(
             ResNet,
@@ -68,7 +81,7 @@ def fit_config_resnet(
             dls=dls_train,
             embds_dbl=embds_dbl,
             embds_tgt=embds_tgt,
-            instance_names=cc.instance_names,
+            instance_names=config.instance_names,
             d=d,
             d_hidden_factor=d_hidden_factor,
             n_layers=n_layers,
@@ -99,7 +112,7 @@ def fit_config_resnet(
             dls_train,
             embds_dbl=embds_dbl,
             embds_tgt=embds_tgt,
-            instance_names=cc.instance_names,
+            instance_names=config.instance_names,
             d=d,
             d_hidden_factor=d_hidden_factor,
             n_layers=n_layers,
@@ -117,7 +130,7 @@ def fit_config_resnet(
             AvgTfedMetric(napct),
         ]
 
-    # Fit
+    # fit
     cbs = [
         # EarlyStoppingCallback(patience=100),
         SaveModelCallback(
@@ -129,6 +142,7 @@ def fit_config_resnet(
         ),
     ]
     cbs += fit_cbs
+    random_seed(seed, use_cuda=use_cuda)
     if fit == "fit_flat_cos":
         surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=cbs)
     elif fit == "fit_one_cycle":
@@ -136,14 +150,11 @@ def fit_config_resnet(
 
     surrogate = surrogate.load("best")
 
-    if export:
-        surrogate.export_onnx(cc, device=export_device)
-
     return surrogate
 
 
 def tune_config_resnet(
-    key, name, device, tfms_fixed={}, trials=1000, walltime=86400, **kwargs
+    key, name, dls_train, tfms_fixed={}, trials=1000, walltime=86400, **kwargs
 ):
     if trials == 0:
         trials = None
@@ -153,23 +164,20 @@ def tune_config_resnet(
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
 
-    storage_name = "sqlite:///{}.db".format(name)
-    pruner = optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=10)
+    storage = "sqlite:///{}.db".format(name)
+    sampler = optuna.samplers.TPESampler(seed=10, n_ei_candidates=1000)
+    pruner = optuna.pruners.MedianPruner(n_startup_trials=10, n_warmup_steps=10)
     study = optuna.create_study(
-        study_name=name,
-        storage=storage_name,
-        direction="minimize",
+        storage=storage,
+        sampler=sampler,
         pruner=pruner,
+        study_name=name,
+        direction="minimize",
         load_if_exists=True,
     )
 
-    cc = cfg(key)
-    # dls_train = dl_from_config(
-    #    cc, pin_memory=True, device=device, save_df_test=True, save_encoding=True
-    # )
-    dls_train = dl_from_config(cc, save_df_test=True, save_encoding=True)
-
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
+    # except for fit_flat_cos and wd
     def objective(trial):
         d = trial.suggest_int("d", 64, 512, step=64)  # layer size
         d_hidden_factor = trial.suggest_float(
@@ -208,17 +216,19 @@ def tune_config_resnet(
             hidden_dropout=hidden_dropout,
             residual_dropout=residual_dropout,
             fit_cbs=cbs,
+            use_cuda=use_cuda,
             **kwargs
         )
         loss = surrogate.recorder.final_record.items[1]  # [1] is validation loss
         return loss
 
     study.optimize(objective, n_trials=trials, timeout=walltime)
-    # plot_optimization_history(study)
     return study
 
 
-def fit_from_best_params_resnet(key, best_params, noisy=False, tfms_fixed={}, **kwargs):
+def fit_from_best_params_resnet(
+    key, dls_train, best_params, noisy=False, tfms_fixed={}, use_cuda=False, **kwargs
+):
     d = best_params.get("d")
     d_hidden_factor = best_params.get("d_hidden_factor")
     n_layers = best_params.get("n_layers")
@@ -228,19 +238,25 @@ def fit_from_best_params_resnet(key, best_params, noisy=False, tfms_fixed={}, **
     else:
         residual_dropout = 0.0
     lr = best_params.get("lr")
-
-    # FIXME: where to get the dls_train from?
+    if best_params.get("use_wd"):
+        wd = best_params.get("wd")
+    else:
+        wd = 0.0
 
     surrogate = fit_config_resnet(
         key=key,
+        dls_train=dls_train,
         tfms=tfms_fixed,
         noisy=noisy,
+        fit=fit,
         lr=lr,
+        wd=wd,
         d=d,
         d_hidden_factor=d_hidden_factor,
         n_layers=n_layers,
         hidden_dropout=hidden_dropout,
         residual_dropout=residual_dropout,
+        use_cuda=use_cuda,
         **kwargs
     )
 
@@ -279,24 +295,24 @@ if __name__ == "__main__":
     # tfms_list.update({"rbv2_aknn": tfms_rbv2_aknn})
 
     # tfms_iaml_super = {}
-    # tfms_iaml_super.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
+    # tfms_iaml_super.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
     # tfms_list.update({"iaml_super": tfms_iaml_super})
 
     # tfms_iaml_xgboost = {}
-    # tfms_iaml_xgboost.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
+    # tfms_iaml_xgboost.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
     # tfms_list.update({"iaml_xgboost": tfms_iaml_xgboost})
 
     # tfms_iaml_ranger = {}
-    # tfms_iaml_ranger.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
+    # tfms_iaml_ranger.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
     # tfms_list.update({"iaml_ranger": tfms_iaml_ranger})
 
     # tfms_iaml_rpart = {}
-    # tfms_iaml_rpart.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])})
+    # tfms_iaml_rpart.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
     # tfms_list.update({"iaml_rpart": tfms_iaml_rpart})
 
     tfms_iaml_glmnet = {}
     tfms_iaml_glmnet.update(
-        {"nf": tfms_chain([ContTransformerInt, ContTransformerStandardize])}
+        {"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])}
     )
     tfms_list.update({"iaml_glmnet": tfms_iaml_glmnet})
 
@@ -331,7 +347,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--trials",
         type=int,
-        default=0,
+        default=1,
         help="Number of optuna trials",
     )  # by default we run until terminated externally
     parser.add_argument(
@@ -347,18 +363,52 @@ if __name__ == "__main__":
         current_device = torch.cuda.current_device()
         device_name = torch.cuda.get_device_name()
         device = torch.device("cuda:0")
+        use_cuda = True
         print("Using cuda device: " + device_name + " " + str(current_device))
     else:
         warnings.warn(
             "No cuda device available. You probably do not want to tune on CPUs."
         )
         device = torch.device("cpu")
+        use_cuda = False
 
-    tune_config_resnet(
+    config = cfg(args.key)
+    dls_train = dl_from_config(
+        config,
+        shuffle=False,
+        pin_memory=True,
+        device=device,
+        save_df_test=True,
+        save_encoding=True,
+    )
+
+    study = tune_config_resnet(
         args.key,
         name=args.name,
-        device=device,
+        dls_train=dls_train,
         tfms_fixed=tfms_list.get(args.key),
+        use_cuda=use_cuda,
         trials=args.trials,
         walltime=args.walltime,
     )
+
+    best_params = study.best_params
+    if best_params.get("use_residual_dropout") != True:
+        best_params.update({"residual_dropout": 0})
+
+    if best_params.get("use_wd") != True:
+        best_params.update({"wd": 0})
+
+    best_params.pop("use_residual_dropout")
+    best_params.pop("use_wd")
+
+    surrogate = fit_config_resnet(
+        args.key,
+        dls_train=dls_train,
+        tfms=tfms_list.get(args.key),
+        use_cuda=use_cuda,
+        **best_params
+    )
+
+    surrogate.export_onnx(config, device=device, suffix="v2")
+    generate_all_test_set_metrics(args.key, model="model_v2.onnx", save_to_csv=True)
