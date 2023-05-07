@@ -34,6 +34,7 @@ def get_set_metrics(
     bench = benchmark_set.BenchmarkSet(key, active_session=False, multithread=False)
     if model is not None:
         bench.config.config.update({"model": model})
+    bench.set_session(multithread=False)
     bench.check = False  # see note below
     dtypes = dict(zip(bench.config.cat_names, ["object"] * len(bench.config.cat_names)))
     dtypes.update(
