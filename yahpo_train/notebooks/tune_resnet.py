@@ -154,7 +154,7 @@ def fit_config_resnet(
 
 
 def tune_config_resnet(
-    key, name, dls_train, tfms_fixed={}, trials=1000, walltime=86400, **kwargs
+    key, name, dls_train, use_cuda, tfms_fixed={}, trials=1000, walltime=86400, **kwargs
 ):
     if trials == 0:
         trials = None
@@ -227,7 +227,7 @@ def tune_config_resnet(
 
 
 def fit_from_best_params_resnet(
-    key, dls_train, best_params, noisy=False, tfms_fixed={}, use_cuda=False, **kwargs
+    key, dls_train, best_params, use_cuda, noisy=False, tfms_fixed={}, **kwargs
 ):
     d = best_params.get("d")
     d_hidden_factor = best_params.get("d_hidden_factor")
@@ -386,8 +386,8 @@ if __name__ == "__main__":
         args.key,
         name=args.name,
         dls_train=dls_train,
-        tfms_fixed=tfms_list.get(args.key),
         use_cuda=use_cuda,
+        tfms_fixed=tfms_list.get(args.key),
         trials=args.trials,
         walltime=args.walltime,
     )
@@ -405,8 +405,8 @@ if __name__ == "__main__":
     surrogate = fit_config_resnet(
         args.key,
         dls_train=dls_train,
-        tfms=tfms_list.get(args.key),
         use_cuda=use_cuda,
+        tfms=tfms_list.get(args.key),
         **best_params
     )
 
