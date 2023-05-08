@@ -294,27 +294,75 @@ if __name__ == "__main__":
     # tfms_rbv2_aknn = {}
     # tfms_list.update({"rbv2_aknn": tfms_rbv2_aknn})
 
-    # tfms_iaml_super = {}
-    # tfms_iaml_super.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
-    # tfms_list.update({"iaml_super": tfms_iaml_super})
-
-    # tfms_iaml_xgboost = {}
-    # tfms_iaml_xgboost.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
-    # tfms_list.update({"iaml_xgboost": tfms_iaml_xgboost})
-
-    # tfms_iaml_ranger = {}
-    # tfms_iaml_ranger.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
-    # tfms_list.update({"iaml_ranger": tfms_iaml_ranger})
-
-    # tfms_iaml_rpart = {}
-    # tfms_iaml_rpart.update({"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])})
-    # tfms_list.update({"iaml_rpart": tfms_iaml_rpart})
-
-    tfms_iaml_glmnet = {}
-    tfms_iaml_glmnet.update(
-        {"nf": tfms_chain([ContTransformerInt, ContTransformerStandardizeGroupedRange])}
+    tfms_iaml = {}
+    tfms_iaml.update(
+        {
+            "mmce": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "f1": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "auc": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "logloss": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "rammodel": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "timetrain": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "mec": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "ias": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "nf": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerInt,
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+        }
     )
-    tfms_list.update({"iaml_glmnet": tfms_iaml_glmnet})
+    tfms_list.update(
+        {
+            "iaml_glmnet": tfms_iaml,
+            "iaml_rpart": tfms_iaml,
+            "iaml_ranger": tfms_iaml,
+            "iaml_xgboost": tfms_iaml,
+            "iaml_super": tfms_iaml,
+        }
+    )
 
     # tfms_fair_fgrrm = {}
     # tfms_list.update({"fair_fgrrm": tfms_fair_fgrrm})

@@ -106,7 +106,6 @@ class ContTransformerStandardizeGrouped(nn.Module):
                 for group_id in self.group_ids
             ]
         )
-
         if any([sd <= 1e-12 for sd in self.sds]):
             raise Exception("Constant feature detected!")
 
@@ -160,6 +159,34 @@ class ContTransformerInt(nn.Module):
         Round to nearest integer.
         """
         x = torch.round(x)
+        return x.float()
+
+
+class ContTransformerClamp(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms to [min,max].
+    """
+
+    def __init__(self, x, min=None, max=None, **kwargs):
+        super().__init__()
+        self.min, self.max = min, max
+        if self.min is not None:
+            self.min = torch.Tensor([min])
+        if self.max is not None:
+            self.max = torch.Tensor([max])
+
+    @staticmethod
+    def forward(x, **kwargs):
+        """
+        Batch-wise transform for x.
+        """
+        return x.float()
+
+    def invert(self, x, **kwargs):
+        """
+        Batch-wise inverse transform for x.
+        """
+        x = torch.clamp(x, self.min, self.max)
         return x.float()
 
 
