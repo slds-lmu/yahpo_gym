@@ -146,7 +146,7 @@ def fit_config_resnet(
     if fit == "fit_flat_cos":
         surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=cbs)
     elif fit == "fit_one_cycle":
-        surrogate.fit_one_cycle(epochs, lr_max=lr, moms=(0.95, 0.85), wd=wd, cbs=cbs)
+        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, cbs=cbs)
 
     surrogate = surrogate.load("best")
 
