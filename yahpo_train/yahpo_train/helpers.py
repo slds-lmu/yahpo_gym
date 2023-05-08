@@ -116,3 +116,7 @@ def generate_all_test_set_metrics(
             index_label="target",
         )
     return test_set_metrics
+
+
+if __name__ == "__main__":
+    generate_all_test_set_metrics("iaml_super", model="model_v2.onnx", save_to_csv=True)

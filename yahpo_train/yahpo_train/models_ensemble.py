@@ -63,6 +63,7 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
         moms=None,
         cbs=None,
         reset_opt=False,
+        start_epoch=0,
     ):
         for i in range(self.n_models):
             self._before_ens_fit(i)
@@ -70,7 +71,16 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
                 f"Training ensemble model {i + 1}/{self.n_models} with fit_one_cycle with lr {lr_max}"
             )
             self.learners[i].fit_one_cycle(
-                n_epoch, lr_max, div, div_final, pct_start, wd, moms, cbs, reset_opt
+                n_epoch=np_epoch,
+                lr_max=lr_max,
+                div=div,
+                div_final=div_final,
+                pct_start=pct_start,
+                wd=wd,
+                moms=moms,
+                cbs=cbs,
+                reset_opt=reset_opt,
+                start_epoch=start_epoch,
             )
             self._after_ens_fit(i)
 
@@ -83,6 +93,7 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
         wd=None,
         cbs=None,
         reset_opt=False,
+        start_epoch=0,
     ):
         for i in range(self.n_models):
             self._before_ens_fit(i)
@@ -90,21 +101,16 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
                 f"Training ensemble model {i + 1}/{self.n_models} with fit_flat_cos with lr {lr}"
             )
             self.learners[i].fit_flat_cos(
-                n_epoch, lr, div_final, pct_start, wd, cbs, reset_opt
+                n_epoch=n_epoch,
+                lr=lr,
+                div_final=div_final,
+                pct_start=pct_start,
+                wd=wd,
+                cbs=cbs,
+                reset_opt=reset_opt,
+                start_epoch=start_epoch,
             )
             self._after_ens_fit(i)
-
-    def fit_sgdr(
-        self,
-        n_cycles,
-        cycle_len,
-        lr_max=None,
-        cycle_mult=2,
-        cbs=None,
-        reset_opt=False,
-        wd=None,
-    ):
-        raise NotImplementedError
 
     def _before_ens_fit(self, i):
         # avoid duplicate callbacks
@@ -129,8 +135,8 @@ if __name__ == "__main__":
     cfg = cfg("iaml_glmnet")
     dls = dl_from_config(cfg, pin_memory=True, device=device)
 
-    ensemble = Ensemble(ResNet, n_models=3, dls=dls)
+    ensemble = Ensemble(ResNet, n_models=3, dls=dls, instance_names=cfg.instance_names)
     surrogate = SurrogateEnsembleLearner(
-        dls, ensemble, loss_func=MultiMseLoss(), metrics=None
+        dls, ensemble, loss_func=MultiMaeLoss(), metrics=None
     )
-    surrogate.fit_one_cycle(10, 1e-4)
+    surrogate.fit_one_cycle(5, 1e-4)

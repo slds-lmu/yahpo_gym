@@ -292,6 +292,6 @@ if __name__ == "__main__":
 
     model = ResNet(dls, instance_names=cfg.instance_names)
     surrogate = SurrogateTabularLearner(
-        dls, model, loss_func=MultiMseLoss(), metrics=None
+        dls, model, loss_func=MultiMaeLoss(), metrics=None
     )
     surrogate.fit_one_cycle(5, 1e-4)

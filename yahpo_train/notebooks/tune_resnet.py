@@ -89,7 +89,7 @@ def fit_config_resnet(
             residual_dropout=residual_dropout,
         )
         surrogate = SurrogateEnsembleLearner(
-            dls_train, ensemble=model, loss_func=MultiMseLoss()
+            dls_train, ensemble=model, loss_func=MultiMaeLoss()
         )
         # FIXME: this is ugly, we probably should overload the metric setter and getter for the SurrogateEnsembleLearner
         surrogate.metrics = [
@@ -120,7 +120,7 @@ def fit_config_resnet(
             residual_dropout=residual_dropout,
         )
         surrogate = SurrogateTabularLearner(
-            dls_train, model=model, loss_func=MultiMseLoss()
+            dls_train, model=model, loss_func=MultiMaeLoss()
         )
         surrogate.metrics = [
             AvgTfedMetric(mae),
@@ -146,7 +146,7 @@ def fit_config_resnet(
     if fit == "fit_flat_cos":
         surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=cbs)
     elif fit == "fit_one_cycle":
-        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, cbs=cbs)
+        surrogate.fit_one_cycle(epochs, lr_max=lr, mons=(0.95, 0.85), wd=wd, cbs=cbs)
 
     surrogate = surrogate.load("best")
 

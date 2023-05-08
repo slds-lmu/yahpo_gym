@@ -64,7 +64,7 @@ def dl_from_config(
 
     if bs is None:
         # batch size is 2^x, where x is the smallest integer such that 2^x > len(df_train) * (1 - valid_frac)
-        bs = 2 ** (int(math.log2((len(df_train) * (1 - valid_frac) / 100))) + 1)
+        bs = 2 ** (int(math.log2((len(df_train) * (1 - valid_frac) / 10))) + 1)
 
     dls = TabularDataLoaders.from_df(
         df=df_train,
