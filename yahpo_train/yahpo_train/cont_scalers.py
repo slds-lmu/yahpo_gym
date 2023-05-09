@@ -186,7 +186,11 @@ class ContTransformerClamp(nn.Module):
         """
         Batch-wise inverse transform for x.
         """
-        x = torch.clamp(x, self.min.to(x.device), self.max.to(x.device))
+        if self.min is not None:
+            min = self.min.to(x.device)
+        if self.max is not None:
+            max = self.max.to(x.device)
+        x = torch.clamp(x, min, max)
         return x.float()
 
 
