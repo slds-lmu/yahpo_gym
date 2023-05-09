@@ -188,8 +188,12 @@ class ContTransformerClamp(nn.Module):
         """
         if self.min is not None:
             min = self.min.to(x.device)
+        else:
+            min = None
         if self.max is not None:
             max = self.max.to(x.device)
+        else:
+            max = None
         x = torch.clamp(x, min, max)
         return x.float()
 
