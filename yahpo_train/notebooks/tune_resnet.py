@@ -154,7 +154,7 @@ def fit_config_resnet(
 
 
 def tune_config_resnet(
-    key, name, dls_train, use_cuda, tfms_fixed={}, trials=1000, walltime=86400, **kwargs
+    key, name, dls_train, use_cuda, tfms_fixed={}, trials=0, walltime=0, **kwargs
 ):
     if trials == 0:
         trials = None
@@ -395,7 +395,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--trials",
         type=int,
-        default=1,
+        default=0,
         help="Number of optuna trials",
     )  # by default we run until terminated externally
     parser.add_argument(
