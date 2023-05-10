@@ -28,24 +28,24 @@ def random_seed(seed, use_cuda):
 
 
 def fit_config_resnet(
-    key,
-    dls_train,
-    noisy=False,
-    embds_dbl=None,
-    embds_tgt=None,
-    tfms=None,
-    fit="fit_flat_cos",
-    lr=1e-4,
-    wd=None,
-    epochs=100,
-    d=256,
-    d_hidden_factor=2.0,
-    n_layers=4,
-    hidden_dropout=0.0,
-    residual_dropout=0.2,
-    fit_cbs=[],
-    seed=10,
-    use_cuda=False,
+        key,
+        dls_train,
+        noisy=False,
+        embds_dbl=None,
+        embds_tgt=None,
+        tfms=None,
+        fit="fit_flat_cos",
+        lr=1e-4,
+        wd=None,
+        epochs=100,
+        d=256,
+        d_hidden_factor=2.0,
+        n_layers=4,
+        hidden_dropout=0.0,
+        residual_dropout=0.2,
+        fit_cbs=[],
+        seed=10,
+        use_cuda=False,
 ):
     """
     Fit function with hyperparameters for resnet.
@@ -154,7 +154,7 @@ def fit_config_resnet(
 
 
 def tune_config_resnet(
-    key, name, dls_train, use_cuda, tfms_fixed={}, trials=0, walltime=0, **kwargs
+        key, name, dls_train, use_cuda, tfms_fixed={}, trials=0, walltime=0, **kwargs
 ):
     if trials == 0:
         trials = None
@@ -227,7 +227,7 @@ def tune_config_resnet(
 
 
 def fit_from_best_params_resnet(
-    key, dls_train, best_params, use_cuda, noisy=False, tfms_fixed={}, **kwargs
+        key, dls_train, best_params, use_cuda, noisy=False, tfms_fixed={}, **kwargs
 ):
     d = best_params.get("d")
     d_hidden_factor = best_params.get("d_hidden_factor")
@@ -264,7 +264,6 @@ def fit_from_best_params_resnet(
 
 
 if __name__ == "__main__":
-    # tfms_list holds for each benchmark scenario (key) optional transformers that should be fixed and not tuned
     tfms_list = {}
 
     # tfms_lcbench = {}
@@ -364,20 +363,80 @@ if __name__ == "__main__":
         }
     )
 
-    # tfms_fair_fgrrm = {}
-    # tfms_list.update({"fair_fgrrm": tfms_fair_fgrrm})
-
-    # tfms_fair_rpart = {}
-    # tfms_list.update({"fair_rpart": tfms_fair_rpart})
-
-    # tfms_fair_ranger = {}
-    # tfms_list.update({"fair_ranger": tfms_fair_ranger})
-
-    # tfms_fair_xgboost = {}
-    # tfms_list.update({"fair_xgboost": tfms_fair_xgboost})
-
-    # tfms_fair_super = {}
-    # tfms_list.update({"fair_super": tfms_fair_super})
+    tfms_fair = {}
+    tfms_fair.update(
+        {
+            "mmce": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "f1": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "feo": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "fpredp": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "facc": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "ftpr": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "ffomr": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "ffnr": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=1.0),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "rammodel": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "timetrain": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.0, max=None),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+        }
+    )
+    tfms_list.update(
+        {
+            "fair_fgrrm": tfms_fair,
+            "fair_rpart": tfms_fair,
+            "fair_ranger": tfms_fair,
+            "fair_xgboost": tfms_fair,
+            "fair_super": tfms_fair,
+        }
+    )
 
     parser = argparse.ArgumentParser(description="Args for resnet tuning")
     parser.add_argument(
@@ -441,10 +500,10 @@ if __name__ == "__main__":
     )
 
     best_params = study.best_params
-    if best_params.get("use_residual_dropout") != True:
+    if not best_params.get("use_residual_dropout"):
         best_params.update({"residual_dropout": 0})
 
-    if best_params.get("use_wd") != True:
+    if not best_params.get("use_wd"):
         best_params.update({"wd": 0})
 
     best_params.pop("use_residual_dropout")

@@ -53,7 +53,6 @@ class BenchmarkSet:
 
         assert scenario is not None, "Please provide a valid scenario."
         self.config = cfg(scenario)
-        self.config.config.update({"model": "model_v2.onnx"})
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
@@ -477,26 +476,30 @@ class BenchmarkSet:
             self.config.get_path("model_noisy")
         return path
 
+
 if __name__ == "__main__":
     from yahpo_gym import benchmark_set
     import yahpo_gym.benchmarks.lcbench
+
     bench = benchmark_set.BenchmarkSet("iaml_super")
     bench.instances
     bench.set_instance("1067")
-    config = {'task_id': '1067',
-    'learner': 'xgboost',
-    'xgboost.booster': 'dart',
-    'xgboost.nrounds': 200,
-    'xgboost.eta': 0.00325768836773932,
-    'xgboost.gamma': 0.00020697589206974953,
-    'xgboost.lambda': 533.0795288085938,
-    'xgboost.alpha': 0.00980402808636427,
-    'xgboost.subsample': 0.16586729884147644,
-    'xgboost.max_depth': 15,
-    'xgboost.min_child_weight': 23.20631217956543,
-    'xgboost.colsample_bytree': 0.5535841584205627,
-    'xgboost.colsample_bylevel': 0.0642591267824173,
-    'xgboost.rate_drop': 0.9892222285270691,
-    'xgboost.skip_drop': 0.3657853901386261,
-    'trainsize': 1.0}
+    config = {
+        "task_id": "1067",
+        "learner": "xgboost",
+        "xgboost.booster": "dart",
+        "xgboost.nrounds": 200,
+        "xgboost.eta": 0.00325768836773932,
+        "xgboost.gamma": 0.00020697589206974953,
+        "xgboost.lambda": 533.0795288085938,
+        "xgboost.alpha": 0.00980402808636427,
+        "xgboost.subsample": 0.16586729884147644,
+        "xgboost.max_depth": 15,
+        "xgboost.min_child_weight": 23.20631217956543,
+        "xgboost.colsample_bytree": 0.5535841584205627,
+        "xgboost.colsample_bylevel": 0.0642591267824173,
+        "xgboost.rate_drop": 0.9892222285270691,
+        "xgboost.skip_drop": 0.3657853901386261,
+        "trainsize": 1.0,
+    }
     print(bench.objective_function(config))
