@@ -28,24 +28,24 @@ def random_seed(seed, use_cuda):
 
 
 def fit_config_resnet(
-        key,
-        dls_train,
-        noisy=False,
-        embds_dbl=None,
-        embds_tgt=None,
-        tfms=None,
-        fit="fit_flat_cos",
-        lr=1e-4,
-        wd=None,
-        epochs=100,
-        d=256,
-        d_hidden_factor=2.0,
-        n_layers=4,
-        hidden_dropout=0.0,
-        residual_dropout=0.2,
-        fit_cbs=[],
-        seed=10,
-        use_cuda=False,
+    key,
+    dls_train,
+    noisy=False,
+    embds_dbl=None,
+    embds_tgt=None,
+    tfms=None,
+    fit="fit_flat_cos",
+    lr=1e-4,
+    wd=None,
+    epochs=100,
+    d=256,
+    d_hidden_factor=2.0,
+    n_layers=4,
+    hidden_dropout=0.0,
+    residual_dropout=0.2,
+    fit_cbs=[],
+    seed=10,
+    use_cuda=False,
 ):
     """
     Fit function with hyperparameters for resnet.
@@ -154,7 +154,7 @@ def fit_config_resnet(
 
 
 def tune_config_resnet(
-        key, name, dls_train, use_cuda, tfms_fixed={}, trials=0, walltime=0, **kwargs
+    key, name, dls_train, use_cuda, tfms_fixed={}, trials=0, walltime=0, **kwargs
 ):
     if trials == 0:
         trials = None
@@ -227,7 +227,7 @@ def tune_config_resnet(
 
 
 def fit_from_best_params_resnet(
-        key, dls_train, best_params, use_cuda, noisy=False, tfms_fixed={}, **kwargs
+    key, dls_train, best_params, use_cuda, noisy=False, tfms_fixed={}, **kwargs
 ):
     d = best_params.get("d")
     d_hidden_factor = best_params.get("d_hidden_factor")
