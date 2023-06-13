@@ -177,7 +177,7 @@ def tune_config_resnet(
     )
 
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
-    # except for fit_flat_cos and wd
+    # except for fit and wd
     def objective(trial):
         d = trial.suggest_int("d", 64, 512, step=64)  # layer size
         d_hidden_factor = trial.suggest_float(
