@@ -47,7 +47,7 @@ def dl_from_config(
     # fill missing target with 0
     df[config.y_names] = df[config.y_names].fillna(0.0)
 
-    # if train_frac = 0.8 and validation frac is 0.25, we get 0.8/0.1/0.1 train/valid/test
+    # if train_frac = 0.8 and validation frac is 0.25, we get 0.6/0.2/0.2 train/valid/test
     test_ids = _get_idx(df, config, frac=1 - train_frac, seed=seed)
     df_test = df[df.index.isin(test_ids)].reset_index(drop=True)
     df_train = df[~df.index.isin(test_ids)].reset_index(drop=True)
