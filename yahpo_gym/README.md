@@ -63,6 +63,7 @@ from yahpo_gym import local_config
 local_config.init_config()
 local_config.set_data_path("path-to-data")
 ```
+You can test whether the setup was successful by instantiating the object as documented in the **Usage** section below.
 
 ### Usage
 
