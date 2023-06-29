@@ -198,6 +198,54 @@ class ContTransformerClamp(nn.Module):
         return x.float()
 
 
+class ContTransformerClampGrouped(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms to [min,max].
+    Grouped by group.
+    """
+
+    def __init__(self, x, group, min=None, max=None, **kwargs):
+        super().__init__()
+        self.group_ids = torch.unique(
+            group
+        )  # see also the resulting encoding.json in the data_path directories how groups will match to ids
+        self.min, self.max = min, max
+        if self.min is not None:
+            if len(min) != len(self.group_ids):
+                raise Exception("Length of min does not match number of groups.")
+            self.min = torch.Tensor([min]).squeeze(0)
+        if self.max is not None:
+            if len(max) != len(self.group_ids):
+                raise Exception("Length of max does not match number of groups.")
+            self.max = torch.Tensor([max]).squeeze(0)
+
+    @staticmethod
+    def forward(x, **kwargs):
+        """
+        Batch-wise transform for x.
+        """
+        return x.float()
+
+    def invert(self, x, group, **kwargs):
+        """
+        Batch-wise inverse transform for x.
+        """
+        if self.min is not None:
+            min = (
+                self.min.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+            )
+        else:
+            min = None
+        if self.max is not None:
+            max = (
+                self.max.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+            )
+        else:
+            max = None
+        x = torch.clamp(x, min, max)
+        return x.float()
+
+
 class ContTransformerChain(nn.Module):
     """
     Chained transformer Continuous Variables. Chains several transforms.

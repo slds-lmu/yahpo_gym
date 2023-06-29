@@ -346,7 +346,11 @@ if __name__ == "__main__":
             ),
             "nf": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
+                    partial(
+                        ContTransformerClampGrouped,
+                        min=[0, 0, 0, 0],  # 1067, 1489, 40981, 41146
+                        max=[21, 5, 14, 20],  # 1067, 1489, 40981, 41146
+                    ),
                     ContTransformerInt,
                     ContTransformerStandardizeGroupedRange,
                 ]
