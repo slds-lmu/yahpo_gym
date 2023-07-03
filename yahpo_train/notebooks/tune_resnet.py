@@ -132,7 +132,6 @@ def fit_config_resnet(
 
     # fit
     cbs = [
-        # EarlyStoppingCallback(patience=100),
         SaveModelCallback(
             monitor="valid_loss",
             comp=np.less,
@@ -226,48 +225,51 @@ def tune_config_resnet(
     return study
 
 
-def fit_from_best_params_resnet(
-    key, dls_train, best_params, use_cuda, noisy=False, tfms_fixed={}, **kwargs
-):
-    d = best_params.get("d")
-    d_hidden_factor = best_params.get("d_hidden_factor")
-    n_layers = best_params.get("n_layers")
-    hidden_dropout = best_params.get("hidden_dropout")
-    if best_params.get("use_residual_dropout"):
-        residual_dropout = best_params.get("residual_dropout")
-    else:
-        residual_dropout = 0.0
-    lr = best_params.get("lr")
-    if best_params.get("use_wd"):
-        wd = best_params.get("wd")
-    else:
-        wd = 0.0
-
-    surrogate = fit_config_resnet(
-        key=key,
-        dls_train=dls_train,
-        tfms=tfms_fixed,
-        noisy=noisy,
-        fit=fit,
-        lr=lr,
-        wd=wd,
-        d=d,
-        d_hidden_factor=d_hidden_factor,
-        n_layers=n_layers,
-        hidden_dropout=hidden_dropout,
-        residual_dropout=residual_dropout,
-        use_cuda=use_cuda,
-        **kwargs
-    )
-
-    return surrogate
-
-
 if __name__ == "__main__":
     tfms_list = {}
 
-    # tfms_lcbench = {}
-    # tfms_list.update({"lcbench": tfms_lcbench})
+    tfms_lcbench = {}
+    tfms_lcbench.update(
+        {
+            "val_accuracy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=100.00),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "val_cross_entropy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "val_balanced_accuracy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "test_cross_entropy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "test_balanced_accuracy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+            "time": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerStandardizeGroupedRange,
+                ]
+            ),
+        }
+    )
+    tfms_list.update({"lcbench": tfms_lcbench})
 
     # tfms_nb301 = {}
     # tfms_list.update({"nb301": tfms_nb301})
@@ -513,6 +515,8 @@ if __name__ == "__main__":
     best_params.pop("use_residual_dropout")
     best_params.pop("use_wd")
 
+    # FIXME: here we could refit on all data
+    # first we need to decide on reshuffling or not
     surrogate = fit_config_resnet(
         args.key,
         dls_train=dls_train,
@@ -521,5 +525,5 @@ if __name__ == "__main__":
         **best_params
     )
 
-    surrogate.export_onnx(config, device=device, suffix="v2")
+    surrogate.export_onnx(config, device=device)
     generate_all_test_set_metrics(args.key, model="model_v2.onnx", save_to_csv=True)

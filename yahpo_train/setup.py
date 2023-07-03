@@ -38,7 +38,7 @@ setup(
         "scikit-learn",
         "fastai",
         "optuna",
-        "onnx>=1.14.0"
+        "onnx>=1.14.0",
         "yahpo_gym @ git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym",
     ],
     keywords=["module", "train", "yahpo"],

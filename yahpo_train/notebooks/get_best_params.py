@@ -19,5 +19,5 @@ for key in keys:
     storage = "sqlite:///{}.db".format("tune_" + key + "_resnet")
     study = optuna.load_study(study_name="tune_" + key + "_resnet", storage=storage)
     best_params = study.best_params
-    with open(bench.config.config_path + "/best_params_resnet_v1_9.json", "w") as f:
+    with open(bench.config.config_path + "/best_params_resnet_v2.json", "w") as f:
         json.dump(best_params, f)
