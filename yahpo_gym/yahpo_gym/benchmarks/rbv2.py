@@ -2,6 +2,7 @@ from yahpo_gym.configuration import config_dict, cfg
 
 # Default dict, holds for all 'rbv2_' benchmarks
 _rbv2_dict = {
+    "model": "model_v2.onnx",
     "y_names": [
         "acc",
         "bac",

@@ -2,15 +2,16 @@ from yahpo_gym.configuration import config_dict, cfg
 
 _lcbench_dict = {
     "config_id": "lcbench",
+    "model": "model_v2.onnx",
     "y_names": [
-        "time",
         "val_accuracy",
         "val_cross_entropy",
         "val_balanced_accuracy",
         "test_cross_entropy",
         "test_balanced_accuracy",
+        "time",
     ],
-    "y_minimize": [True, False, True, False, True, False],
+    "y_minimize": [False, True, False, True, False, True],
     "cont_names": [
         "epoch",
         "batch_size",

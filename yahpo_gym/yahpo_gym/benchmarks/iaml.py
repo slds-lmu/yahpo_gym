@@ -2,7 +2,7 @@ from yahpo_gym.configuration import config_dict, cfg
 
 # Default dict, holds for all "iaml_" benchmarks
 _iaml_dict = {
-    "model": "model_v1_9.onnx",
+    "model": "model_v2.onnx",
     "y_names": [
         "mmce",
         "f1",

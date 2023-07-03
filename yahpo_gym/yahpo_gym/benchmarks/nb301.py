@@ -2,6 +2,7 @@ from yahpo_gym.configuration import config_dict, cfg
 
 _nb301_dict = {
     "config_id": "nb301",
+    "model": "model_v2.onnx",
     "y_names": ["val_accuracy", "runtime"],
     "y_minimize": [False, True],
     "cont_names": ["epoch"],
