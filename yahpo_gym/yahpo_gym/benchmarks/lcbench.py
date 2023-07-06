@@ -2,7 +2,6 @@ from yahpo_gym.configuration import config_dict, cfg
 
 _lcbench_dict = {
     "config_id": "lcbench",
-    "model": "model_v2.onnx",
     "y_names": [
         "val_accuracy",
         "val_cross_entropy",
