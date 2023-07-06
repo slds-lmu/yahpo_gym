@@ -444,7 +444,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--trials",
         type=int,
-        default=11,
+        default=0,
         help="Number of optuna trials",
     )  # by default we run until terminated externally
     parser.add_argument(
