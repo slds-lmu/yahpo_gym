@@ -14,6 +14,65 @@ import random
 import numpy as np
 import logging
 import warnings
+from fastai.callback.tracker import *
+
+
+# FIXME: das macht kein sinn das rauszuschreiben weil das dann immer die beste epoche von der letzten config ist
+# muss adaptiert werden fuer optuna
+# https://github.com/fastai/fastai/blob/b4d8ac0fecc4bd32da9411c055cf4b86a037e73e/fastai/callback/tracker.py#L75
+class SaveModelCallbackCustom(TrackerCallback):
+    "A `TrackerCallback` that saves the model's best during training and loads it at the end. Also saves the epoch."
+
+    def __init__(
+        self,
+        monitor="valid_loss",  # value (usually loss or metric) being monitored.
+        comp=None,  # numpy comparison operator; np.less if monitor is loss, np.greater if monitor is metric.
+        min_delta=0.0,  # minimum delta between the last monitor value and the best monitor value.
+        fname="model",  # model name to be used when saving model.
+        every_epoch=False,  # if true, save model after every epoch; else save only when model is better than existing best.
+        at_end=False,  # if true, save model when training ends; else load best model if there is only one saved model.
+        with_opt=False,  # if true, save optimizer state (if any available) when saving model.
+        reset_on_fit=True,  # before model fitting, reset value being monitored to -infinity (if monitor is metric) or +infinity (if monitor is loss).
+    ):
+        super().__init__(
+            monitor=monitor, comp=comp, min_delta=min_delta, reset_on_fit=reset_on_fit
+        )
+        assert not (
+            every_epoch and at_end
+        ), "every_epoch and at_end cannot both be set to True"
+        # keep track of file path for loggers
+        self.last_saved_path = None
+        store_attr("fname,every_epoch,at_end,with_opt")
+
+    def _save(self, name):
+        self.last_saved_path = self.learn.save(name, with_opt=self.with_opt)
+
+    def after_epoch(self):
+        """Compare the value monitored to its best score and save if best."""
+        if self.every_epoch:
+            if (self.epoch % self.every_epoch) == 0:
+                self._save(f"{self.fname}_{self.epoch}")
+        else:  # every improvement
+            super().after_epoch()
+            if self.new_best:
+                print(
+                    f"Better model found at epoch {self.epoch} with {self.monitor} value: {self.best}."
+                )
+                self._save(f"{self.fname}")
+                # also store the epoch number
+                path = self.last_saved_path
+                epoch_path = Path(
+                    str(path).replace(f"{self.fname}.pth", f"{self.fname}_epoch.txt")
+                )
+                with open(epoch_path, "w") as f:
+                    f.write(str(self.epoch) + "\n" + str(self.best))
+
+    def after_fit(self, **kwargs):
+        """Load the best model."""
+        if self.at_end:
+            self._save(f"{self.fname}")
+        elif not self.every_epoch:
+            self.learn.load(f"{self.fname}", with_opt=self.with_opt)
 
 
 def random_seed(seed, use_cuda):
@@ -37,19 +96,23 @@ def fit_config_resnet(
     fit="fit_flat_cos",
     lr=1e-4,
     wd=None,
-    epochs=10,
+    epochs=100,
     d=256,
     d_hidden_factor=2.0,
     n_layers=4,
     hidden_dropout=0.0,
     residual_dropout=0.2,
     fit_cbs=[],
+    refit=False,
     seed=10,
     use_cuda=False,
 ):
     """
     Fit function with hyperparameters for resnet.
     """
+    # set seed
+    random_seed(seed, use_cuda=use_cuda)
+
     config = cfg(key)
 
     # construct embds from tfms
@@ -128,10 +191,28 @@ def fit_config_resnet(
         ]
 
     # fit
+    # checkpointing only done during tuning and not during refit
+    if refit:
+        cbs = []
+    else:
+        cbs = [
+            SaveModelCallbackCustom(
+                monitor="valid_loss",
+                comp=np.less,
+                fname="best",
+                with_opt=True,
+                reset_on_fit=True,
+            ),
+        ]
+    cbs += fit_cbs
     if fit == "fit_flat_cos":
-        surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=fit_cbs)
+        surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=cbs)
     elif fit == "fit_one_cycle":
-        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, cbs=fit_cbs)
+        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, cbs=cbs)
+
+    # load best model if not refit
+    if not refit:
+        surrogate = surrogate.load("best")
 
     return surrogate
 
@@ -202,7 +283,9 @@ def tune_config_resnet(
             use_cuda=use_cuda,
             **kwargs,
         )
-        loss = surrogate.validate()[0]
+        loss = surrogate.validate()[
+            0
+        ]  # we have to validate again to get the metrics because we loaded the best checkpointed model
         return loss
 
     study.optimize(objective, n_trials=trials, timeout=walltime)
@@ -444,7 +527,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--trials",
         type=int,
-        default=11,
+        default=0,
         help="Number of optuna trials",
     )  # by default we run until terminated externally
     parser.add_argument(
@@ -479,8 +562,6 @@ if __name__ == "__main__":
         pin_memory=True,
     )
 
-    random_seed(10, use_cuda=use_cuda)
-
     study = tune_config_resnet(
         args.key,
         name=args.name,
@@ -504,10 +585,15 @@ if __name__ == "__main__":
     best_params.pop("use_residual_dropout")
     best_params.pop("use_wd")
 
+    with open(Path(config.config_path, "models", "best_epoch.txt"), "r") as f:
+        best_epoch = int(f.readline().strip("\n"))
+
     surrogate = fit_config_resnet(
         args.key,
         dl_train=dl_refit,
         tfms=tfms_list.get(args.key),
+        epochs=best_epoch + 1,
+        refit=True,
         use_cuda=use_cuda,
         **best_params,
     )

@@ -59,26 +59,31 @@ class ContTransformerStandardize(nn.Module):
     Transformer for Continuous Variables. Transforms via standardization.
     """
 
-    def __init__(self, x, **kwargs):
+    def __init__(self, x, robust=False, **kwargs):
         super().__init__()
-        self.mean, self.sd = torch.mean(x[~torch.isnan(x)]), torch.sqrt(
-            torch.var(x[~torch.isnan(x)])
-        )
-        if self.sd <= 1e-12:
+        if robust:
+            self.center, self.scale = torch.median(x[~torch.isnan(x)]), torch.quantile(
+                x[~torch.isnan(x)], 0.75
+            ) - torch.quantile(x[~torch.isnan(x)], 0.25)
+        else:
+            self.center, self.scale = torch.mean(x[~torch.isnan(x)]), torch.sqrt(
+                torch.var(x[~torch.isnan(x)])
+            )
+        if self.scale <= 1e-12:
             raise Exception("Constant feature detected!")
 
     def forward(self, x, **kwargs):
         """
         Batch-wise transform for x.
         """
-        x = (x - self.mean) / self.sd
+        x = (x - self.center) / self.scale
         return x.float()
 
     def invert(self, x, **kwargs):
         """
         Batch-wise inverse transform for x.
         """
-        x = x * self.sd + self.mean
+        x = x * self.scale + self.center
         return x.float()
 
 
@@ -88,49 +93,75 @@ class ContTransformerStandardizeGrouped(nn.Module):
     Grouped by group.
     """
 
-    def __init__(self, x, group, **kwargs):
+    def __init__(self, x, group, robust=False, **kwargs):
         super().__init__()
         self.group_ids = torch.unique(group)
 
-        self.means = torch.stack(
-            [
-                torch.mean(x[group == group_id][~torch.isnan(x[group == group_id])])
-                for group_id in self.group_ids
-            ]
-        )
-        self.sds = torch.stack(
-            [
-                torch.sqrt(
-                    torch.var(x[group == group_id][~torch.isnan(x[group == group_id])])
-                )
-                for group_id in self.group_ids
-            ]
-        )
-        if any([sd <= 1e-12 for sd in self.sds]):
+        if robust:
+            self.centers = torch.stack(
+                [
+                    torch.median(
+                        x[group == group_id][~torch.isnan(x[group == group_id])]
+                    )
+                    for group_id in self.group_ids
+                ]
+            )
+            self.scales = torch.stack(
+                [
+                    torch.quantile(
+                        x[group == group_id][~torch.isnan(x[group == group_id])], 0.75
+                    )
+                    - torch.quantile(
+                        x[group == group_id][~torch.isnan(x[group == group_id])], 0.25
+                    )
+                    for group_id in self.group_ids
+                ]
+            )
+        else:
+            self.centers = torch.stack(
+                [
+                    torch.mean(x[group == group_id][~torch.isnan(x[group == group_id])])
+                    for group_id in self.group_ids
+                ]
+            )
+            self.scales = torch.stack(
+                [
+                    torch.sqrt(
+                        torch.var(
+                            x[group == group_id][~torch.isnan(x[group == group_id])]
+                        )
+                    )
+                    for group_id in self.group_ids
+                ]
+            )
+
+        if any([scale <= 1e-12 for scale in self.scales]):
             raise Exception("Constant feature detected!")
 
     def forward(self, x, group, **kwargs):
         """
         Batch-wise transform for x.
         """
-        # FIXME: more efficient device handling
-        means = (
-            self.means.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        centers = (
+            self.centers.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
         )
-        sds = self.sds.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
-        x = (x - means) / sds
+        scales = (
+            self.scales.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        )
+        x = (x - centers) / scales
         return x.float()
 
     def invert(self, x, group, **kwargs):
         """
         Batch-wise inverse transform for x.
         """
-        # FIXME: more efficient device handling
-        means = (
-            self.means.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        centers = (
+            self.centers.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
         )
-        sds = self.sds.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
-        x = x * sds + means
+        scales = (
+            self.scales.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        )
+        x = x * scales + centers
         return x.float()
 
 

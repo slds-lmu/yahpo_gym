@@ -156,19 +156,6 @@ class AbstractSurrogate(nn.Module):
         )
 
 
-class Attention(nn.Module):
-    def __init__(self, n_inputs):
-        super().__init__()
-        self.n_inputs = n_inputs
-        self.attn = nn.Linear(n_inputs, 1)
-
-    def forward(self, x):
-        attn_weights = self.attn(x)
-        attn_weights = F.softmax(attn_weights, dim=0)
-        weighted_x = attn_weights * x
-        return weighted_x
-
-
 # ResNet
 class ResNet(AbstractSurrogate):
     def __init__(
@@ -288,10 +275,10 @@ if __name__ == "__main__":
     device = torch.device("cpu")
 
     cfg = cfg("iaml_glmnet")
-    dls = dl_from_config(cfg, pin_memory=True, device=device)
+    dl_train, dl_refit = dl_from_config(cfg, pin_memory=True, device=device)
 
-    model = ResNet(dls, instance_names=cfg.instance_names)
+    model = ResNet(dl_train, instance_names=cfg.instance_names)
     surrogate = SurrogateTabularLearner(
-        dls, model, loss_func=MultiMaeLoss(), metrics=None
+        dl_train, model, loss_func=MultiMseLoss(), metrics=None
     )
     surrogate.fit_one_cycle(5, 1e-4)

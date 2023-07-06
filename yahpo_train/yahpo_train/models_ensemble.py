@@ -71,7 +71,7 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
                 f"Training ensemble model {i + 1}/{self.n_models} with fit_one_cycle with lr {lr_max}"
             )
             self.learners[i].fit_one_cycle(
-                n_epoch=np_epoch,
+                n_epoch=n_epoch,
                 lr_max=lr_max,
                 div=div,
                 div_final=div_final,
@@ -133,10 +133,16 @@ if __name__ == "__main__":
     device = torch.device("cpu")
 
     cfg = cfg("iaml_glmnet")
-    dls = dl_from_config(cfg, pin_memory=True, device=device)
+    dl_train, dl_refit = dl_from_config(cfg, pin_memory=True, device=device)
 
-    ensemble = Ensemble(ResNet, n_models=3, dls=dls, instance_names=cfg.instance_names)
-    surrogate = SurrogateEnsembleLearner(
-        dls, ensemble, loss_func=MultiMaeLoss(), metrics=None
+    ensemble = Ensemble(
+        ResNet, n_models=3, dls=dl_train, instance_names=cfg.instance_names
     )
+    surrogate = SurrogateEnsembleLearner(
+        dl_train, ensemble, loss_func=MultiMseLoss(), metrics=None
+    )
+    # FIXME:
+    # epoch train_loss valid_loss time
+    # is logged two times
+
     surrogate.fit_one_cycle(5, 1e-4)

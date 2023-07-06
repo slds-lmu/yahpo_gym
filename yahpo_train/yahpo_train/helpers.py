@@ -112,7 +112,7 @@ def generate_all_test_set_metrics(
         test_set_metrics = pd.concat([test_set_metrics, tmp])
     if save_to_csv:
         test_set_metrics.to_csv(
-            bench.config.config_path + "/test_set_metrics_" + model + ".csv",
+            Path(bench.config.config_path, "test_set_metrics_" + model + ".csv"),
             index_label="target",
         )
     return test_set_metrics

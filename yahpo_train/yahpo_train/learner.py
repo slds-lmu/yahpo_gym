@@ -23,7 +23,7 @@ def dl_from_config(
     random.seed(seed)
 
     # we shuffle the DataFrame before handing it to the dataloader to ensure mixed batches
-    # all relevant info is obtained from the 'config'
+    # all relevant info is obtained from the config
     dtypes = dict(zip(config.cat_names, ["object"] * len(config.cat_names)))
     dtypes.update(
         dict(
@@ -39,7 +39,6 @@ def dl_from_config(
         usecols=list(dtypes.keys()),
         dtype=dtypes,
     ).sample(frac=1.0, random_state=seed)
-    instance_names = config.instance_names
     # get rid of irrelevant columns
     # if config.instance_names is not None we can be sure that it is the first element of config.cat_names
     df = df[config.cat_names + config.cont_names + config.y_names]
@@ -56,10 +55,19 @@ def dl_from_config(
         df_test.to_csv(config.get_path("test_dataset"), index=False)
 
     if bs is None:
-        # batch size is 2^x, where x is the smallest integer such that 2^x > len(df_train) * (1 - valid_frac)
-        bs = 2 ** (int(math.log2((len(df_train) * (1 - valid_frac) / 32))) + 1)
+        potential_batch_sizes = [
+            32,
+            64,
+            128,
+            256,
+            512,
+            1024,
+        ]
+        desired_fraction = 0.01
+        desired_samples = len(df_train) * (1 - valid_frac) * desired_fraction
+        bs = min(potential_batch_sizes, key=lambda x: abs(x - desired_samples))
 
-    dls = TabularDataLoaders.from_df(
+    dl_train = TabularDataLoaders.from_df(
         df=df_train,
         path=config.config_path,
         y_names=config.y_names,
@@ -82,16 +90,37 @@ def dl_from_config(
         **kwargs
     )
 
+    dl_refit = TabularDataLoaders.from_df(
+        df=df_train,
+        path=config.config_path,
+        y_names=config.y_names,
+        cont_names=config.cont_names,
+        cat_names=config.cat_names,
+        procs=[
+            Categorify,
+            FillMissing(
+                fill_strategy=FillStrategy.constant,
+                add_col=False,
+                fill_vals=dict((k, 0.0) for k in config.cont_names + config.cat_names),
+            ),
+        ],
+        valid_idx=[],
+        bs=bs,
+        shuffle=shuffle,
+        device=device,
+        **kwargs
+    )
+
     # save the encoding of categories
     encoding = {
-        cat_name: dict(dls.classes[cat_name].o2i) for cat_name in config.cat_names
+        cat_name: dict(dl_train.classes[cat_name].o2i) for cat_name in config.cat_names
     }
 
     if save_encoding:
-        with open(config.get_path("encoding"), "w") as f:
+        with open(Path(config.get_path("encoding")), "w") as f:
             json.dump(encoding, fp=f, sort_keys=True)
 
-    return dls
+    return dl_train, dl_refit
 
 
 def _get_idx(
