@@ -63,7 +63,7 @@ def dl_from_config(
             512,
             1024,
         ]
-        desired_fraction = 0.01
+        desired_fraction = 0.05
         desired_samples = len(df_train) * (1 - valid_frac) * desired_fraction
         bs = min(potential_batch_sizes, key=lambda x: abs(x - desired_samples))
 
