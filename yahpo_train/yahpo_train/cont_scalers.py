@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+from sklearn.preprocessing import QuantileTransformer
+import numpy as np
 from functools import partial
 
 
@@ -87,6 +89,44 @@ class ContTransformerStandardize(nn.Module):
         return x.float()
 
 
+class ContTransformerQuantile(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms via quantile transformation.
+    """
+
+    def __init__(self, x, **kwargs):
+        super().__init__()
+
+        # convert PyTorch tensor to numpy array for sklearn
+        x_np = x.unsqueeze(1).detach().cpu().numpy()
+
+        # initialize and fit the QuantileTransformer
+        self.qt = QuantileTransformer(output_distribution="uniform", random_state=0)
+        self.qt.fit(x_np[~np.isnan(x_np), None])
+
+    def forward(self, x, **kwargs):
+        """
+        Batch-wise transform for x.
+        """
+        # convert PyTorch tensor to numpy array for sklearn
+        x_np = x.unsqueeze(1).detach().cpu().numpy()
+
+        # apply the QuantileTransformer and convert back to PyTorch tensor
+        x_transformed = torch.tensor(self.qt.transform(x_np)).float().to(x.device)
+        return x_transformed.squeeze(1)
+
+    def invert(self, x, **kwargs):
+        """
+        Batch-wise inverse transform for x.
+        """
+        # convert PyTorch tensor to numpy array for sklearn
+        x_np = x.unsqueeze(1).detach().cpu().numpy()
+
+        # apply the inverse transformation and convert back to PyTorch tensor
+        x_inverted = torch.tensor(self.qt.inverse_transform(x_np)).float().to(x.device)
+        return x_inverted.squeeze(1)
+
+
 class ContTransformerStandardizeGrouped(nn.Module):
     """
     Transformer for Continuous Variables. Transforms via standardization.
@@ -163,6 +203,70 @@ class ContTransformerStandardizeGrouped(nn.Module):
         )
         x = x * scales + centers
         return x.float()
+
+
+class ContTransformerQuantileGrouped(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms via quantile transformation.
+    Grouped by group.
+    """
+
+    def __init__(self, x, group, **kwargs):
+        super().__init__()
+
+        # convert PyTorch tensor to numpy array for sklearn
+        x_np = x.unsqueeze(1).detach().cpu().numpy()
+        group_np = group.detach().cpu().numpy()
+
+        self.group_ids = np.unique(group_np)
+
+        # initialize and fit the QuantileTransformer for each group
+        self.qts = {}
+        for group_id in self.group_ids:
+            qt = QuantileTransformer(output_distribution="uniform", random_state=0)
+            group_x = x_np[group_np == group_id]
+            qt.fit(group_x[~np.isnan(group_x), None])
+            self.qts[group_id] = qt
+
+    def forward(self, x, group, **kwargs):
+        """
+        Batch-wise transform for x.
+        """
+        # convert PyTorch tensor to numpy array for sklearn
+        x_np = x.unsqueeze(1).detach().cpu().numpy()
+        group_np = group.detach().cpu().numpy()
+
+        x_transformed = np.empty_like(x_np)
+        for group_id in self.group_ids:
+            if any(group_np == group_id):
+                group_x = x_np[group_np == group_id]
+                x_transformed[group_np == group_id] = self.qts[group_id].transform(
+                    group_x
+                )
+
+        # convert back to PyTorch tensor
+        x_transformed = torch.tensor(x_transformed).float().to(x.device)
+        return x_transformed.squeeze(1)
+
+    def invert(self, x, group, **kwargs):
+        """
+        Batch-wise inverse transform for x.
+        """
+        # convert PyTorch tensor to numpy array for sklearn
+        x_np = x.unsqueeze(1).detach().cpu().numpy()
+        group_np = group.detach().cpu().numpy()
+
+        x_inverted = np.empty_like(x_np)
+        for group_id in self.group_ids:
+            if any(group_np == group_id):
+                group_x = x_np[group_np == group_id]
+                x_inverted[group_np == group_id] = self.qts[group_id].inverse_transform(
+                    group_x
+                )
+
+        # convert back to PyTorch tensor
+        x_inverted = torch.tensor(x_inverted).float().to(x.device)
+        return x_inverted.squeeze(1)
 
 
 class ContTransformerInt(nn.Module):

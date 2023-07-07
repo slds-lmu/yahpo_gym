@@ -36,7 +36,7 @@ class AbstractSurrogate(nn.Module):
         else:
             self.embds_dbl = nn.ModuleList(
                 [
-                    ContTransformerStandardize(torch.from_numpy(cont.values).float())
+                    ContTransformerQuantile(torch.from_numpy(cont.values).float())
                     for _, cont in dls.all_cols[dls.cont_names].items()
                 ]
             )
@@ -65,7 +65,7 @@ class AbstractSurrogate(nn.Module):
             if instance_names is not None:
                 self.embds_tgt = nn.ModuleList(
                     [
-                        ContTransformerStandardizeGroupedRange(
+                        ContTransformerQuantileGrouped(
                             torch.from_numpy(cont.values).float(),
                             group=torch.from_numpy(dls.xs[instance_names].values).int(),
                         )
@@ -75,9 +75,7 @@ class AbstractSurrogate(nn.Module):
             else:
                 self.embds_tgt = nn.ModuleList(
                     [
-                        ContTransformerStandardizeRange(
-                            torch.from_numpy(cont.values).float()
-                        )
+                        ContTransformerQuantile(torch.from_numpy(cont.values).float())
                         for name, cont in dls.ys[dls.y_names].items()
                     ]
                 )
