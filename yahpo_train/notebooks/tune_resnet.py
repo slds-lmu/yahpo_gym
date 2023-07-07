@@ -26,7 +26,8 @@ def random_seed(seed, use_cuda):
         torch.backends.cudnn.deterministic = True  # needed
         torch.backends.cudnn.benchmark = False
 
-
+# FIXME: rethink about using a large number of epochs and use early stopping
+# with a callback of checkpointing storing the best number of epochs
 def fit_config_resnet(
     key,
     dl_train,
@@ -128,6 +129,7 @@ def fit_config_resnet(
         ]
 
     # fit
+    # FIXME: check whether learning rate tuning ranges are sensible?
     if fit == "fit_flat_cos":
         surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=fit_cbs)
     elif fit == "fit_one_cycle":
