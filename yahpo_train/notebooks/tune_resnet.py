@@ -37,7 +37,7 @@ def fit_config_resnet(
     fit="fit_flat_cos",
     lr=1e-4,
     wd=None,
-    epochs=10,
+    epochs=50,
     d=256,
     d_hidden_factor=2.0,
     n_layers=4,
@@ -130,7 +130,6 @@ def fit_config_resnet(
         ]
 
     # fit
-    # FIXME: check whether learning rate tuning ranges are sensible?
     if fit == "fit_flat_cos":
         surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=fit_cbs)
     elif fit == "fit_one_cycle":
@@ -447,7 +446,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--trials",
         type=int,
-        default=1,
+        default=0,
         help="Number of optuna trials",
     )  # by default we run until terminated externally
     parser.add_argument(

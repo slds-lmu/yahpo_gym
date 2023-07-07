@@ -56,15 +56,8 @@ def dl_from_config(
         df_test.to_csv(config.get_path("test_dataset"), index=False)
 
     if bs is None:
-        potential_batch_sizes = [
-            32,
-            64,
-            128,
-            256,
-            512,
-            1024,
-        ]
-        desired_fraction = 0.05
+        potential_batch_sizes = 2 ** np.arange(5, 14)
+        desired_fraction = 0.01
         desired_samples = len(df_train) * (1 - valid_frac) * desired_fraction
         bs = min(potential_batch_sizes, key=lambda x: abs(x - desired_samples))
 
