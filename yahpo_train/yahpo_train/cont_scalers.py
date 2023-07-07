@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
-from sklearn.preprocessing import QuantileTransformer
+from scipy.stats import boxcox
 import numpy as np
 from functools import partial
+import warnings
 
 
 class ContTransformerNone(nn.Module):
@@ -30,11 +31,12 @@ class ContTransformerNone(nn.Module):
 
 class ContTransformerRange(nn.Module):
     """
-    Transformer for Continuous Variables. Transforms to [0,1].
+    Transformer for Continuous Variables. Transforms to [eps,1-eps].
     """
 
-    def __init__(self, x, **kwargs):
+    def __init__(self, x, eps=1e-2, **kwargs):
         super().__init__()
+        self.eps = eps
         self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(
             x[~torch.isnan(x)]
         )
@@ -45,14 +47,63 @@ class ContTransformerRange(nn.Module):
         """
         Batch-wise transform for x.
         """
-        x = (x - self.min) / (self.max - self.min)
+        x = self.eps + (1 - 2 * self.eps) * (x - self.min) / (self.max - self.min)
         return x.float()
 
     def invert(self, x, **kwargs):
         """
         Batch-wise inverse transform for x.
         """
-        x = x * (self.max - self.min) + self.min
+        x = self.min + (x - self.eps) / (1 - 2 * self.eps) * (self.max - self.min)
+        return x.float()
+
+
+class ContTransformerRangeGrouped(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms to [eps,1-eps].
+    Grouped by group.
+    """
+
+    def __init__(self, x, group, eps=1e-2, **kwargs):
+        super().__init__()
+        self.group_ids = torch.unique(group)
+        self.eps = eps
+
+        self.mins = torch.stack(
+            [
+                torch.min(x[group == group_id][~torch.isnan(x[group == group_id])])
+                for group_id in self.group_ids
+            ]
+        )
+
+        self.maxs = torch.stack(
+            [
+                torch.max(x[group == group_id][~torch.isnan(x[group == group_id])])
+                for group_id in self.group_ids
+            ]
+        )
+
+        if any([max_ == min_ for max_, min_ in zip(self.maxs, self.mins)]):
+            raise Exception("Constant feature detected!")
+
+    def forward(self, x, group, **kwargs):
+        """
+        Batch-wise transform for x.
+        """
+        mins = self.mins.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        maxs = self.maxs.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+
+        x = self.eps + (1 - 2 * self.eps) * (x - mins) / (maxs - mins)
+        return x.float()
+
+    def invert(self, x, group, **kwargs):
+        """
+        Batch-wise inverse transform for x.
+        """
+        mins = self.mins.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        maxs = self.maxs.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+
+        x = mins + (x - self.eps) / (1 - 2 * self.eps) * (maxs - mins)
         return x.float()
 
 
@@ -87,44 +138,6 @@ class ContTransformerStandardize(nn.Module):
         """
         x = x * self.scale + self.center
         return x.float()
-
-
-class ContTransformerQuantile(nn.Module):
-    """
-    Transformer for Continuous Variables. Transforms via quantile transformation.
-    """
-
-    def __init__(self, x, **kwargs):
-        super().__init__()
-
-        # convert PyTorch tensor to numpy array for sklearn
-        x_np = x.unsqueeze(1).detach().cpu().numpy()
-
-        # initialize and fit the QuantileTransformer
-        self.qt = QuantileTransformer(output_distribution="uniform", random_state=0)
-        self.qt.fit(x_np[~np.isnan(x_np), None])
-
-    def forward(self, x, **kwargs):
-        """
-        Batch-wise transform for x.
-        """
-        # convert PyTorch tensor to numpy array for sklearn
-        x_np = x.unsqueeze(1).detach().cpu().numpy()
-
-        # apply the QuantileTransformer and convert back to PyTorch tensor
-        x_transformed = torch.tensor(self.qt.transform(x_np)).float().to(x.device)
-        return x_transformed.squeeze(1)
-
-    def invert(self, x, **kwargs):
-        """
-        Batch-wise inverse transform for x.
-        """
-        # convert PyTorch tensor to numpy array for sklearn
-        x_np = x.unsqueeze(1).detach().cpu().numpy()
-
-        # apply the inverse transformation and convert back to PyTorch tensor
-        x_inverted = torch.tensor(self.qt.inverse_transform(x_np)).float().to(x.device)
-        return x_inverted.squeeze(1)
 
 
 class ContTransformerStandardizeGrouped(nn.Module):
@@ -205,68 +218,53 @@ class ContTransformerStandardizeGrouped(nn.Module):
         return x.float()
 
 
-class ContTransformerQuantileGrouped(nn.Module):
+class ContTransformerBoxCox(nn.Module):
     """
-    Transformer for Continuous Variables. Transforms via quantile transformation.
-    Grouped by group.
+    Transformer for Continuous Variables. Transforms via Box-Cox transformation.
     """
 
-    def __init__(self, x, group, **kwargs):
+    def __init__(self, x, **kwargs):
         super().__init__()
+        self.fallback = False
 
-        # convert PyTorch tensor to numpy array for sklearn
-        x_np = x.unsqueeze(1).detach().cpu().numpy()
-        group_np = group.detach().cpu().numpy()
+        # convert PyTorch tensor to numpy array for scipy
+        x_np = x.detach().cpu().numpy()
 
-        self.group_ids = np.unique(group_np)
+        # estimate the Box-Cox transformation parameter
+        with np.errstate(all="raise"):
+            try:
+                _, self.lmbda_ = boxcox(x_np[~np.isnan(x_np)])
+            except Exception as e:
+                print(
+                    f"Box-Cox estimation failed with error: {e}. Using identity as fallback."
+                )
+                self.fallback = True
 
-        # initialize and fit the QuantileTransformer for each group
-        self.qts = {}
-        for group_id in self.group_ids:
-            qt = QuantileTransformer(output_distribution="uniform", random_state=0)
-            group_x = x_np[group_np == group_id]
-            qt.fit(group_x[~np.isnan(group_x), None])
-            self.qts[group_id] = qt
-
-    def forward(self, x, group, **kwargs):
+    def forward(self, x, **kwargs):
         """
         Batch-wise transform for x.
         """
-        # convert PyTorch tensor to numpy array for sklearn
-        x_np = x.unsqueeze(1).detach().cpu().numpy()
-        group_np = group.detach().cpu().numpy()
+        if self.fallback:
+            return x
+        else:
+            if self.lmbda_ != 0:
+                x = (torch.pow(x, self.lmbda_) - 1) / self.lmbda_
+            else:
+                x = torch.log(x)
+            return x.float()
 
-        x_transformed = np.empty_like(x_np)
-        for group_id in self.group_ids:
-            if any(group_np == group_id):
-                group_x = x_np[group_np == group_id]
-                x_transformed[group_np == group_id] = self.qts[group_id].transform(
-                    group_x
-                )
-
-        # convert back to PyTorch tensor
-        x_transformed = torch.tensor(x_transformed).float().to(x.device)
-        return x_transformed.squeeze(1)
-
-    def invert(self, x, group, **kwargs):
+    def invert(self, x, **kwargs):
         """
         Batch-wise inverse transform for x.
         """
-        # convert PyTorch tensor to numpy array for sklearn
-        x_np = x.unsqueeze(1).detach().cpu().numpy()
-        group_np = group.detach().cpu().numpy()
-
-        x_inverted = np.empty_like(x_np)
-        for group_id in self.group_ids:
-            if any(group_np == group_id):
-                group_x = x_np[group_np == group_id]
-                x_inverted[group_np == group_id] = self.qts[group_id].inverse_transform(
-                    group_x
-                )
-
-        # convert back to PyTorch tensor
-        x_inverted = torch.tensor(x_inverted).float().to(x.device)
-        return x_inverted.squeeze(1)
+        if self.fallback:
+            return x
+        else:
+            if self.lmbda_ != 0:
+                x = torch.pow((self.lmbda_ * x) + 1, 1 / self.lmbda_)
+            else:
+                x = torch.exp(x)
+            return x.float()
 
 
 class ContTransformerInt(nn.Module):
@@ -417,10 +415,6 @@ def tfms_chain(tfms):
     return partial(ContTransformerChain, tfms=tfms)
 
 
-ContTransformerStandardizeRange = tfms_chain(
-    [ContTransformerStandardize, ContTransformerRange]
-)
-
-ContTransformerStandardizeGroupedRange = tfms_chain(
-    [ContTransformerStandardizeGrouped, ContTransformerRange]
+ContTransformerRangeBoxCoxRange = tfms_chain(
+    [ContTransformerRange, ContTransformerBoxCox, ContTransformerRange]
 )

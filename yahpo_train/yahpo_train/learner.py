@@ -1,6 +1,7 @@
 import random
 import pandas as pd
 import numpy as np
+import torch
 from fastai.tabular.all import *
 from yahpo_gym.configuration import Configuration
 
@@ -14,7 +15,7 @@ def dl_from_config(
     train_frac: float = 0.8,
     valid_frac: float = 0.25,
     shuffle: bool = True,
-    device: str = "cpu",
+    device: torch.device = torch.device("cpu"),
     seed: int = 10,
     **kwargs
 ) -> "fastai.tabular.data.TabularDataLoaders":

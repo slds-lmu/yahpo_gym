@@ -26,8 +26,7 @@ def random_seed(seed, use_cuda):
         torch.backends.cudnn.deterministic = True  # needed
         torch.backends.cudnn.benchmark = False
 
-# FIXME: rethink about using a large number of epochs and use early stopping
-# with a callback of checkpointing storing the best number of epochs
+
 def fit_config_resnet(
     key,
     dl_train,
@@ -38,7 +37,7 @@ def fit_config_resnet(
     fit="fit_flat_cos",
     lr=1e-4,
     wd=None,
-    epochs=100,
+    epochs=10,
     d=256,
     d_hidden_factor=2.0,
     n_layers=4,
@@ -57,16 +56,18 @@ def fit_config_resnet(
     # tfms overwrites emdbs_dbl, embds_tgt
     if tfms is not None:
         embds_dbl = [
-            tfms.get(name) if tfms.get(name) is not None else ContTransformerQuantile
+            tfms.get(name)
+            if tfms.get(name) is not None
+            else ContTransformerRangeBoxCoxRange
             for name, cont in dl_train.all_cols[dl_train.cont_names].items()
         ]
         embds_tgt = [
             tfms.get(name)
             if tfms.get(name) is not None
             else (
-                ContTransformerQuantileGrouped
+                ContTransformerRangeGrouped
                 if config.instance_names is not None
-                else ContTransformerQuantile
+                else ContTransformerRange
             )
             for name, cont in dl_train.ys.items()
         ]
@@ -220,37 +221,37 @@ if __name__ == "__main__":
             "val_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=100.00),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "val_cross_entropy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "val_balanced_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "test_cross_entropy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "test_balanced_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "time": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
         }
@@ -287,49 +288,49 @@ if __name__ == "__main__":
             "mmce": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "f1": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "auc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "logloss": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "mec": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "ias": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "nf": tfms_chain(
@@ -340,7 +341,7 @@ if __name__ == "__main__":
                         max=[21, 5, 14, 20],  # 1067, 1489, 40981, 41146
                     ),
                     ContTransformerInt,
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
         }
@@ -361,61 +362,61 @@ if __name__ == "__main__":
             "mmce": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "f1": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "feo": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "fpredp": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "facc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "ftpr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "ffomr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "ffnr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerQuantileGrouped,
+                    ContTransformerRangeGrouped,
                 ]
             ),
         }
@@ -446,7 +447,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--trials",
         type=int,
-        default=0,
+        default=1,
         help="Number of optuna trials",
     )  # by default we run until terminated externally
     parser.add_argument(
@@ -506,6 +507,9 @@ if __name__ == "__main__":
     best_params.pop("use_residual_dropout")
     best_params.pop("use_wd")
 
+    warnings.filterwarnings(
+        "ignore", category=UserWarning
+    )  # ignore warnings due to empty validation set
     surrogate = fit_config_resnet(
         args.key,
         dl_train=dl_refit,
@@ -513,6 +517,7 @@ if __name__ == "__main__":
         use_cuda=use_cuda,
         **best_params,
     )
+    warnings.filterwarnings("default", category=UserWarning)  # reset warnings
 
     surrogate.export_onnx(config, device=device)
     generate_all_test_set_metrics(

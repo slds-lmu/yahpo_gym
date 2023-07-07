@@ -10,6 +10,8 @@ from fastai.tabular.all import *
 from yahpo_train.cont_scalers import *
 from yahpo_train.models_utils import *
 
+import warnings
+
 
 class AbstractSurrogate(nn.Module):
     def __init__(self):
@@ -36,7 +38,7 @@ class AbstractSurrogate(nn.Module):
         else:
             self.embds_dbl = nn.ModuleList(
                 [
-                    ContTransformerQuantile(torch.from_numpy(cont.values).float())
+                    ContTransformerYeoJohnson(torch.from_numpy(cont.values).float())
                     for _, cont in dls.all_cols[dls.cont_names].items()
                 ]
             )
@@ -65,7 +67,7 @@ class AbstractSurrogate(nn.Module):
             if instance_names is not None:
                 self.embds_tgt = nn.ModuleList(
                     [
-                        ContTransformerQuantileGrouped(
+                        ContTransformerYeoJohnsonGrouped(
                             torch.from_numpy(cont.values).float(),
                             group=torch.from_numpy(dls.xs[instance_names].values).int(),
                         )
@@ -75,7 +77,7 @@ class AbstractSurrogate(nn.Module):
             else:
                 self.embds_tgt = nn.ModuleList(
                     [
-                        ContTransformerQuantile(torch.from_numpy(cont.values).float())
+                        ContTransformerYeoJohnson(torch.from_numpy(cont.values).float())
                         for name, cont in dls.ys[dls.y_names].items()
                     ]
                 )
@@ -122,7 +124,7 @@ class AbstractSurrogate(nn.Module):
     def export_onnx(self, config_dict, device="cuda:0", suffix=""):
         """
         Export model to an ONNX file.
-        We can safely ignore tracing errors with respect to lambda since lambda will be constant during inference.
+        We can safely ignore tracing errors with respect to invert_y_trafo as it will be constant during inference.
         """
         self.eval()
         model_path = config_dict.get_path("model")
@@ -130,6 +132,9 @@ class AbstractSurrogate(nn.Module):
             model_path = config_dict.get_path("model").replace(
                 ".onnx", "_" + suffix + ".onnx"
             )
+        warnings.filterwarnings(
+            "ignore", category=torch.jit.TracerWarning
+        )  # ignore tracer warnings
         torch.onnx.export(
             self,
             # touple of x_cat followed by x_cont
@@ -152,6 +157,9 @@ class AbstractSurrogate(nn.Module):
                 "output": {0: "batch_size"},
             },
         )
+        warnings.filterwarnings(
+            "default", category=torch.jit.TracerWarning
+        )  # reset warnings
 
 
 # ResNet
@@ -245,7 +253,7 @@ class ResNet(AbstractSurrogate):
         x = self.last_activation(x)
         x = self.head(x)
         y = self.final_act(x)
-        if torch.tensor(invert_ytrafo):
+        if invert_ytrafo:
             if self.instance_names is not None:
                 current_device = y.device
                 group = x_cat[:, 0].to(current_device)
