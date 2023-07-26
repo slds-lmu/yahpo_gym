@@ -1,12 +1,14 @@
-from yahpo_train.models import *
+from functools import partial
+
+from fastai.callback.wandb import *
+from yahpo_gym import benchmark_set
+from yahpo_gym.benchmarks import fcnet, iaml, lcbench, nb301, rbv2, taskset
+from yahpo_gym.configuration import cfg
+
+from yahpo_train.cont_scalers import *
 from yahpo_train.learner import *
 from yahpo_train.metrics import *
-from yahpo_train.cont_scalers import *
-from yahpo_gym import benchmark_set
-from yahpo_gym.benchmarks import lcbench, rbv2, nb301, fcnet, taskset, iaml
-from yahpo_gym.configuration import cfg
-from fastai.callback.wandb import *
-from functools import partial
+from yahpo_train.models import *
 
 
 def fit_config(
@@ -134,11 +136,12 @@ def get_arch(max_units, n, shape):
 
 
 def tune_config(key, name, tfms_fixed={}, **kwargs):
+    import logging
+    import sys
+
     import optuna
     from optuna.integration import FastAIPruningCallback
     from optuna.visualization import plot_optimization_history
-    import logging
-    import sys
 
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
 

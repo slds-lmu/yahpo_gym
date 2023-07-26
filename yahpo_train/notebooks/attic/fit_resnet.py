@@ -1,15 +1,17 @@
 if __name__ == "__main__":
 
-    import optuna
     import json
-    import torch
     import random
+    from functools import partial
+
     import numpy as np
+    import optuna
+    import torch
     from tune_resnet import *
     from yahpo_gym import benchmark_set
+
     from yahpo_train.cont_scalers import *
     from yahpo_train.helpers import generate_all_test_set_metrics
-    from functools import partial
 
     study_path = "/home/ru84tad2/"  # FIXME: needs adaption
 

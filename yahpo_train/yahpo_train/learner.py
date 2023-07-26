@@ -1,14 +1,18 @@
 import random
-import pandas as pd
+from typing import Optional
+
 import numpy as np
+import pandas as pd
 import torch
 from fastai.tabular.all import *
+from fastai.tabular.data import TabularDataLoaders
+from pandas.core.frame import DataFrame
 from yahpo_gym.configuration import Configuration
 
 
 def dl_from_config(
-    config: "yahpo_gym.configuration.Configuration",
-    bs: int = None,
+    config: Configuration,
+    bs: Optional[int] = None,
     skipinitialspace: bool = True,
     save_df_test: bool = True,
     save_encoding: bool = False,
@@ -18,8 +22,10 @@ def dl_from_config(
     device: torch.device = torch.device("cpu"),
     seed: int = 10,
     **kwargs
-) -> "fastai.tabular.data.TabularDataLoaders":
-    """Create a fastai dataloader from a config file."""
+) -> Tuple[TabularDataLoaders, TabularDataLoaders]:
+    """
+    Create a fastai train and refit dataloader from a Configuration object.
+    """
     np.random.seed(seed)
     random.seed(seed)
 
@@ -118,12 +124,12 @@ def dl_from_config(
 
 
 def _get_idx(
-    df: "pd.core.frame.DataFrame",
-    config: "yahpo_gym.configuration.Configuration",
+    df: DataFrame,
+    config: Configuration,
     frac: float = 0.25,
     seed: int = 10,
     k: int = 10,
-):
+) -> pd.Index:
     """
     Include or exclude blocks of hyperparameters with differing fidelity.
     """
@@ -154,7 +160,7 @@ def _get_idx(
 class SurrogateTabularLearner(Learner):
     """Learner for tabular data"""
 
-    def _do_one_batch(self):
+    def _do_one_batch(self) -> None:
         if not self.training:
             self.tfpred = self.model(*self.xb, invert_ytrafo=True)
             self.tfyb = self.yb
@@ -182,7 +188,7 @@ class SurrogateTabularLearner(Learner):
         self._with_events(self.opt.step, "step", CancelStepException)
         self.opt.zero_grad()
 
-    def _end_cleanup(self):
+    def _end_cleanup(self) -> None:
         self.dl, self.xb, self.yb, self.pred, self.loss, self.tfpred, self.tfyb = (
             None,
             (None,),
@@ -193,5 +199,7 @@ class SurrogateTabularLearner(Learner):
             None,
         )
 
-    def export_onnx(self, config, device, suffix=""):
+    def export_onnx(
+        self, config: Configuration, device: torch.device, suffix: str = ""
+    ) -> None:
         return self.model.export_onnx(config, device, suffix)

@@ -1,14 +1,18 @@
-from yahpo_train.models import *
+import argparse
+from functools import partial
+
+import wandb
+from fastai.callback.wandb import *
+from yahpo_gym import benchmark_set
+from yahpo_gym.benchmarks import (fcnet, iaml, lcbench, nasbench_301, rbv2,
+                                  taskset)
+from yahpo_gym.configuration import cfg
+
+from yahpo_train.cont_scalers import *
 from yahpo_train.learner import *
 from yahpo_train.metrics import *
-from yahpo_train.cont_scalers import *
-from yahpo_gym import benchmark_set
-from yahpo_gym.benchmarks import lcbench, rbv2, nasbench_301, fcnet, taskset, iaml
-from yahpo_gym.configuration import cfg
-from fastai.callback.wandb import *
-from functools import partial
-import wandb
-import argparse
+from yahpo_train.models import *
+
 
 def fit_config(key, dls_train=None, save_df_test_encoding=True, embds_dbl=None, embds_tgt=None, tfms=None, lr=1e-4, epochs=100, deep=[1024,512,256], deeper=[], dropout=0., wide=True, use_bn=False, bs=10240, frac=1., mixup=True, export=False, log_wandb=True, wandb_entity='mfsurrogates', cbs=[], device='cuda:0'):
     """
@@ -67,11 +71,12 @@ def get_arch(max_units, n, shape):
         return units
 
 def tune_config(key, name, tfms_fixed={}, trials=1000, walltime=86400, **kwargs):
+    import logging
+    import sys
+
     import optuna
     from optuna.integration import FastAIPruningCallback
     from optuna.visualization import plot_optimization_history
-    import logging
-    import sys
 
     if trials == 0:
         trials = None

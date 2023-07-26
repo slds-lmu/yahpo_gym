@@ -1,14 +1,15 @@
-from yahpo_gym import benchmark_set
-from yahpo_train.metrics import *
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 import pandas as pd
 import torch
+from yahpo_gym import benchmark_set
 
-# FIXME: should silence some onnx thread warnings
+from yahpo_train.metrics import *
 
 
-def chunk(n: int, size: int) -> list:
-    """Split the range [0, n) into chunks of size size."""
+def chunk(n: int, size: int) -> List[List[int]]:
+    """Split the range [0, n) into chunks of size as specified by `size`."""
     m = n // size
     result = []
     lower = 0
@@ -26,10 +27,10 @@ def chunk(n: int, size: int) -> list:
 def get_set_metrics(
     key: str,
     set: str = "test",
-    model: str = None,
-    instance: str = None,
+    model: Optional[str] = None,
+    instance: Optional[str] = None,
     chunk_size: int = 10000,
-) -> dict:
+) -> Dict:
     """Get the metrics for a given benchmark scenario and set (test or all) for a given model."""
     # NOTE: this is somewhat slow because we first map the points to the right format for the onnx model and
     # then use the onnx model for prediction
@@ -100,7 +101,7 @@ def get_set_metrics(
 
 
 def generate_all_test_set_metrics(
-    key: str, model: str = None, save_to_csv: bool = False
+    key: str, model: Optional[str] = None, save_to_csv: bool = False
 ) -> pd.DataFrame:
     """Generates test set metrics for all instances and saves them to a csv file."""
     bench = benchmark_set.BenchmarkSet(key)

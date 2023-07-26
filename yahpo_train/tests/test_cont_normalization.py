@@ -1,9 +1,10 @@
-import torch
 import numpy as np
-from yahpo_train.cont_normalization import ContNormalization
-from yahpo_gym.configuration import cfg
 import pandas as pd
 import scipy.stats
+import torch
+from yahpo_gym.configuration import cfg
+
+from yahpo_train.cont_normalization import ContNormalization
 
 
 def test_cont_norm():

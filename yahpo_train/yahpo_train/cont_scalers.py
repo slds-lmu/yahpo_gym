@@ -1,9 +1,10 @@
+from functools import partial
+from typing import Any, Callable, Dict, List, Optional
+
+import numpy as np
 import torch
 import torch.nn as nn
 from scipy.stats import boxcox
-import numpy as np
-from functools import partial
-import warnings
 
 
 class ContTransformerNone(nn.Module):
@@ -11,18 +12,18 @@ class ContTransformerNone(nn.Module):
     Transformer for Continuous Variables. Performs no transformation.
     """
 
-    def __init__(self, x, **kwargs):
+    def __init__(self, x: torch.Tensor, **kwargs):
         super().__init__()
 
     @staticmethod
-    def forward(x, **kwargs):
+    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return x.float()
 
     @staticmethod
-    def invert(x, **kwargs):
+    def invert(x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -32,42 +33,63 @@ class ContTransformerNone(nn.Module):
 class ContTransformerRange(nn.Module):
     """
     Transformer for Continuous Variables. Transforms to [eps,1-eps].
+    If x_range is "-1-1", transforms to [-1+eps,1-eps].
     """
 
-    def __init__(self, x, eps=1e-2, **kwargs):
+    def __init__(
+        self, x: torch.Tensor, eps: float = 1e-2, x_range: str = "0-1", **kwargs
+    ):
         super().__init__()
         self.eps = eps
+        self.x_range = x_range
         self.min, self.max = torch.min(x[~torch.isnan(x)]), torch.max(
             x[~torch.isnan(x)]
         )
         if self.max == self.min:
             raise Exception("Constant feature detected!")
 
-    def forward(self, x, **kwargs):
+    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
-        x = self.eps + (1 - 2 * self.eps) * (x - self.min) / (self.max - self.min)
+        if self.x_range == "0-1":
+            x = self.eps + (1 - 2 * self.eps) * (x - self.min) / (self.max - self.min)
+        elif self.x_range == "-1-1":
+            x = self.eps + (1 - 2 * self.eps) * (x - self.min) / (self.max - self.min)
+            x = 2 * x - 1
         return x.float()
 
-    def invert(self, x, **kwargs):
+    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
-        x = self.min + (x - self.eps) / (1 - 2 * self.eps) * (self.max - self.min)
+        if self.x_range == "0-1":
+            x = self.min + (x - self.eps) / (1 - 2 * self.eps) * (self.max - self.min)
+        elif self.x_range == "-1-1":
+            x = (x + 1) / 2
+            x = self.min + (x - self.eps) / (1 - 2 * self.eps) * (self.max - self.min)
         return x.float()
 
 
 class ContTransformerRangeGrouped(nn.Module):
     """
     Transformer for Continuous Variables. Transforms to [eps,1-eps].
+    If x_range is "-1-1", transforms to [-1+eps,1-eps].
     Grouped by group.
     """
 
-    def __init__(self, x, group, eps=1e-2, **kwargs):
+    def __init__(
+        self,
+        x: torch.Tensor,
+        group: torch.Tensor,
+        eps: float = 1e-2,
+        x_range: str = "0-1",
+        **kwargs,
+    ):
         super().__init__()
         self.group_ids = torch.unique(group)
         self.eps = eps
+        self.x_range = x_range
 
         self.mins = torch.stack(
             [
@@ -86,24 +108,32 @@ class ContTransformerRangeGrouped(nn.Module):
         if any([max_ == min_ for max_, min_ in zip(self.maxs, self.mins)]):
             raise Exception("Constant feature detected!")
 
-    def forward(self, x, group, **kwargs):
+    def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         mins = self.mins.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
         maxs = self.maxs.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
 
-        x = self.eps + (1 - 2 * self.eps) * (x - mins) / (maxs - mins)
+        if self.x_range == "0-1":
+            x = self.eps + (1 - 2 * self.eps) * (x - mins) / (maxs - mins)
+        elif self.x_range == "-1-1":
+            x = self.eps + (1 - 2 * self.eps) * (x - mins) / (maxs - mins)
+            x = 2 * x - 1
         return x.float()
 
-    def invert(self, x, group, **kwargs):
+    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
         mins = self.mins.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
         maxs = self.maxs.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
 
-        x = mins + (x - self.eps) / (1 - 2 * self.eps) * (maxs - mins)
+        if self.x_range == "0-1":
+            x = mins + (x - self.eps) / (1 - 2 * self.eps) * (maxs - mins)
+        elif self.x_range == "-1-1":
+            x = (x + 1) / 2
+            x = mins + (x - self.eps) / (1 - 2 * self.eps) * (maxs - mins)
         return x.float()
 
 
@@ -112,7 +142,7 @@ class ContTransformerStandardize(nn.Module):
     Transformer for Continuous Variables. Transforms via standardization.
     """
 
-    def __init__(self, x, robust=False, **kwargs):
+    def __init__(self, x: torch.Tensor, robust: bool = False, **kwargs):
         super().__init__()
         if robust:
             self.center, self.scale = torch.median(x[~torch.isnan(x)]), torch.quantile(
@@ -125,14 +155,14 @@ class ContTransformerStandardize(nn.Module):
         if self.scale <= 1e-12:
             raise Exception("Constant feature detected!")
 
-    def forward(self, x, **kwargs):
+    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         x = (x - self.center) / self.scale
         return x.float()
 
-    def invert(self, x, **kwargs):
+    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -146,7 +176,9 @@ class ContTransformerStandardizeGrouped(nn.Module):
     Grouped by group.
     """
 
-    def __init__(self, x, group, robust=False, **kwargs):
+    def __init__(
+        self, x: torch.Tensor, group: torch.Tensor, robust: bool = False, **kwargs
+    ):
         super().__init__()
         self.group_ids = torch.unique(group)
 
@@ -191,7 +223,7 @@ class ContTransformerStandardizeGrouped(nn.Module):
         if any([scale <= 1e-12 for scale in self.scales]):
             raise Exception("Constant feature detected!")
 
-    def forward(self, x, group, **kwargs):
+    def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
@@ -204,7 +236,7 @@ class ContTransformerStandardizeGrouped(nn.Module):
         x = (x - centers) / scales
         return x.float()
 
-    def invert(self, x, group, **kwargs):
+    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -223,7 +255,7 @@ class ContTransformerBoxCox(nn.Module):
     Transformer for Continuous Variables. Transforms via Box-Cox transformation.
     """
 
-    def __init__(self, x, **kwargs):
+    def __init__(self, x: torch.Tensor, **kwargs):
         super().__init__()
         self.fallback = False
 
@@ -240,7 +272,7 @@ class ContTransformerBoxCox(nn.Module):
                 )
                 self.fallback = True
 
-    def forward(self, x, **kwargs):
+    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
@@ -253,7 +285,7 @@ class ContTransformerBoxCox(nn.Module):
                 x = torch.log(x)
             return x.float()
 
-    def invert(self, x, **kwargs):
+    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -269,25 +301,23 @@ class ContTransformerBoxCox(nn.Module):
 
 class ContTransformerInt(nn.Module):
     """
-
     Transform doubles to their nearest integer.
     Assumes that the input is integer. Therefore, the forward step is simply the identity.
-    Note that the data type remains unchanged.
-
+    Note that the data type remains unchanged as a float.
     """
 
-    def __init__(self, x, **kwargs):
+    def __init__(self, x: torch.Tensor, **kwargs):
         super().__init__()
 
     @staticmethod
-    def forward(x, **kwargs):
+    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Identity.
         """
         return x.float()
 
     @staticmethod
-    def invert(x, **kwargs):
+    def invert(x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Round to nearest integer.
         """
@@ -300,7 +330,13 @@ class ContTransformerClamp(nn.Module):
     Transformer for Continuous Variables. Transforms to [min,max].
     """
 
-    def __init__(self, x, min=None, max=None, **kwargs):
+    def __init__(
+        self,
+        x: torch.Tensor,
+        min: Optional[float] = None,
+        max: Optional[float] = None,
+        **kwargs,
+    ):
         super().__init__()
         self.min, self.max = min, max
         if self.min is not None:
@@ -309,13 +345,13 @@ class ContTransformerClamp(nn.Module):
             self.max = torch.Tensor([max])
 
     @staticmethod
-    def forward(x, **kwargs):
+    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return x.float()
 
-    def invert(self, x, **kwargs):
+    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -337,7 +373,14 @@ class ContTransformerClampGrouped(nn.Module):
     Grouped by group.
     """
 
-    def __init__(self, x, group, min=None, max=None, **kwargs):
+    def __init__(
+        self,
+        x: torch.Tensor,
+        group: torch.Tensor,
+        min: Optional[List[float]] = None,
+        max: Optional[List[float]] = None,
+        **kwargs,
+    ):
         super().__init__()
         self.group_ids = torch.unique(
             group
@@ -353,13 +396,13 @@ class ContTransformerClampGrouped(nn.Module):
             self.max = torch.Tensor([max]).squeeze(0)
 
     @staticmethod
-    def forward(x, **kwargs):
+    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return x.float()
 
-    def invert(self, x, group, **kwargs):
+    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -386,7 +429,7 @@ class ContTransformerChain(nn.Module):
     during invert, the order is reversed.
     """
 
-    def __init__(self, x, tfms, **kwargs):
+    def __init__(self, x: torch.Tensor, tfms: List[nn.Module], **kwargs):
         super().__init__()
         self.tfms = []
         for tf in tfms:
@@ -394,7 +437,7 @@ class ContTransformerChain(nn.Module):
             x = itf.forward(x, **kwargs)  # test whether forward works
             self.tfms += [itf]
 
-    def forward(self, x, **kwargs):
+    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Chained batch-wise transform for x.
         """
@@ -402,7 +445,7 @@ class ContTransformerChain(nn.Module):
             x = tf.forward(x, **kwargs)
         return x
 
-    def invert(self, x, **kwargs):
+    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
         Chained batch-wise inverse transform for x.
         """
@@ -411,10 +454,16 @@ class ContTransformerChain(nn.Module):
         return x.float()
 
 
-def tfms_chain(tfms):
+def tfms_chain(
+    tfms: List,
+) -> Callable[[torch.Tensor, Dict[str, Any]], ContTransformerChain]:
     return partial(ContTransformerChain, tfms=tfms)
 
 
-ContTransformerRangeBoxCoxRange = tfms_chain(
-    [ContTransformerRange, ContTransformerBoxCox, ContTransformerRange]
+ContTransformerRangeBoxCoxRangeExtended = tfms_chain(
+    [
+        ContTransformerRange,
+        ContTransformerBoxCox,
+        partial(ContTransformerRange, x_range="-1-1"),
+    ]
 )

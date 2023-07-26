@@ -1,7 +1,9 @@
+import numpy as np
 import pytest
 import torch
-import numpy as np
+
 from yahpo_train.cont_scalers import *
+
 
 def test_cont_scaler():
     def cont_scaler_helper(x, transformer, eps = 1e-5):

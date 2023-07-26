@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as nn_init
 
+
 class Tokenizer(nn.Module):
     category_offsets: ty.Optional[Tensor]
 

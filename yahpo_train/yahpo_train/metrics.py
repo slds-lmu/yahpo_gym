@@ -1,6 +1,8 @@
-from scipy.stats import spearmanr, pearsonr
-from sklearn.metrics import mean_absolute_error, r2_score
 from fastai.tabular.all import *
+from scipy.stats import pearsonr, spearmanr
+from sklearn.metrics import mean_absolute_error, r2_score
+
+from yahpo_train.learner import SurrogateTabularLearner
 
 
 class AvgTfedMetric(Metric):
@@ -9,27 +11,27 @@ class AvgTfedMetric(Metric):
     Specializes to transformed metrics saved during get_one_batch
     """
 
-    def __init__(self, func):
+    def __init__(self, func: Callable):
         self.func = func
         self.total = 0.0
         self.count = 0
 
-    def reset(self):
+    def reset(self) -> None:
         self.total, self.count = 0.0, 0
 
-    def accumulate(self, learn):
-        bs = find_bs(learn.tfyb)
+    def accumulate(self, learner: SurrogateTabularLearner) -> None:
+        bs = find_bs(learner.tfyb)
         self.total += (
-            learn.to_detach(self.func(*learn.tfyb, learn.tfpred)) * bs
-        )  # func is called with truth and pred
+            learner.to_detach(self.func(*learner.tfyb, learner.tfpred)) * bs
+        )  # func is called with truth and prediction
         self.count += bs
 
     @property
-    def value(self):
+    def value(self) -> float:
         return self.total / self.count if self.count != 0 else None
 
     @property
-    def name(self):
+    def name(self) -> str:
         return (
             self.func.func.__name__
             if hasattr(self.func, "func")
@@ -37,21 +39,21 @@ class AvgTfedMetric(Metric):
         )
 
 
-def mae(x, y, impute_nan=True):
+def mae(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
     return mean_absolute_error(x.cpu(), y_pred=y.cpu(), multioutput="raw_values")
 
 
-def r2(x, y, impute_nan=True):
+def r2(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
     return r2_score(x.cpu(), y_pred=y.cpu(), multioutput="raw_values")
 
 
-def spearman(x, y, impute_nan=True):
+def spearman(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
@@ -74,7 +76,7 @@ def spearman(x, y, impute_nan=True):
     return np.array(rho)
 
 
-def pearson(x, y, impute_nan=True):
+def pearson(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
@@ -97,5 +99,5 @@ def pearson(x, y, impute_nan=True):
     return np.array(r)
 
 
-def napct(x, y, impute_nan=True):
-    return torch.mean(torch.isnan(y).float())
+def napct(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
+    return torch.mean(torch.isnan(y).float()).numpy()

@@ -9,7 +9,7 @@ class MultiMaeLoss(nn.Module):
         super(MultiMaeLoss, self).__init__()
 
     @staticmethod
-    def forward(output: torch.tensor, target: torch.tensor) -> torch.tensor:
+    def forward(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         loss = torch.mean(torch.mean(torch.abs(output - target), axis=0))
         if torch.isnan(loss):
             loss = torch.tensor(9999999999)  # if loss is nan, set to high value
@@ -23,7 +23,7 @@ class MultiMseLoss(nn.Module):
         super(MultiMseLoss, self).__init__()
 
     @staticmethod
-    def forward(output: torch.tensor, target: torch.tensor) -> torch.tensor:
+    def forward(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         loss = torch.mean(torch.mean(torch.pow(output - target, 2), axis=0))
         if torch.isnan(loss):
             loss = torch.tensor(9999999999)  # if loss is nan, set to high value

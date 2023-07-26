@@ -1,19 +1,21 @@
-from yahpo_train.models import *
-from yahpo_train.models_ensemble import *
+import argparse
+import logging
+import random
+import warnings
+
+import numpy as np
+import optuna
+import torch
+from optuna.integration import FastAIPruningCallback
+from yahpo_gym.configuration import cfg
+
+from yahpo_train.cont_scalers import *
+from yahpo_train.helpers import generate_all_test_set_metrics
 from yahpo_train.learner import *
 from yahpo_train.losses import *
 from yahpo_train.metrics import *
-from yahpo_train.cont_scalers import *
-from yahpo_gym.configuration import cfg
-from yahpo_train.helpers import generate_all_test_set_metrics
-import argparse
-import optuna
-from optuna.integration import FastAIPruningCallback
-import torch
-import random
-import numpy as np
-import logging
-import warnings
+from yahpo_train.models import *
+from yahpo_train.models_ensemble import *
 
 
 def random_seed(seed, use_cuda):
@@ -58,7 +60,7 @@ def fit_config_resnet(
         embds_dbl = [
             tfms.get(name)
             if tfms.get(name) is not None
-            else ContTransformerRangeBoxCoxRange
+            else ContTransformerRangeBoxCoxRangeExtended
             for name, cont in dl_train.all_cols[dl_train.cont_names].items()
         ]
         embds_tgt = [
@@ -90,7 +92,7 @@ def fit_config_resnet(
         surrogate = SurrogateEnsembleLearner(
             dl_train, ensemble=model, loss_func=MultiMseLoss()
         )
-        # FIXME: this is ugly, we probably should overload the metric setter and getter for the SurrogateEnsembleLearner
+        # NOTE: this is ugly, we probably should overload the metric setter and getter for the SurrogateEnsembleLearner
         surrogate.metrics = [
             AvgTfedMetric(mae),
             AvgTfedMetric(r2),
@@ -523,4 +525,13 @@ if __name__ == "__main__":
         args.key, model=config.config.get("model"), save_to_csv=True
     )
 
-    # FIXME: also fit noisy here
+    surrogate_noisy = fit_config_resnet(
+        args.key,
+        dl_train=dl_refit,
+        tfms=tfms_list.get(args.key),
+        use_cuda=use_cuda,
+        **best_params,
+        noisy=True,
+    )
+
+    surrogate_noisy.export_onnx(config, device=device, suffix="noisy")
