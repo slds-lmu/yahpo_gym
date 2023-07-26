@@ -471,9 +471,10 @@ class BenchmarkSet:
         return quant
 
     def _get_model_path(self):
-        path = self.config.get_path("model")
         if self.noisy:
-            self.config.get_path("model_noisy")
+            path = self.config.get_path("model_noisy")
+        else:
+            path = self.config.get_path("model")
         return path
 
 

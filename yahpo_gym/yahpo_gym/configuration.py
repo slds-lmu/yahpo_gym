@@ -29,7 +29,7 @@ class Configuration:
             "basedir": local_config.data_path,
             "config_id": "",
             "model": "model_v2.onnx",
-            "model_noisy": "model_noisy_v2.onnx",
+            "model_noisy": "model_v2_noisy.onnx",
             "dataset": "data.csv",
             "test_dataset": "test_data.csv",
             "config_space": "config_space_v2.json",
