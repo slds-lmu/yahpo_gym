@@ -262,26 +262,77 @@ if __name__ == "__main__":
     # tfms_nb301 = {}
     # tfms_list.update({"nb301": tfms_nb301})
 
-    # tfms_rbv2_super = {}
-    # tfms_list.update({"rbv2_super": tfms_rbv2_super})
+    tfms_rbv2 = {}
+    tfms_rbv2.update(
+        {
+            "acc": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "bac": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "f1": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "auc": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "brier": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=2.00),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "logloss": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=None),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "timetrain": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=None),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "timepredict": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=None),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "memory": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=None),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+        }
+    )
 
-    # tfms_rbv2_svm = {}
-    # tfms_list.update({"rbv2_svm": tfms_rbv2_svm})
-
-    # tfms_rbv2_xgboost = {}
-    # tfms_list.update({"rbv2_xgboost": tfms_rbv2_xgboost})
-
-    # tfms_rbv2_ranger = {}
-    # tfms_list.update({"rbv2_ranger": tfms_rbv2_ranger})
-
-    # tfms_rbv2_rpart = {}
-    # tfms_list.update({"rbv2_rpart": tfms_rbv2_rpart})
-
-    # tfms_rbv2_glmnet = {}
-    # tfms_list.update({"rbv2_glmnet": tfms_rbv2_glmnet})
-
-    # tfms_rbv2_aknn = {}
-    # tfms_list.update({"rbv2_aknn": tfms_rbv2_aknn})
+    tfms_list.update(
+        {
+            "rbv2_glmnet": tfms_rbv2,
+            "rbv2_rpart": tfms_rbv2,
+            "rbv2_aknn": tfms_rbv2,
+            "rbv2_svm": tfms_rbv2,
+            "rbv2_ranger": tfms_rbv2,
+            "rbv2_xgboost": tfms_rbv2,
+            "rbv2_super": tfms_rbv2,
+        }
+    )
 
     tfms_iaml = {}
     tfms_iaml.update(

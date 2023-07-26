@@ -1,3 +1,4 @@
+import gc
 import random
 from typing import Optional
 
@@ -40,18 +41,36 @@ def dl_from_config(
             )
         )
     )
-    df = pd.read_csv(
+
+    chunksize = 10**5
+    chunks = []
+    for chunk in pd.read_csv(
         config.get_path("dataset"),
         skipinitialspace=skipinitialspace,
         usecols=list(dtypes.keys()),
         dtype=dtypes,
-    ).sample(frac=1.0, random_state=seed)
+        chunksize=chunksize,
+    ):
+        chunks.append(chunk)
+    df = pd.concat(chunks, axis=0)
+    df = df.sample(frac=1.0, random_state=seed)
+
+    gc.collect()
+
+    # df = pd.read_csv(
+    #    config.get_path("dataset"),
+    #    skipinitialspace=skipinitialspace,
+    #    usecols=list(dtypes.keys()),
+    #    dtype=dtypes,
+    # ).sample(frac=1.0, random_state=seed)
+
     # get rid of irrelevant columns
     # if config.instance_names is not None we can be sure that it is the first element of config.cat_names
     df = df[config.cat_names + config.cont_names + config.y_names]
-    df.reindex(columns=config.cat_names + config.cont_names + config.y_names)
+    # df.reindex(columns=config.cat_names + config.cont_names + config.y_names)
     # fill missing target with 0
-    df[config.y_names] = df[config.y_names].fillna(0.0)
+    for y_name in config.y_names:
+        df[y_name].fillna(0.0, inplace=True)
 
     # if train_frac = 0.8 and validation frac is 0.25, we get 0.6/0.2/0.2 train/valid/test
     test_ids = _get_idx(df, config, frac=1 - train_frac, seed=seed)

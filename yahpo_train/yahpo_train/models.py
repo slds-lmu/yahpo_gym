@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import torch.nn.init as nn_init
 from fastai.tabular.all import *
 from fastai.tabular.data import TabularDataLoaders
-from yahpo_gym.configuration import ConfigDict
+from yahpo_gym.configuration import Configuration
 
 from yahpo_train.cont_scalers import *
 from yahpo_train.models_utils import *
@@ -150,7 +150,7 @@ class AbstractSurrogate(nn.Module):
 
     def export_onnx(
         self,
-        config_dict: ConfigDict,
+        config_dict: Configuration,
         device: torch.device = torch.device("cuda:0"),
         suffix: str = "",
     ) -> None:
