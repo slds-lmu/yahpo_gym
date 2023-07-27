@@ -41,7 +41,7 @@ class AbstractSurrogate(nn.Module):
         if embds_dbl is not None:
             self.embds_dbl = nn.ModuleList(
                 [
-                    f(torch.from_numpy(cont[1].values).float())
+                    f(torch.from_numpy(cont[1].values).float(), x_id=cont[0])
                     for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
                 ]
             )
@@ -49,7 +49,8 @@ class AbstractSurrogate(nn.Module):
             self.embds_dbl = nn.ModuleList(
                 [
                     ContTransformerRangeBoxCoxRangeExtended(
-                        torch.from_numpy(cont.values).float()
+                        torch.from_numpy(cont.values).float(),
+                        x_id=cont[0],
                     )
                     for _, cont in dls.all_cols[dls.cont_names].items()
                 ]
@@ -69,6 +70,7 @@ class AbstractSurrogate(nn.Module):
                         f(
                             torch.from_numpy(cont[1].values).float(),
                             group=torch.from_numpy(dls.xs[instance_names].values).int(),
+                            x_id=cont[0],
                         )
                         for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
                     ]
@@ -76,7 +78,7 @@ class AbstractSurrogate(nn.Module):
             else:
                 self.embds_tgt = nn.ModuleList(
                     [
-                        f(torch.from_numpy(cont[1].values).float())
+                        f(torch.from_numpy(cont[1].values).float(), x_id=cont[0])
                         for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
                     ]
                 )
@@ -87,6 +89,7 @@ class AbstractSurrogate(nn.Module):
                         ContTransformerRangeGrouped(
                             torch.from_numpy(cont.values).float(),
                             group=torch.from_numpy(dls.xs[instance_names].values).int(),
+                            x_id=cont[0],
                         )
                         for name, cont in dls.ys[dls.y_names].items()
                     ]
@@ -94,7 +97,9 @@ class AbstractSurrogate(nn.Module):
             else:
                 self.embds_tgt = nn.ModuleList(
                     [
-                        ContTransformerRange(torch.from_numpy(cont.values).float())
+                        ContTransformerRange(
+                            torch.from_numpy(cont.values).float(), x_id=cont[0]
+                        )
                         for name, cont in dls.ys[dls.y_names].items()
                     ]
                 )

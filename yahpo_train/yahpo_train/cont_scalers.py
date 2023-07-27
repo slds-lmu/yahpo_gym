@@ -37,7 +37,12 @@ class ContTransformerRange(nn.Module):
     """
 
     def __init__(
-        self, x: torch.Tensor, eps: float = 1e-2, x_range: str = "0-1", **kwargs
+        self,
+        x: torch.Tensor,
+        x_id: str,
+        eps: float = 1e-2,
+        x_range: str = "0-1",
+        **kwargs,
     ):
         super().__init__()
         self.eps = eps
@@ -46,7 +51,7 @@ class ContTransformerRange(nn.Module):
             x[~torch.isnan(x)]
         )
         if self.max == self.min:
-            raise Exception("Constant feature detected!")
+            raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
@@ -82,6 +87,7 @@ class ContTransformerRangeGrouped(nn.Module):
         self,
         x: torch.Tensor,
         group: torch.Tensor,
+        x_id: str,
         eps: float = 1e-2,
         x_range: str = "0-1",
         **kwargs,
@@ -106,7 +112,7 @@ class ContTransformerRangeGrouped(nn.Module):
         )
 
         if any([max_ == min_ for max_, min_ in zip(self.maxs, self.mins)]):
-            raise Exception("Constant feature detected!")
+            raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
         """
@@ -142,7 +148,7 @@ class ContTransformerStandardize(nn.Module):
     Transformer for Continuous Variables. Transforms via standardization.
     """
 
-    def __init__(self, x: torch.Tensor, robust: bool = False, **kwargs):
+    def __init__(self, x: torch.Tensor, x_id: str, robust: bool = False, **kwargs):
         super().__init__()
         if robust:
             self.center, self.scale = torch.median(x[~torch.isnan(x)]), torch.quantile(
@@ -153,7 +159,7 @@ class ContTransformerStandardize(nn.Module):
                 torch.var(x[~torch.isnan(x)])
             )
         if self.scale <= 1e-12:
-            raise Exception("Constant feature detected!")
+            raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         """
@@ -177,7 +183,12 @@ class ContTransformerStandardizeGrouped(nn.Module):
     """
 
     def __init__(
-        self, x: torch.Tensor, group: torch.Tensor, robust: bool = False, **kwargs
+        self,
+        x: torch.Tensor,
+        group: torch.Tensor,
+        x_id: str,
+        robust: bool = False,
+        **kwargs,
     ):
         super().__init__()
         self.group_ids = torch.unique(group)
@@ -221,7 +232,7 @@ class ContTransformerStandardizeGrouped(nn.Module):
             )
 
         if any([scale <= 1e-12 for scale in self.scales]):
-            raise Exception("Constant feature detected!")
+            raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
         """

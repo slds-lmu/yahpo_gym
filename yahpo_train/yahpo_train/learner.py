@@ -100,8 +100,8 @@ def dl_from_config(
                 fill_vals=dict((k, 0.0) for k in config.cont_names + config.cat_names),
             ),
         ],
-        valid_idx=_get_idx(
-            df_train, config=config, frac=valid_frac, seed=seed
+        valid_idx=list(
+            _get_idx(df_train, config=config, frac=valid_frac, seed=seed)
         ),  # validation ids of size 0.25 * train_frac taken from train_ids
         bs=bs,
         shuffle=shuffle,
@@ -147,7 +147,6 @@ def _get_idx(
     config: Configuration,
     frac: float = 0.25,
     seed: int = 10,
-    k: int = 10,
 ) -> pd.Index:
     """
     Include or exclude blocks of hyperparameters with differing fidelity.
@@ -161,11 +160,10 @@ def _get_idx(
     # otherwise groupby breaks
     cat_hpars = list(set(hpars).intersection(set(config.cat_names)))
     df = df[hpars].copy()
-    df[cat_hpars].fillna("_NA_")
+    for cat_hpar in cat_hpars:
+        df[cat_hpar].fillna("_NA_", inplace=True)
     df = df_shrink(df)
     df = df.apply(lambda hpar: pd.factorize(hpar.astype("category"))[0], axis=0)
-    if len(hpars) > 10:
-        hpars = random.sample(hpars, k=k)
 
     idx = pd.Index([], dtype="int64")
     groups = df.groupby(hpars, sort=False)

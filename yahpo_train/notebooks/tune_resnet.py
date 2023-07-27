@@ -2,11 +2,14 @@ import argparse
 import logging
 import random
 import warnings
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import optuna
 import torch
+from fastai.tabular.data import TabularDataLoaders
 from optuna.integration import FastAIPruningCallback
+from optuna.study import Study
 from yahpo_gym.configuration import cfg
 
 from yahpo_train.cont_scalers import *
@@ -18,7 +21,7 @@ from yahpo_train.models import *
 from yahpo_train.models_ensemble import *
 
 
-def random_seed(seed, use_cuda):
+def random_seed(seed: int, use_cuda: bool) -> None:
     np.random.seed(seed)  # cpu vars
     torch.manual_seed(seed)  # cpu  vars
     random.seed(seed)  # python
@@ -30,25 +33,24 @@ def random_seed(seed, use_cuda):
 
 
 def fit_config_resnet(
-    key,
-    dl_train,
-    noisy=False,
-    embds_dbl=None,
-    embds_tgt=None,
-    tfms=None,
-    fit="fit_flat_cos",
-    lr=1e-4,
-    wd=None,
-    epochs=50,
-    d=256,
-    d_hidden_factor=2.0,
-    n_layers=4,
-    hidden_dropout=0.0,
-    residual_dropout=0.2,
-    fit_cbs=[],
-    seed=10,
-    use_cuda=False,
-):
+    key: str,
+    dl_train: TabularDataLoaders,
+    noisy: bool = False,
+    embds_dbl: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
+    embds_tgt: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
+    tfms: Optional[Dict[str, Callable]] = None,
+    fit: str = "fit_one_cycle",
+    lr: float = 1e-4,
+    wd: Optional[float] = None,
+    moms: Optional[Tuple[float, float]] = None,
+    epochs: int = 50,
+    d: int = 256,
+    d_hidden_factor: float = 2.0,
+    n_layers: int = 4,
+    hidden_dropout: float = 0.0,
+    residual_dropout: float = 0.2,
+    fit_cbs: Optional[List[Callback]] = [],
+) -> SurrogateTabularLearner:
     """
     Fit function with hyperparameters for resnet.
     """
@@ -135,14 +137,24 @@ def fit_config_resnet(
     if fit == "fit_flat_cos":
         surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=fit_cbs)
     elif fit == "fit_one_cycle":
-        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, cbs=fit_cbs)
+        if moms[0] < moms[1]:
+            moms = (moms[1], moms[0], moms[1])
+        else:
+            moms = (moms[0], moms[1], moms[0])
+        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, moms=moms, cbs=fit_cbs)
 
     return surrogate
 
 
 def tune_config_resnet(
-    key, name, dl_train, use_cuda, tfms_fixed={}, trials=0, walltime=0, **kwargs
-):
+    key: str,
+    name: str,
+    dl_train: TabularDataLoaders,
+    tfms_fixed: Dict[str, Callable] = {},
+    trials: int = 0,
+    walltime: float = 0,
+    **kwargs
+) -> optuna.study.Study:
     if trials == 0:
         trials = None
 
@@ -182,12 +194,18 @@ def tune_config_resnet(
         else:
             residual_dropout = 0.0
         lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
-        fit = trial.suggest_categorical("fit", ["fit_flat_cos", "fit_one_cycle"])
+        fit = trial.suggest_categorical("fit", ["fit_one_cycle", "fit_flat_cos"])
         use_wd = trial.suggest_categorical("use_wd", [True, False])
         if use_wd:
             wd = trial.suggest_float("wd", 1e-7, 1e-2, log=True)
         else:
             wd = 0.0
+        if fit == "fit_one_cycle":
+            mom1 = trial.suggest_float("mom1", 0.85, 0.99)
+            mom2 = trial.suggest_float("mom2", 0.85, 0.99)
+            moms = (mom1, mom2)
+        else:
+            moms = None
         cbs = [FastAIPruningCallback(trial=trial, monitor="valid_loss")]
 
         surrogate = fit_config_resnet(
@@ -197,13 +215,13 @@ def tune_config_resnet(
             fit=fit,
             lr=lr,
             wd=wd,
+            moms=moms,
             d=d,
             d_hidden_factor=d_hidden_factor,
             n_layers=n_layers,
             hidden_dropout=hidden_dropout,
             residual_dropout=residual_dropout,
             fit_cbs=cbs,
-            use_cuda=use_cuda,
             **kwargs,
         )
         loss = surrogate.validate()[0]
@@ -540,7 +558,6 @@ if __name__ == "__main__":
         args.key,
         name=args.name,
         dl_train=dl_train,
-        use_cuda=use_cuda,
         tfms_fixed=tfms_list.get(args.key),
         trials=args.trials,
         walltime=args.walltime,
@@ -550,6 +567,7 @@ if __name__ == "__main__":
     with open(Path(config.config_path, config.config.get("best_params")), "w") as f:
         json.dump(best_params, f)
 
+    # fix some parameters
     if not best_params.get("use_residual_dropout"):
         best_params.update({"residual_dropout": 0})
 
@@ -559,6 +577,12 @@ if __name__ == "__main__":
     best_params.pop("use_residual_dropout")
     best_params.pop("use_wd")
 
+    if best_params.get("fit") == "fit_one_cycle":
+        mom1 = best_params.get("mom1")
+        mom2 = best_params.get("mom2")
+        moms = (mom1, mom2)
+        best_params.update({"moms": moms})
+
     warnings.filterwarnings(
         "ignore", category=UserWarning
     )  # ignore warnings due to empty validation set
@@ -566,7 +590,6 @@ if __name__ == "__main__":
         args.key,
         dl_train=dl_refit,
         tfms=tfms_list.get(args.key),
-        use_cuda=use_cuda,
         **best_params,
     )
     warnings.filterwarnings("default", category=UserWarning)  # reset warnings
@@ -580,7 +603,6 @@ if __name__ == "__main__":
         args.key,
         dl_train=dl_refit,
         tfms=tfms_list.get(args.key),
-        use_cuda=use_cuda,
         **best_params,
         noisy=True,
     )
