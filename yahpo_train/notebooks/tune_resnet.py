@@ -295,12 +295,6 @@ if __name__ == "__main__":
                     ContTransformerRangeGrouped,
                 ]
             ),
-            "f1": tfms_chain(
-                [
-                    partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGrouped,
-                ]
-            ),
             "auc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
@@ -326,12 +320,6 @@ if __name__ == "__main__":
                 ]
             ),
             "timepredict": tfms_chain(
-                [
-                    partial(ContTransformerClamp, min=0.00, max=None),
-                    ContTransformerRangeGrouped,
-                ]
-            ),
-            "memory": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=None),
                     ContTransformerRangeGrouped,
