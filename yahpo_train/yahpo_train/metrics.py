@@ -100,4 +100,4 @@ def pearson(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.nda
 
 
 def napct(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
-    return torch.mean(torch.isnan(y).float()).numpy()
+    return torch.mean(torch.isnan(y.cpu()).float()).numpy()
