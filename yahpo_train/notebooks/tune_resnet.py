@@ -558,7 +558,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--key",
         type=str,
-        default="rbv2_svm",
+        default="iaml_glmnet",
         help="Key of benchmark scenario, e.g., 'iaml_glmnet'",
     )
     parser.add_argument(
