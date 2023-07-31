@@ -232,6 +232,7 @@ def tune_config_resnet(
 
 
 if __name__ == "__main__":
+    # FIXME: finish all tfms for all scenarios and handle log
     tfms_list = {}
 
     tfms_lcbench = {}
@@ -328,15 +329,79 @@ if __name__ == "__main__":
         }
     )
 
+    tfms_rbv2_glmnet = tfms_rbv2.copy()
+    tfms_rbv2_glmnet.update(
+        {
+            "s": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+        }
+    )
+
+    tfms_rbv2_rpart = tfms_rbv2.copy()
+    tfms_rbv2_rpart.update(
+        {
+            "cp": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+        }
+    )
+
+    tfms_rbv2_aknn = tfms_rbv2.copy()
+    tfms_rbv2_aknn.update(
+        {
+            "ef": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "ef_construction": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+        }
+    )
+
+    tfms_rbv2_svm = tfms_rbv2.copy()
+    tfms_rbv2_svm.update(
+        {
+            "cost": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "tolerance": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+        }
+    )
+
+    tfms_rbv2_ranger = tfms_rbv2.copy()
+
+    tfms_rbv2_xgboost = tfms_rbv2.copy()
+    tfms_rbv2_xgboost.update(
+        {
+            "nrounds": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "eta": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "lambda": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "alpha": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "min_child_weight": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+        }
+    )
+
+    tfms_rbv2_super = tfms_rbv2.copy()
+    tfms_rbv2_super.update(
+        {
+            "glmnet.s": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "rpart.cp": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "aknn.ef": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "aknn.ef_construction": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "svm.cost": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "svm.gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "svm.tolerance": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "xgboost.nrounds": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "xgboost.eta": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "xgboost.gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "xgboost.lambda": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "xgboost.alpha": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "xgboost.min_child_weight": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+        }
+    )
+
     tfms_list.update(
         {
-            "rbv2_glmnet": tfms_rbv2,
-            "rbv2_rpart": tfms_rbv2,
-            "rbv2_aknn": tfms_rbv2,
-            "rbv2_svm": tfms_rbv2,
-            "rbv2_ranger": tfms_rbv2,
-            "rbv2_xgboost": tfms_rbv2,
-            "rbv2_super": tfms_rbv2,
+            "rbv2_glmnet": tfms_rbv2_glmnet,
+            "rbv2_rpart": tfms_rbv2_rpart,
+            "rbv2_aknn": tfms_rbv2_aknn,
+            "rbv2_svm": tfms_rbv2_svm,
+            "rbv2_ranger": tfms_rbv2_ranger,
+            "rbv2_xgboost": tfms_rbv2_xgboost,
+            "rbv2_super": tfms_rbv2_super,
         }
     )
 
@@ -493,7 +558,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--key",
         type=str,
-        default="iaml_glmnet",
+        default="rbv2_svm",
         help="Key of benchmark scenario, e.g., 'iaml_glmnet'",
     )
     parser.add_argument(

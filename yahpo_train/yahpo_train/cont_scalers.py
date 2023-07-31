@@ -266,7 +266,7 @@ class ContTransformerBoxCox(nn.Module):
     Transformer for Continuous Variables. Transforms via Box-Cox transformation.
     """
 
-    def __init__(self, x: torch.Tensor, **kwargs):
+    def __init__(self, x: torch.Tensor, x_id: str, **kwargs):
         super().__init__()
         self.fallback = False
 
@@ -279,7 +279,7 @@ class ContTransformerBoxCox(nn.Module):
                 _, self.lmbda_ = boxcox(x_np[~np.isnan(x_np)])
             except Exception as e:
                 print(
-                    f"Box-Cox estimation failed with error: {e}. Using identity as fallback."
+                    f"Box-Cox estimation for variable `{x_id}` failed with error: {e}. Using identity as fallback."
                 )
                 self.fallback = True
 
@@ -433,6 +433,55 @@ class ContTransformerClampGrouped(nn.Module):
         return x.float()
 
 
+class ContTransformerLog(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms to log-scale.
+    """
+
+    def __init__(self, x: torch.Tensor, x_id: str, **kwargs):
+        super().__init__()
+        if torch.min(x) <= 0:
+            raise Exception(
+                f"Log transformation requires strictly positive values. Failed for variable `{x_id}`."
+            )
+
+    @staticmethod
+    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Batch-wise transform for x.
+        """
+        return torch.log(x.float())
+
+    @staticmethod
+    def invert(x: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Batch-wise inverse transform for x.
+        """
+        return torch.exp(x.float())
+
+
+class ContTransformerShift(nn.Module):
+    """
+    Transformer for Continuous Variables. Shifts by a constant.
+    """
+
+    def __init__(self, x: torch.Tensor, shift: float = 1e-8, **kwargs):
+        super().__init__()
+        self.shift = shift
+
+    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Batch-wise transform for x.
+        """
+        return x.float() + self.shift
+
+    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Batch-wise inverse transform for x.
+        """
+        return x.float() + self.shift
+
+
 class ContTransformerChain(nn.Module):
     """
     Chained transformer Continuous Variables. Chains several transforms.
@@ -473,6 +522,16 @@ def tfms_chain(
 
 ContTransformerRangeBoxCoxRangeExtended = tfms_chain(
     [
+        ContTransformerRange,
+        ContTransformerBoxCox,
+        partial(ContTransformerRange, x_range="-1-1"),
+    ]
+)
+
+ContTransformerShiftLogRangeBoxCoxRangeExtended = tfms_chain(
+    [
+        ContTransformerShift,
+        ContTransformerLog,
         ContTransformerRange,
         ContTransformerBoxCox,
         partial(ContTransformerRange, x_range="-1-1"),

@@ -67,7 +67,7 @@ def dl_from_config(
     # get rid of irrelevant columns
     # if config.instance_names is not None we can be sure that it is the first element of config.cat_names
     df = df[config.cat_names + config.cont_names + config.y_names]
-    # df.reindex(columns=config.cat_names + config.cont_names + config.y_names)
+
     # fill missing target with 0
     for y_name in config.y_names:
         df[y_name].fillna(0.0, inplace=True)
@@ -81,7 +81,7 @@ def dl_from_config(
         df_test.to_csv(config.get_path("test_dataset"), index=False)
 
     if bs is None:
-        potential_batch_sizes = 2 ** np.arange(5, 14)
+        potential_batch_sizes = 2 ** np.arange(5, 17)
         desired_fraction = 0.01
         desired_samples = len(df_train) * (1 - valid_frac) * desired_fraction
         bs = min(potential_batch_sizes, key=lambda x: abs(x - desired_samples))
