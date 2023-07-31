@@ -13,7 +13,17 @@ _rbv2_dict = {
         "timepredict",
         # "memory",
     ],
-    "y_minimize": [False, False, False, True, True, True, True, True, True],
+    "y_minimize": [
+        False,
+        False,
+        False,
+        True,
+        # False,
+        True,
+        True,
+        True,
+        # True
+    ],
     "fidelity_params": ["trainsize", "repl"],
     "instance_names": "task_id",
     "runtime_name": "timetrain",
@@ -134,8 +144,8 @@ _rbv2_svm = _rbv2_dict.copy()
 _rbv2_svm.update(
     {
         "config_id": "rbv2_svm",
-        "cont_names": ["cost", "gamma", "tolerance", "degree", "trainsize", "repl"],
-        "cat_names": ["task_id", "kernel", "num.impute.selected.cpo"],
+        "cont_names": ["cost", "gamma", "tolerance", "degree", "trainsize"],
+        "cat_names": ["task_id", "kernel", "num.impute.selected.cpo", "repl"],
     }
 )
 config_dict.update({"rbv2_svm": _rbv2_svm})
@@ -152,13 +162,13 @@ _rbv2_ranger.update(
             "min.node.size",
             "num.random.splits",
             "trainsize",
-            "repl",
         ],
         "cat_names": [
             "task_id",
             "respect.unordered.factors",
             "splitrule",
             "num.impute.selected.cpo",
+            "repl",
         ],
     }
 )
@@ -169,8 +179,8 @@ _rbv2_rpart = _rbv2_dict.copy()
 _rbv2_rpart.update(
     {
         "config_id": "rbv2_rpart",
-        "cont_names": ["cp", "maxdepth", "minbucket", "minsplit", "trainsize", "repl"],
-        "cat_names": ["task_id", "num.impute.selected.cpo"],
+        "cont_names": ["cp", "maxdepth", "minbucket", "minsplit", "trainsize"],
+        "cat_names": ["task_id", "num.impute.selected.cpo", "repl"],
     }
 )
 config_dict.update({"rbv2_rpart": _rbv2_rpart})
@@ -180,8 +190,8 @@ _rbv2_glmnet = _rbv2_dict.copy()
 _rbv2_glmnet.update(
     {
         "config_id": "rbv2_glmnet",
-        "cont_names": ["alpha", "s", "trainsize", "repl"],
-        "cat_names": ["task_id", "num.impute.selected.cpo"],
+        "cont_names": ["alpha", "s", "trainsize"],
+        "cat_names": ["task_id", "num.impute.selected.cpo", "repl"],
     }
 )
 config_dict.update({"rbv2_glmnet": _rbv2_glmnet})
@@ -205,9 +215,8 @@ _rbv2_xgboost.update(
             "rate_drop",
             "skip_drop",
             "trainsize",
-            "repl",
         ],
-        "cat_names": ["task_id", "booster", "num.impute.selected.cpo"],
+        "cat_names": ["task_id", "booster", "num.impute.selected.cpo", "repl"],
     }
 )
 config_dict.update({"rbv2_xgboost": _rbv2_xgboost})
@@ -217,8 +226,8 @@ _rbv2_aknn = _rbv2_dict.copy()
 _rbv2_aknn.update(
     {
         "config_id": "rbv2_aknn",
-        "cont_names": ["k", "M", "ef", "ef_construction", "trainsize", "repl"],
-        "cat_names": ["task_id", "distance", "num.impute.selected.cpo"],
+        "cont_names": ["k", "M", "ef", "ef_construction", "trainsize"],
+        "cat_names": ["task_id", "distance", "num.impute.selected.cpo", "repl"],
     }
 )
 config_dict.update({"rbv2_aknn": _rbv2_aknn})
@@ -262,7 +271,6 @@ _rbv2_super.update(
             "xgboost.rate_drop",
             "xgboost.skip_drop",
             "trainsize",
-            "repl",
         ],
         "cat_names": [
             "task_id",
@@ -273,6 +281,7 @@ _rbv2_super.update(
             "aknn.distance",
             "xgboost.booster",
             "num.impute.selected.cpo",
+            "repl",
         ],
     }
 )
