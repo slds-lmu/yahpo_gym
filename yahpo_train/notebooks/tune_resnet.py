@@ -636,6 +636,9 @@ if __name__ == "__main__":
         moms = (mom1, mom2)
         best_params.update({"moms": moms})
 
+    best_params.pop("mom1")
+    best_params.pop("mom2")
+
     warnings.filterwarnings(
         "ignore", category=UserWarning
     )  # ignore warnings due to empty validation set
