@@ -145,7 +145,13 @@ _rbv2_svm.update(
     {
         "config_id": "rbv2_svm",
         "cont_names": ["cost", "gamma", "tolerance", "degree", "trainsize"],
-        "cat_names": ["task_id", "kernel", "num.impute.selected.cpo", "repl"],
+        "cat_names": [
+            "task_id",
+            "kernel",
+            "shrinking",
+            "num.impute.selected.cpo",
+            "repl",
+        ],
     }
 )
 config_dict.update({"rbv2_svm": _rbv2_svm})
@@ -167,6 +173,7 @@ _rbv2_ranger.update(
             "task_id",
             "respect.unordered.factors",
             "splitrule",
+            "replace",
             "num.impute.selected.cpo",
             "repl",
         ],
@@ -276,8 +283,10 @@ _rbv2_super.update(
             "task_id",
             "learner_id",
             "svm.kernel",
+            "svm.shrinking",
             "ranger.respect.unordered.factors",
             "ranger.splitrule",
+            "ranger.replace",
             "aknn.distance",
             "xgboost.booster",
             "num.impute.selected.cpo",
