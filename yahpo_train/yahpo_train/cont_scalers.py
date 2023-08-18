@@ -479,7 +479,7 @@ class ContTransformerShift(nn.Module):
         """
         Batch-wise inverse transform for x.
         """
-        return x.float() + self.shift
+        return x.float() - self.shift
 
 
 class ContTransformerChain(nn.Module):
@@ -520,20 +520,11 @@ def tfms_chain(
     return partial(ContTransformerChain, tfms=tfms)
 
 
-ContTransformerRangeBoxCoxRangeExtended = tfms_chain(
-    [
-        ContTransformerRange,
-        ContTransformerBoxCox,
-        partial(ContTransformerRange, x_range="-1-1"),
-    ]
-)
+ContTransformerRangeExtended = partial(ContTransformerRange, x_range="-1-1")
 
-ContTransformerShiftLogRangeBoxCoxRangeExtended = tfms_chain(
+ContTransformerLogRangeExtended = tfms_chain(
     [
-        ContTransformerShift,
         ContTransformerLog,
-        ContTransformerRange,
-        ContTransformerBoxCox,
         partial(ContTransformerRange, x_range="-1-1"),
     ]
 )

@@ -62,7 +62,7 @@ def fit_config_resnet(
         embds_dbl = [
             tfms.get(name)
             if tfms.get(name) is not None
-            else ContTransformerRangeBoxCoxRangeExtended
+            else ContTransformerRangeExtended
             for name, cont in dl_train.all_cols[dl_train.cont_names].items()
         ]
         embds_tgt = [
@@ -240,7 +240,7 @@ if __name__ == "__main__":
         {
             "val_accuracy": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.00, max=100.00),
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
                     ContTransformerRangeGrouped,
                 ]
             ),
@@ -251,6 +251,12 @@ if __name__ == "__main__":
                 ]
             ),
             "val_balanced_accuracy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "test_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
                     ContTransformerRangeGrouped,
@@ -274,6 +280,22 @@ if __name__ == "__main__":
                     ContTransformerRangeGrouped,
                 ]
             ),
+            "time_increase": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerRangeGrouped,
+                ]
+            ),
+            "model_parameters": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=1.00),
+                    ContTransformerInt,
+                    ContTransformerRange,
+                ]
+            ),
+            "batch_size": ContTransformerLogRangeExtended,
+            "learning_rate": ContTransformerLogRangeExtended,
+            "max_units": ContTransformerLogRangeExtended,
         }
     )
     tfms_list.update({"lcbench": tfms_lcbench})
@@ -332,31 +354,31 @@ if __name__ == "__main__":
     tfms_rbv2_glmnet = tfms_rbv2.copy()
     tfms_rbv2_glmnet.update(
         {
-            "s": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "s": ContTransformerLogRangeExtended,
         }
     )
 
     tfms_rbv2_rpart = tfms_rbv2.copy()
     tfms_rbv2_rpart.update(
         {
-            "cp": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "cp": ContTransformerLogRangeExtended,
         }
     )
 
     tfms_rbv2_aknn = tfms_rbv2.copy()
     tfms_rbv2_aknn.update(
         {
-            "ef": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "ef_construction": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "ef": ContTransformerLogRangeExtended,
+            "ef_construction": ContTransformerLogRangeExtended,
         }
     )
 
     tfms_rbv2_svm = tfms_rbv2.copy()
     tfms_rbv2_svm.update(
         {
-            "cost": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "tolerance": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "cost": ContTransformerLogRangeExtended,
+            "gamma": ContTransformerLogRangeExtended,
+            "tolerance": ContTransformerLogRangeExtended,
         }
     )
 
@@ -365,31 +387,31 @@ if __name__ == "__main__":
     tfms_rbv2_xgboost = tfms_rbv2.copy()
     tfms_rbv2_xgboost.update(
         {
-            "nrounds": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "eta": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "lambda": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "alpha": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "min_child_weight": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "nrounds": ContTransformerLogRangeExtended,
+            "eta": ContTransformerLogRangeExtended,
+            "gamma": ContTransformerLogRangeExtended,
+            "lambda": ContTransformerLogRangeExtended,
+            "alpha": ContTransformerLogRangeExtended,
+            "min_child_weight": ContTransformerLogRangeExtended,
         }
     )
 
     tfms_rbv2_super = tfms_rbv2.copy()
     tfms_rbv2_super.update(
         {
-            "glmnet.s": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "rpart.cp": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "aknn.ef": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "aknn.ef_construction": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "svm.cost": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "svm.gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "svm.tolerance": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "xgboost.nrounds": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "xgboost.eta": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "xgboost.gamma": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "xgboost.lambda": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "xgboost.alpha": ContTransformerShiftLogRangeBoxCoxRangeExtended,
-            "xgboost.min_child_weight": ContTransformerShiftLogRangeBoxCoxRangeExtended,
+            "glmnet.s": ContTransformerLogRangeExtended,
+            "rpart.cp": ContTransformerLogRangeExtended,
+            "aknn.ef": ContTransformerLogRangeExtended,
+            "aknn.ef_construction": ContTransformerLogRangeExtended,
+            "svm.cost": ContTransformerLogRangeExtended,
+            "svm.gamma": ContTransformerLogRangeExtended,
+            "svm.tolerance": ContTransformerLogRangeExtended,
+            "xgboost.nrounds": ContTransformerLogRangeExtended,
+            "xgboost.eta": ContTransformerLogRangeExtended,
+            "xgboost.gamma": ContTransformerLogRangeExtended,
+            "xgboost.lambda": ContTransformerLogRangeExtended,
+            "xgboost.alpha": ContTransformerLogRangeExtended,
+            "xgboost.min_child_weight": ContTransformerLogRangeExtended,
         }
     )
 

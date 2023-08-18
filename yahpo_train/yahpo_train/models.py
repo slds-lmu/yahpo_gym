@@ -48,7 +48,7 @@ class AbstractSurrogate(nn.Module):
         else:
             self.embds_dbl = nn.ModuleList(
                 [
-                    ContTransformerRangeBoxCoxRangeExtended(
+                    ContTransformerRangeExtended(
                         torch.from_numpy(cont.values).float(),
                         x_id=cont[0],
                     )
