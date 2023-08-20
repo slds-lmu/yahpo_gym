@@ -657,9 +657,8 @@ if __name__ == "__main__":
         mom2 = best_params.get("mom2")
         moms = (mom1, mom2)
         best_params.update({"moms": moms})
-
-    best_params.pop("mom1")
-    best_params.pop("mom2")
+        best_params.pop("mom1")
+        best_params.pop("mom2")
 
     warnings.filterwarnings(
         "ignore", category=UserWarning
