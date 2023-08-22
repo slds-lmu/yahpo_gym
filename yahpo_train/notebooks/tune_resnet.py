@@ -39,7 +39,6 @@ def fit_config_resnet(
     embds_dbl: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
     embds_tgt: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
     tfms: Optional[Dict[str, Callable]] = None,
-    fit: str = "fit_one_cycle",
     lr: float = 1e-4,
     wd: Optional[float] = None,
     moms: Optional[Tuple[float, float]] = None,
@@ -134,14 +133,11 @@ def fit_config_resnet(
         ]
 
     # fit
-    if fit == "fit_flat_cos":
-        surrogate.fit_flat_cos(epochs, lr=lr, wd=wd, cbs=fit_cbs)
-    elif fit == "fit_one_cycle":
-        if moms[0] < moms[1]:
-            moms = (moms[1], moms[0], moms[1])
-        else:
-            moms = (moms[0], moms[1], moms[0])
-        surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, moms=moms, cbs=fit_cbs)
+    if moms[0] < moms[1]:
+        moms = (moms[1], moms[0], moms[1])
+    else:
+        moms = (moms[0], moms[1], moms[0])
+    surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, moms=moms, cbs=fit_cbs)
 
     return surrogate
 
@@ -176,7 +172,7 @@ def tune_config_resnet(
     )
 
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
-    # except for fit and wd
+    # except for wd and moms
     def objective(trial):
         d = trial.suggest_int("d", 64, 512, step=64)  # layer size
         d_hidden_factor = trial.suggest_float(
@@ -194,25 +190,20 @@ def tune_config_resnet(
         else:
             residual_dropout = 0.0
         lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
-        fit = trial.suggest_categorical("fit", ["fit_one_cycle", "fit_flat_cos"])
         use_wd = trial.suggest_categorical("use_wd", [True, False])
         if use_wd:
             wd = trial.suggest_float("wd", 1e-7, 1e-2, log=True)
         else:
             wd = 0.0
-        if fit == "fit_one_cycle":
-            mom1 = trial.suggest_float("mom1", 0.85, 0.99)
-            mom2 = trial.suggest_float("mom2", 0.85, 0.99)
-            moms = (mom1, mom2)
-        else:
-            moms = None
+        mom1 = trial.suggest_float("mom1", 0.85, 0.99)
+        mom2 = trial.suggest_float("mom2", 0.85, 0.99)
+        moms = (mom1, mom2)
         cbs = [FastAIPruningCallback(trial=trial, monitor="valid_loss")]
 
         surrogate = fit_config_resnet(
             key=key,
             dl_train=dl_train,
             tfms=tfms_fixed,
-            fit=fit,
             lr=lr,
             wd=wd,
             moms=moms,
@@ -491,13 +482,56 @@ if __name__ == "__main__":
             ),
         }
     )
+
+    tfms_iaml_glmnet = tfms_iaml.copy()
+    tfms_iaml_glmnet.update(
+        {
+            "s": ContTransformerLogRangeExtended,
+        }
+    )
+
+    tfms_iaml_rpart = tfms_iaml.copy()
+    tfms_iaml_rpart.update(
+        {
+            "cp": ContTransformerLogRangeExtended,
+        }
+    )
+
+    tfms_iaml_ranger = tfms_iaml.copy()
+
+    tfms_iaml_xgboost = tfms_iaml.copy()
+    tfms_iaml_xgboost.update(
+        {
+            "nrounds": ContTransformerLogRangeExtended,
+            "eta": ContTransformerLogRangeExtended,
+            "gamma": ContTransformerLogRangeExtended,
+            "lambda": ContTransformerLogRangeExtended,
+            "alpha": ContTransformerLogRangeExtended,
+            "min_child_weight": ContTransformerLogRangeExtended,
+        }
+    )
+
+    tfms_iaml_super = tfms_iaml.copy()
+    tfms_iaml_super.update(
+        {
+            "glmnet.s": ContTransformerLogRangeExtended,
+            "rpart.cp": ContTransformerLogRangeExtended,
+            "xgboost.nrounds": ContTransformerLogRangeExtended,
+            "xgboost.eta": ContTransformerLogRangeExtended,
+            "xgboost.gamma": ContTransformerLogRangeExtended,
+            "xgboost.lambda": ContTransformerLogRangeExtended,
+            "xgboost.alpha": ContTransformerLogRangeExtended,
+            "xgboost.min_child_weight": ContTransformerLogRangeExtended,
+        }
+    )
+
     tfms_list.update(
         {
-            "iaml_glmnet": tfms_iaml,
-            "iaml_rpart": tfms_iaml,
-            "iaml_ranger": tfms_iaml,
-            "iaml_xgboost": tfms_iaml,
-            "iaml_super": tfms_iaml,
+            "iaml_glmnet": tfms_iaml_glmnet,
+            "iaml_rpart": tfms_iaml_rpart,
+            "iaml_ranger": tfms_iaml_ranger,
+            "iaml_xgboost": tfms_iaml_xgboost,
+            "iaml_super": tfms_iaml_super,
         }
     )
 
@@ -566,13 +600,56 @@ if __name__ == "__main__":
             ),
         }
     )
+
+    tfms_fair_fgrrm = tfms_fair.copy()
+    tfms_fair_fgrrm.update(
+        {
+            "lambda": ContTransformerLogRangeExtended,
+        }
+    )
+
+    tfms_fair_rpart = tfms_fair.copy()
+    tfms_fair_rpart.update(
+        {
+            "cp": ContTransformerLogRangeExtended,
+        }
+    )
+
+    tfms_fair_ranger = tfms_fair.copy()
+
+    tfms_fair_xgboost = tfms_fair.copy()
+    tfms_fair_xgboost.update(
+        {
+            "nrounds": ContTransformerLogRangeExtended,
+            "eta": ContTransformerLogRangeExtended,
+            "gamma": ContTransformerLogRangeExtended,
+            "lambda": ContTransformerLogRangeExtended,
+            "alpha": ContTransformerLogRangeExtended,
+            "min_child_weight": ContTransformerLogRangeExtended,
+        }
+    )
+
+    tfms_fair_super = tfms_fair.copy()
+    tfms_fair_super.update(
+        {
+            "fgrrm.lambda": ContTransformerLogRangeExtended,
+            "rpart.cp": ContTransformerLogRangeExtended,
+            "xgboost.nrounds": ContTransformerLogRangeExtended,
+            "xgboost.eta": ContTransformerLogRangeExtended,
+            "xgboost.gamma": ContTransformerLogRangeExtended,
+            "xgboost.lambda": ContTransformerLogRangeExtended,
+            "xgboost.alpha": ContTransformerLogRangeExtended,
+            "xgboost.min_child_weight": ContTransformerLogRangeExtended,
+        }
+    )
+
     tfms_list.update(
         {
-            "fair_fgrrm": tfms_fair,
-            "fair_rpart": tfms_fair,
-            "fair_ranger": tfms_fair,
-            "fair_xgboost": tfms_fair,
-            "fair_super": tfms_fair,
+            "fair_fgrrm": tfms_fair_fgrrm,
+            "fair_rpart": tfms_fair_rpart,
+            "fair_ranger": tfms_fair_ranger,
+            "fair_xgboost": tfms_fair_xgboost,
+            "fair_super": tfms_fair_super,
         }
     )
 
@@ -652,13 +729,12 @@ if __name__ == "__main__":
     best_params.pop("use_residual_dropout")
     best_params.pop("use_wd")
 
-    if best_params.get("fit") == "fit_one_cycle":
-        mom1 = best_params.get("mom1")
-        mom2 = best_params.get("mom2")
-        moms = (mom1, mom2)
-        best_params.update({"moms": moms})
-        best_params.pop("mom1")
-        best_params.pop("mom2")
+    mom1 = best_params.get("mom1")
+    mom2 = best_params.get("mom2")
+    moms = (mom1, mom2)
+    best_params.update({"moms": moms})
+    best_params.pop("mom1")
+    best_params.pop("mom2")
 
     warnings.filterwarnings(
         "ignore", category=UserWarning
@@ -676,6 +752,9 @@ if __name__ == "__main__":
         args.key, model=config.config.get("model"), save_to_csv=True
     )
 
+    warnings.filterwarnings(
+        "ignore", category=UserWarning
+    )  # ignore warnings due to empty validation set
     surrogate_noisy = fit_config_resnet(
         args.key,
         dl_train=dl_refit,
@@ -683,5 +762,6 @@ if __name__ == "__main__":
         **best_params,
         noisy=True,
     )
+    warnings.filterwarnings("default", category=UserWarning)  # reset warnings
 
     surrogate_noisy.export_onnx(config, device=device, suffix="noisy")
