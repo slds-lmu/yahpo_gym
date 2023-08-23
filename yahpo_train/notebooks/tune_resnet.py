@@ -556,12 +556,6 @@ if __name__ == "__main__":
                     ContTransformerRangeGrouped,
                 ]
             ),
-            "fpredp": tfms_chain(
-                [
-                    partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
-                ]
-            ),
             "facc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
@@ -595,7 +589,7 @@ if __name__ == "__main__":
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerRangeGrouped,
+                    ContTransformerLogRangeGrouped,
                 ]
             ),
         }

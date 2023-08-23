@@ -528,3 +528,7 @@ ContTransformerLogRangeExtended = tfms_chain(
         partial(ContTransformerRange, x_range="-1-1"),
     ]
 )
+
+ContTransformerLogRangeGrouped = tfms_chain(
+    [ContTransformerLog, ContTransformerRangeGrouped]
+)
