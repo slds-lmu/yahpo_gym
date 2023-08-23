@@ -323,19 +323,19 @@ if __name__ == "__main__":
             ),
             "logloss": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.00, max=None),
+                    partial(ContTransformerClamp, min=0.00),
                     ContTransformerRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.00, max=None),
+                    partial(ContTransformerClamp, min=0.00),
                     ContTransformerRangeGrouped,
                 ]
             ),
             "timepredict": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.00, max=None),
+                    partial(ContTransformerClamp, min=0.00),
                     ContTransformerRangeGrouped,
                 ]
             ),
@@ -441,31 +441,31 @@ if __name__ == "__main__":
             ),
             "logloss": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
+                    partial(ContTransformerClamp, min=0.0),
                     ContTransformerRangeGrouped,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
+                    partial(ContTransformerClamp, min=0.0),
                     ContTransformerRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
+                    partial(ContTransformerClamp, min=0.0),
                     ContTransformerRangeGrouped,
                 ]
             ),
             "mec": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
+                    partial(ContTransformerClamp, min=0.0),
                     ContTransformerRangeGrouped,
                 ]
             ),
             "ias": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
+                    partial(ContTransformerClamp, min=0.0),
                     ContTransformerRangeGrouped,
                 ]
             ),
@@ -582,13 +582,13 @@ if __name__ == "__main__":
             ),
             "rammodel": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
-                    ContTransformerRangeGrouped,
+                    partial(ContTransformerClamp, min=0.0),
+                    ContTransformerLogRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.0, max=None),
+                    partial(ContTransformerClamp, min=0.0),
                     ContTransformerLogRangeGrouped,
                 ]
             ),
