@@ -529,6 +529,14 @@ ContTransformerLogRangeExtended = tfms_chain(
     ]
 )
 
+ContTransformerStandardizeGroupedRange = tfms_chain(
+    [ContTransformerStandardizeGrouped, ContTransformerRange]
+)
+
+ContTransformerLogStandardizeGroupedRange = tfms_chain(
+    [ContTransformerLog, ContTransformerStandardizeGrouped, ContTransformerRange]
+)
+
 ContTransformerLogRangeGrouped = tfms_chain(
     [ContTransformerLog, ContTransformerRangeGrouped]
 )

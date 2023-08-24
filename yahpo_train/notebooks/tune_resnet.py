@@ -223,7 +223,9 @@ def tune_config_resnet(
 
 
 if __name__ == "__main__":
-    # FIXME: finish all tfms for all scenarios and handle log
+    # FIXME: finish all tfms for all scenarios and handle log (x input)
+    # also ram and time usually should be log
+    # y RangeGrouped or StandardizeGroupedRange
     tfms_list = {}
 
     tfms_lcbench = {}
@@ -541,55 +543,55 @@ if __name__ == "__main__":
             "mmce": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "f1": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "feo": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "facc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "ftpr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "ffomr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "ffnr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGrouped,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerLogRangeGrouped,
+                    ContTransformerLogStandardizeGroupedRange,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerLogRangeGrouped,
+                    ContTransformerLogStandardizeGroupedRange,
                 ]
             ),
         }
@@ -651,13 +653,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--key",
         type=str,
-        default="iaml_glmnet",
+        default="fair_fgrrm",
         help="Key of benchmark scenario, e.g., 'iaml_glmnet'",
     )
     parser.add_argument(
         "--name",
         type=str,
-        default="tune_iaml_glmnet_resnet",
+        default="tune_fair_fgrrm_resnet",
         help="Name of the optuna study, e.g., 'tune_iaml_glmnet_resnet'",
     )
     parser.add_argument(
