@@ -224,8 +224,7 @@ def tune_config_resnet(
 
 if __name__ == "__main__":
     # FIXME: finish all tfms for all scenarios and handle log (x input)
-    # also ram and time usually should be log
-    # y RangeGrouped or StandardizeGroupedRange
+    # y RangeGrouped or StandardizeGroupedRange (probably standardize)
     tfms_list = {}
 
     tfms_lcbench = {}
@@ -585,13 +584,13 @@ if __name__ == "__main__":
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerLogStandardizeGroupedRange,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerLogStandardizeGroupedRange,
+                    ContTransformerStandardizeGroupedRange,
                 ]
             ),
         }
@@ -653,13 +652,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--key",
         type=str,
-        default="fair_fgrrm",
+        default="iaml_glmnet",
         help="Key of benchmark scenario, e.g., 'iaml_glmnet'",
     )
     parser.add_argument(
         "--name",
         type=str,
-        default="tune_fair_fgrrm_resnet",
+        default="tune_iaml_glmnet_resnet",
         help="Name of the optuna study, e.g., 'tune_iaml_glmnet_resnet'",
     )
     parser.add_argument(
@@ -748,16 +747,16 @@ if __name__ == "__main__":
         args.key, model=config.config.get("model"), save_to_csv=True
     )
 
-    warnings.filterwarnings(
-        "ignore", category=UserWarning
-    )  # ignore warnings due to empty validation set
-    surrogate_noisy = fit_config_resnet(
-        args.key,
-        dl_train=dl_refit,
-        tfms=tfms_list.get(args.key),
-        **best_params,
-        noisy=True,
-    )
-    warnings.filterwarnings("default", category=UserWarning)  # reset warnings
+    # warnings.filterwarnings(
+    #    "ignore", category=UserWarning
+    # )  # ignore warnings due to empty validation set
+    # surrogate_noisy = fit_config_resnet(
+    #    args.key,
+    #    dl_train=dl_refit,
+    #    tfms=tfms_list.get(args.key),
+    #    **best_params,
+    #    noisy=True,
+    # )
+    # warnings.filterwarnings("default", category=UserWarning)  # reset warnings
 
-    surrogate_noisy.export_onnx(config, device=device, suffix="noisy")
+    # surrogate_noisy.export_onnx(config, device=device, suffix="noisy")
