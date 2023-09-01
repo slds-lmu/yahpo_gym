@@ -4,6 +4,8 @@ from sklearn.metrics import mean_absolute_error, r2_score
 
 from yahpo_train.learner import SurrogateTabularLearner
 
+import pandas as pd
+
 
 class AvgTfedMetric(Metric):
     """
@@ -21,6 +23,8 @@ class AvgTfedMetric(Metric):
 
     def accumulate(self, learner: SurrogateTabularLearner) -> None:
         bs = find_bs(learner.tfyb)
+        if torch.isnan(learner.tfpred).any():
+            raise ValueError("NaNs in predictions.")
         self.total += (
             learner.to_detach(self.func(*learner.tfyb, learner.tfpred)) * bs
         )  # func is called with truth and prediction

@@ -34,13 +34,14 @@ class ContTransformerRange(nn.Module):
     """
     Transformer for Continuous Variables. Transforms to [eps,1-eps].
     If x_range is "-1-1", transforms to [-1+eps,1-eps].
+    if x_range is "1-2", transforms to [1+eps,2-eps].
     """
 
     def __init__(
         self,
         x: torch.Tensor,
         x_id: str,
-        eps: float = 1e-2,
+        eps: float = 1e-8,
         x_range: str = "0-1",
         **kwargs,
     ):
@@ -62,6 +63,9 @@ class ContTransformerRange(nn.Module):
         elif self.x_range == "-1-1":
             x = self.eps + (1 - 2 * self.eps) * (x - self.min) / (self.max - self.min)
             x = 2 * x - 1
+        elif self.x_range == "1-2":
+            x = self.eps + (1 - 2 * self.eps) * (x - self.min) / (self.max - self.min)
+            x = x + 1
         return x.float()
 
     def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
@@ -73,6 +77,9 @@ class ContTransformerRange(nn.Module):
         elif self.x_range == "-1-1":
             x = (x + 1) / 2
             x = self.min + (x - self.eps) / (1 - 2 * self.eps) * (self.max - self.min)
+        elif self.x_range == "1-2":
+            x = x - 1
+            x = self.min + (x - self.eps) / (1 - 2 * self.eps) * (self.max - self.min)
         return x.float()
 
 
@@ -80,6 +87,7 @@ class ContTransformerRangeGrouped(nn.Module):
     """
     Transformer for Continuous Variables. Transforms to [eps,1-eps].
     If x_range is "-1-1", transforms to [-1+eps,1-eps].
+    If x_range is "1-2", transforms to [1+eps,2-eps].
     Grouped by group.
     """
 
@@ -88,7 +96,7 @@ class ContTransformerRangeGrouped(nn.Module):
         x: torch.Tensor,
         group: torch.Tensor,
         x_id: str,
-        eps: float = 1e-2,
+        eps: float = 1e-8,
         x_range: str = "0-1",
         **kwargs,
     ):
@@ -126,6 +134,9 @@ class ContTransformerRangeGrouped(nn.Module):
         elif self.x_range == "-1-1":
             x = self.eps + (1 - 2 * self.eps) * (x - mins) / (maxs - mins)
             x = 2 * x - 1
+        elif self.x_range == "1-2":
+            x = self.eps + (1 - 2 * self.eps) * (x - mins) / (maxs - mins)
+            x = x + 1
         return x.float()
 
     def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
@@ -139,6 +150,9 @@ class ContTransformerRangeGrouped(nn.Module):
             x = mins + (x - self.eps) / (1 - 2 * self.eps) * (maxs - mins)
         elif self.x_range == "-1-1":
             x = (x + 1) / 2
+            x = mins + (x - self.eps) / (1 - 2 * self.eps) * (maxs - mins)
+        elif self.x_range == "1-2":
+            x = x - 1
             x = mins + (x - self.eps) / (1 - 2 * self.eps) * (maxs - mins)
         return x.float()
 
@@ -276,7 +290,9 @@ class ContTransformerBoxCox(nn.Module):
         # estimate the Box-Cox transformation parameter
         with np.errstate(all="raise"):
             try:
-                _, self.lmbda_ = boxcox(x_np[~np.isnan(x_np)])
+                self.lmbda_ = torch.tensor(boxcox(x_np[~np.isnan(x_np)])[1])
+                self.lmbda_ = torch.min(self.lmbda_, torch.tensor(5))
+                self.lmbda_ = torch.max(self.lmbda_, torch.tensor(-5))
             except Exception as e:
                 print(
                     f"Box-Cox estimation for variable `{x_id}` failed with error: {e}. Using identity as fallback."
@@ -290,10 +306,10 @@ class ContTransformerBoxCox(nn.Module):
         if self.fallback:
             return x
         else:
-            if self.lmbda_ != 0:
-                x = (torch.pow(x, self.lmbda_) - 1) / self.lmbda_
-            else:
+            if abs(self.lmbda_) < 1e-2:
                 x = torch.log(x)
+            else:
+                x = (torch.pow(x, self.lmbda_) - 1) / self.lmbda_
             return x.float()
 
     def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
@@ -303,11 +319,104 @@ class ContTransformerBoxCox(nn.Module):
         if self.fallback:
             return x
         else:
-            if self.lmbda_ != 0:
-                x = torch.pow((self.lmbda_ * x) + 1, 1 / self.lmbda_)
-            else:
+            if abs(self.lmbda_) < 1e-2:
                 x = torch.exp(x)
+            else:
+                x = torch.pow((self.lmbda_ * x) + 1, 1 / self.lmbda_)
             return x.float()
+
+
+class ContTransformerBoxCoxGrouped(nn.Module):
+    """
+    Transformer for Continuous Variables. Transforms via Box-Cox transformation.
+    Grouped by group.
+    """
+
+    def __init__(
+        self,
+        x: torch.Tensor,
+        group: torch.Tensor,
+        x_id: str,
+        **kwargs,
+    ):
+        super().__init__()
+        self.fallback = False
+
+        self.group_ids = torch.unique(group)
+
+        # convert PyTorch tensor to numpy array for scipy
+        x_np = x.detach().cpu().numpy()
+
+        # estimate the Box-Cox transformation parameter
+        with np.errstate(all="raise"):
+            try:
+                self.lmbdas_ = torch.tensor(
+                    [
+                        boxcox(
+                            x_np[group == group_id][~np.isnan(x_np[group == group_id])]
+                        )[1]
+                        for group_id in self.group_ids
+                    ]
+                )
+                self.lmbdas_ = torch.min(self.lmbdas_, torch.tensor(5))
+                self.lmbdas_ = torch.max(self.lmbdas_, torch.tensor(-5))
+            except Exception as e:
+                print(
+                    f"Box-Cox estimation for variable `{x_id}` failed with error: {e}. Using identity as fallback."
+                )
+                self.fallback = True
+
+    def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Batch-wise transform for x.
+        """
+        if self.fallback:
+            return x
+        else:
+            for group_id in self.group_ids:
+                x[group == group_id] = self.forward_single(
+                    x[group == group_id], group_id=group_id
+                )
+            return x.float()
+
+    def forward_single(
+        self, x: torch.Tensor, group_id: torch.Tensor, **kwargs
+    ) -> torch.Tensor:
+        """
+        Batch-wise transform for x.
+        """
+        lmbda = self.lmbdas_[group_id - 1]
+        if abs(lmbda) < 1e-2:
+            x = torch.log(x)
+        else:
+            x = (torch.pow(x, lmbda) - 1) / lmbda
+        return x.float()
+
+    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Batch-wise inverse transform for x.
+        """
+        if self.fallback:
+            return x
+        else:
+            for group_id in self.group_ids:
+                x[group == group_id] = self.invert_single(
+                    x[group == group_id], group_id=group_id
+                )
+            return x.float()
+
+    def invert_single(
+        self, x: torch.Tensor, group_id: torch.Tensor, **kwargs
+    ) -> torch.Tensor:
+        """
+        Batch-wise inverse transform for x.
+        """
+        lmbda = self.lmbdas_[group_id - 1]
+        if abs(lmbda) < 1e-2:
+            x = torch.exp(x)
+        else:
+            x = torch.pow((lmbda * x) + 1, 1 / lmbda)
+        return x.float()
 
 
 class ContTransformerInt(nn.Module):
@@ -520,6 +629,14 @@ def tfms_chain(
     return partial(ContTransformerChain, tfms=tfms)
 
 
+ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped = tfms_chain(
+    [
+        partial(ContTransformerRangeGrouped, x_range="1-2"),
+        ContTransformerBoxCoxGrouped,
+        ContTransformerRangeGrouped,
+    ]
+)
+
 ContTransformerRangeExtended = partial(ContTransformerRange, x_range="-1-1")
 
 ContTransformerLogRangeExtended = tfms_chain(
@@ -527,16 +644,4 @@ ContTransformerLogRangeExtended = tfms_chain(
         ContTransformerLog,
         partial(ContTransformerRange, x_range="-1-1"),
     ]
-)
-
-ContTransformerStandardizeGroupedRange = tfms_chain(
-    [ContTransformerStandardizeGrouped, ContTransformerRange]
-)
-
-ContTransformerLogStandardizeGroupedRange = tfms_chain(
-    [ContTransformerLog, ContTransformerStandardizeGrouped, ContTransformerRange]
-)
-
-ContTransformerLogRangeGrouped = tfms_chain(
-    [ContTransformerLog, ContTransformerRangeGrouped]
 )
