@@ -664,18 +664,20 @@ def tfms_chain(
     return partial(ContTransformerChain, tfms=tfms)
 
 
-ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped = tfms_chain(
+ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped = tfms_chain(
     [
         partial(ContTransformerRangeGrouped, x_range="1-2"),
         ContTransformerBoxCoxGrouped,
+        ContTransformerStandardizeGrouped,
         ContTransformerRangeGrouped,
     ]
 )
 
-ContTransformerRangeGroupedBoxCoxRange = tfms_chain(
+ContTransformerRangeBoxCoxStandardizeRange = tfms_chain(
     [
-        partial(ContTransformerRangeGrouped, x_range="1-2"),
+        partial(ContTransformerRange, x_range="1-2"),
         ContTransformerBoxCox,
+        ContTransformerStandardize,
         ContTransformerRange,
     ]
 )
