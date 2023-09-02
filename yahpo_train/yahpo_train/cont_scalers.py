@@ -298,7 +298,6 @@ class ContTransformerBoxCox(nn.Module):
         self, x_id: str, x: torch.Tensor, group: Optional[torch.Tensor] = None
     ):
         super().__init__()
-        self.fallback = False
 
         # convert PyTorch tensor to numpy array for scipy
         x_np = x.detach().cpu().numpy()
@@ -306,16 +305,14 @@ class ContTransformerBoxCox(nn.Module):
         # estimate the Box-Cox transformation parameter
         with np.errstate(all="raise"):
             try:
-                self.lmbda_ = torch.tensor(
-                    boxcox(x_np[~np.isnan(x_np)])[1], dtype=torch.float32
-                )
-                self.lmbda_ = torch.min(self.lmbda_, torch.tensor(5))
-                self.lmbda_ = torch.max(self.lmbda_, torch.tensor(-5))
+                lmbda = boxcox(x_np[~np.isnan(x_np)])[1]
             except Exception as e:
                 print(
                     f"Box-Cox estimation for variable `{x_id}` failed with error: {e}. Using identity as fallback."
                 )
-                self.fallback = True
+                lmbda = 1.0
+        self.lmbda_ = torch.tensor(lmbda, dtype=torch.float32)
+        self.lmbda_ = torch.clamp(self.lmbda_, min=-5, max=5)
 
     def forward(
         self, x: torch.Tensor, group: Optional[torch.Tensor] = None
@@ -323,14 +320,11 @@ class ContTransformerBoxCox(nn.Module):
         """
         Batch-wise transform for x.
         """
-        if self.fallback:
-            return x
+        if abs(self.lmbda_) < 1e-2:
+            x = torch.log(x)
         else:
-            if abs(self.lmbda_) < 1e-2:
-                x = torch.log(x)
-            else:
-                x = (torch.pow(x, self.lmbda_) - 1) / self.lmbda_
-            return x.float()
+            x = (torch.pow(x, self.lmbda_) - 1) / self.lmbda_
+        return x.float()
 
     def invert(
         self, x: torch.Tensor, group: Optional[torch.Tensor] = None
@@ -338,14 +332,11 @@ class ContTransformerBoxCox(nn.Module):
         """
         Batch-wise inverse transform for x.
         """
-        if self.fallback:
-            return x
+        if abs(self.lmbda_) < 1e-2:
+            x = torch.exp(x)
         else:
-            if abs(self.lmbda_) < 1e-2:
-                x = torch.exp(x)
-            else:
-                x = torch.pow((self.lmbda_ * x) + 1, 1 / self.lmbda_)
-            return x.float()
+            x = torch.pow((self.lmbda_ * x) + 1, 1 / self.lmbda_)
+        return x.float()
 
 
 class ContTransformerBoxCoxGrouped(nn.Module):
@@ -361,7 +352,6 @@ class ContTransformerBoxCoxGrouped(nn.Module):
         group: torch.Tensor,
     ):
         super().__init__()
-        self.fallback = False
 
         self.group_ids = torch.unique(group)
 
@@ -369,66 +359,54 @@ class ContTransformerBoxCoxGrouped(nn.Module):
         x_np = x.detach().cpu().numpy()
 
         # estimate the Box-Cox transformation parameter
+        lmbdas_list = []
         with np.errstate(all="raise"):
-            try:
-                self.lmbdas_ = torch.tensor(
-                    [
-                        boxcox(
-                            x_np[group == group_id][~np.isnan(x_np[group == group_id])]
-                        )[1]
-                        for group_id in self.group_ids
-                    ],
-                    dtype=torch.float32,
-                )
-                self.lmbdas_ = torch.min(self.lmbdas_, torch.tensor(5))
-                self.lmbdas_ = torch.max(self.lmbdas_, torch.tensor(-5))
-            except Exception as e:
-                print(
-                    f"Box-Cox estimation for variable `{x_id}` failed with error: {e}. Using identity as fallback."
-                )
-                self.fallback = True
+            for group_id in self.group_ids:
+                try:
+                    lmbda = boxcox(
+                        x_np[group == group_id][~np.isnan(x_np[group == group_id])]
+                    )[1]
+                except Exception as e:
+                    print(
+                        f"Box-Cox estimation for variable `{x_id}` for group `{group_id}` failed with error: {e}. Using identity as fallback."
+                    )
+                    lmbda = 1.0  # fallback value
+                lmbdas_list.append(lmbda)
+
+        self.lmbdas_ = torch.tensor(lmbdas_list, dtype=torch.float32)
+        self.lmbdas_ = torch.clamp(self.lmbdas_, min=-5, max=5)
 
     def forward(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
-        if self.fallback:
-            return x
-        else:
-            lmbdas = (
-                self.lmbdas_.to(x.device)
-                .index_select(dim=0, index=group - 1)
-                .to(x.device)
-            )
+        lmbdas = (
+            self.lmbdas_.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        )
 
-            x = torch.where(
-                torch.abs(lmbdas) < 1e-2,
-                torch.log(x),
-                (torch.pow(x, lmbdas) - 1) / lmbdas,
-            )
+        x = torch.where(
+            torch.abs(lmbdas) < 1e-2,
+            torch.log(x),
+            (torch.pow(x, lmbdas) - 1) / lmbdas,
+        )
 
-            return x.float()
+        return x.float()
 
     def invert(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
-        if self.fallback:
-            return x
-        else:
-            lmbdas = (
-                self.lmbdas_.to(x.device)
-                .index_select(dim=0, index=group - 1)
-                .to(x.device)
-            )
+        lmbdas = (
+            self.lmbdas_.to(x.device).index_select(dim=0, index=group - 1).to(x.device)
+        )
 
-            x = torch.where(
-                torch.abs(lmbdas) < 1e-2,
-                torch.exp(x),
-                torch.pow((lmbdas * x) + 1, 1 / lmbdas),
-            )
+        x = torch.where(
+            torch.abs(lmbdas) < 1e-2,
+            torch.exp(x),
+            torch.pow((lmbdas * x) + 1, 1 / lmbdas),
+        )
 
-            return x.float()
+        return x.float()
 
 
 class ContTransformerInt(nn.Module):
