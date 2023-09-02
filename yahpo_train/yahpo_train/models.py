@@ -41,7 +41,11 @@ class AbstractSurrogate(nn.Module):
         if embds_dbl is not None:
             self.embds_dbl = nn.ModuleList(
                 [
-                    f(torch.from_numpy(cont[1].values).float(), x_id=cont[0])
+                    f(
+                        x_id=cont[0],
+                        x=torch.from_numpy(cont[1].values).float(),
+                        group=torch.Tensor(),
+                    )
                     for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
                 ]
             )
@@ -49,8 +53,9 @@ class AbstractSurrogate(nn.Module):
             self.embds_dbl = nn.ModuleList(
                 [
                     ContTransformerRangeExtended(
-                        torch.from_numpy(cont.values).float(),
                         x_id=cont[0],
+                        x=torch.from_numpy(cont.values).float(),
+                        group=torch.Tensor(),
                     )
                     for _, cont in dls.all_cols[dls.cont_names].items()
                 ]
@@ -68,9 +73,9 @@ class AbstractSurrogate(nn.Module):
                 self.embds_tgt = nn.ModuleList(
                     [
                         f(
-                            torch.from_numpy(cont[1].values).float(),
-                            group=torch.from_numpy(dls.xs[instance_names].values).int(),
                             x_id=cont[0],
+                            x=torch.from_numpy(cont[1].values).float(),
+                            group=torch.from_numpy(dls.xs[instance_names].values).int(),
                         )
                         for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
                     ]
@@ -78,7 +83,11 @@ class AbstractSurrogate(nn.Module):
             else:
                 self.embds_tgt = nn.ModuleList(
                     [
-                        f(torch.from_numpy(cont[1].values).float(), x_id=cont[0])
+                        f(
+                            x_id=cont[0],
+                            x=torch.from_numpy(cont[1].values).float(),
+                            group=torch.tensor(),
+                        )
                         for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
                     ]
                 )
@@ -87,9 +96,9 @@ class AbstractSurrogate(nn.Module):
                 self.embds_tgt = nn.ModuleList(
                     [
                         ContTransformerRangeGrouped(
-                            torch.from_numpy(cont.values).float(),
-                            group=torch.from_numpy(dls.xs[instance_names].values).int(),
                             x_id=cont[0],
+                            x=torch.from_numpy(cont.values).float(),
+                            group=torch.from_numpy(dls.xs[instance_names].values).int(),
                         )
                         for name, cont in dls.ys[dls.y_names].items()
                     ]
@@ -98,7 +107,9 @@ class AbstractSurrogate(nn.Module):
                 self.embds_tgt = nn.ModuleList(
                     [
                         ContTransformerRange(
-                            torch.from_numpy(cont.values).float(), x_id=cont[0]
+                            x_id=cont[0],
+                            x=torch.from_numpy(cont.values).float(),
+                            group=torch.tensor(),
                         )
                         for name, cont in dls.ys[dls.y_names].items()
                     ]
@@ -139,7 +150,7 @@ class AbstractSurrogate(nn.Module):
         return ys
 
     def inv_trafo_ys(
-        self, ys: torch.Tensor, group: Optional[torch.tensor] = None
+        self, ys: torch.Tensor, group: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         ys = [
             e.invert(ys[:, i], group=group).unsqueeze(1)
@@ -172,6 +183,7 @@ class AbstractSurrogate(nn.Module):
         warnings.filterwarnings(
             "ignore", category=torch.jit.TracerWarning
         )  # ignore tracer warnings
+        # model = torch.jit.script(self)
         torch.onnx.export(
             self,
             # touple of x_cat followed by x_cont

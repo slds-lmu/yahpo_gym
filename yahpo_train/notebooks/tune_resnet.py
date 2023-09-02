@@ -431,43 +431,43 @@ if __name__ == "__main__":
             "f1": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "auc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "logloss": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "mec": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "ias": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "nf": tfms_chain(
@@ -478,7 +478,7 @@ if __name__ == "__main__":
                         max=[21, 5, 14, 20],  # 1067, 1489, 40981, 41146
                     ),
                     ContTransformerInt,
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
         }
@@ -542,55 +542,55 @@ if __name__ == "__main__":
             "mmce": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "f1": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "feo": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "facc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "ftpr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "ffomr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "ffnr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped,
+                    ContTransformerRangeGroupedBoxCoxRange,
                 ]
             ),
         }

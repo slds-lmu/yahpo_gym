@@ -12,18 +12,20 @@ class ContTransformerNone(nn.Module):
     Transformer for Continuous Variables. Performs no transformation.
     """
 
-    def __init__(self, x: torch.Tensor, **kwargs):
+    def __init__(
+        self, x_id: str, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ):
         super().__init__()
 
     @staticmethod
-    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(x: torch.Tensor, group: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return x.float()
 
     @staticmethod
-    def invert(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(x: torch.Tensor, group: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -39,11 +41,11 @@ class ContTransformerRange(nn.Module):
 
     def __init__(
         self,
-        x: torch.Tensor,
         x_id: str,
+        x: torch.Tensor,
         eps: float = 1e-8,
         x_range: str = "0-1",
-        **kwargs,
+        group: Optional[torch.Tensor] = None,
     ):
         super().__init__()
         self.eps = eps
@@ -54,7 +56,9 @@ class ContTransformerRange(nn.Module):
         if self.max == self.min:
             raise Exception(f"Constant variable `{x_id}` detected!")
 
-    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
@@ -68,7 +72,9 @@ class ContTransformerRange(nn.Module):
             x = x + 1
         return x.float()
 
-    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -93,12 +99,11 @@ class ContTransformerRangeGrouped(nn.Module):
 
     def __init__(
         self,
+        x_id: str,
         x: torch.Tensor,
         group: torch.Tensor,
-        x_id: str,
         eps: float = 1e-8,
         x_range: str = "0-1",
-        **kwargs,
     ):
         super().__init__()
         self.group_ids = torch.unique(group)
@@ -122,7 +127,7 @@ class ContTransformerRangeGrouped(nn.Module):
         if any([max_ == min_ for max_, min_ in zip(self.maxs, self.mins)]):
             raise Exception(f"Constant variable `{x_id}` detected!")
 
-    def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
@@ -139,7 +144,7 @@ class ContTransformerRangeGrouped(nn.Module):
             x = x + 1
         return x.float()
 
-    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -162,7 +167,13 @@ class ContTransformerStandardize(nn.Module):
     Transformer for Continuous Variables. Transforms via standardization.
     """
 
-    def __init__(self, x: torch.Tensor, x_id: str, robust: bool = False, **kwargs):
+    def __init__(
+        self,
+        x_id: str,
+        x: torch.Tensor,
+        robust: bool = False,
+        group: Optional[torch.Tensor] = None,
+    ):
         super().__init__()
         if robust:
             self.center, self.scale = torch.median(x[~torch.isnan(x)]), torch.quantile(
@@ -175,14 +186,18 @@ class ContTransformerStandardize(nn.Module):
         if self.scale <= 1e-12:
             raise Exception(f"Constant variable `{x_id}` detected!")
 
-    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         x = (x - self.center) / self.scale
         return x.float()
 
-    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -198,11 +213,10 @@ class ContTransformerStandardizeGrouped(nn.Module):
 
     def __init__(
         self,
+        x_id: str,
         x: torch.Tensor,
         group: torch.Tensor,
-        x_id: str,
         robust: bool = False,
-        **kwargs,
     ):
         super().__init__()
         self.group_ids = torch.unique(group)
@@ -248,7 +262,7 @@ class ContTransformerStandardizeGrouped(nn.Module):
         if any([scale <= 1e-12 for scale in self.scales]):
             raise Exception(f"Constant variable `{x_id}` detected!")
 
-    def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
@@ -261,7 +275,7 @@ class ContTransformerStandardizeGrouped(nn.Module):
         x = (x - centers) / scales
         return x.float()
 
-    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -280,7 +294,9 @@ class ContTransformerBoxCox(nn.Module):
     Transformer for Continuous Variables. Transforms via Box-Cox transformation.
     """
 
-    def __init__(self, x: torch.Tensor, x_id: str, **kwargs):
+    def __init__(
+        self, x_id: str, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ):
         super().__init__()
         self.fallback = False
 
@@ -290,7 +306,9 @@ class ContTransformerBoxCox(nn.Module):
         # estimate the Box-Cox transformation parameter
         with np.errstate(all="raise"):
             try:
-                self.lmbda_ = torch.tensor(boxcox(x_np[~np.isnan(x_np)])[1])
+                self.lmbda_ = torch.tensor(
+                    boxcox(x_np[~np.isnan(x_np)])[1], dtype=torch.float32
+                )
                 self.lmbda_ = torch.min(self.lmbda_, torch.tensor(5))
                 self.lmbda_ = torch.max(self.lmbda_, torch.tensor(-5))
             except Exception as e:
@@ -299,7 +317,9 @@ class ContTransformerBoxCox(nn.Module):
                 )
                 self.fallback = True
 
-    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
@@ -312,7 +332,9 @@ class ContTransformerBoxCox(nn.Module):
                 x = (torch.pow(x, self.lmbda_) - 1) / self.lmbda_
             return x.float()
 
-    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -334,10 +356,9 @@ class ContTransformerBoxCoxGrouped(nn.Module):
 
     def __init__(
         self,
+        x_id: str,
         x: torch.Tensor,
         group: torch.Tensor,
-        x_id: str,
-        **kwargs,
     ):
         super().__init__()
         self.fallback = False
@@ -356,7 +377,8 @@ class ContTransformerBoxCoxGrouped(nn.Module):
                             x_np[group == group_id][~np.isnan(x_np[group == group_id])]
                         )[1]
                         for group_id in self.group_ids
-                    ]
+                    ],
+                    dtype=torch.float32,
                 )
                 self.lmbdas_ = torch.min(self.lmbdas_, torch.tensor(5))
                 self.lmbdas_ = torch.max(self.lmbdas_, torch.tensor(-5))
@@ -366,57 +388,47 @@ class ContTransformerBoxCoxGrouped(nn.Module):
                 )
                 self.fallback = True
 
-    def forward(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         if self.fallback:
             return x
         else:
-            for group_id in self.group_ids:
-                x[group == group_id] = self.forward_single(
-                    x[group == group_id], group_id=group_id
-                )
+            lmbdas = (
+                self.lmbdas_.to(x.device)
+                .index_select(dim=0, index=group - 1)
+                .to(x.device)
+            )
+
+            x = torch.where(
+                torch.abs(lmbdas) < 1e-2,
+                torch.log(x),
+                (torch.pow(x, lmbdas) - 1) / lmbdas,
+            )
+
             return x.float()
 
-    def forward_single(
-        self, x: torch.Tensor, group_id: torch.Tensor, **kwargs
-    ) -> torch.Tensor:
-        """
-        Batch-wise transform for x.
-        """
-        lmbda = self.lmbdas_[group_id - 1]
-        if abs(lmbda) < 1e-2:
-            x = torch.log(x)
-        else:
-            x = (torch.pow(x, lmbda) - 1) / lmbda
-        return x.float()
-
-    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
         if self.fallback:
             return x
         else:
-            for group_id in self.group_ids:
-                x[group == group_id] = self.invert_single(
-                    x[group == group_id], group_id=group_id
-                )
-            return x.float()
+            lmbdas = (
+                self.lmbdas_.to(x.device)
+                .index_select(dim=0, index=group - 1)
+                .to(x.device)
+            )
 
-    def invert_single(
-        self, x: torch.Tensor, group_id: torch.Tensor, **kwargs
-    ) -> torch.Tensor:
-        """
-        Batch-wise inverse transform for x.
-        """
-        lmbda = self.lmbdas_[group_id - 1]
-        if abs(lmbda) < 1e-2:
-            x = torch.exp(x)
-        else:
-            x = torch.pow((lmbda * x) + 1, 1 / lmbda)
-        return x.float()
+            x = torch.where(
+                torch.abs(lmbdas) < 1e-2,
+                torch.exp(x),
+                torch.pow((lmbdas * x) + 1, 1 / lmbdas),
+            )
+
+            return x.float()
 
 
 class ContTransformerInt(nn.Module):
@@ -426,18 +438,20 @@ class ContTransformerInt(nn.Module):
     Note that the data type remains unchanged as a float.
     """
 
-    def __init__(self, x: torch.Tensor, **kwargs):
+    def __init__(
+        self, x_id: str, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ):
         super().__init__()
 
     @staticmethod
-    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(x: torch.Tensor, group: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Identity.
         """
         return x.float()
 
     @staticmethod
-    def invert(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(x: torch.Tensor, group: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Round to nearest integer.
         """
@@ -452,10 +466,11 @@ class ContTransformerClamp(nn.Module):
 
     def __init__(
         self,
+        x_id: str,
         x: torch.Tensor,
+        group: Optional[torch.Tensor] = None,
         min: Optional[float] = None,
         max: Optional[float] = None,
-        **kwargs,
     ):
         super().__init__()
         self.min, self.max = min, max
@@ -465,13 +480,15 @@ class ContTransformerClamp(nn.Module):
             self.max = torch.Tensor([max])
 
     @staticmethod
-    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(x: torch.Tensor, group: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return x.float()
 
-    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -495,11 +512,11 @@ class ContTransformerClampGrouped(nn.Module):
 
     def __init__(
         self,
+        x_id: str,
         x: torch.Tensor,
         group: torch.Tensor,
         min: Optional[List[float]] = None,
         max: Optional[List[float]] = None,
-        **kwargs,
     ):
         super().__init__()
         self.group_ids = torch.unique(
@@ -516,13 +533,13 @@ class ContTransformerClampGrouped(nn.Module):
             self.max = torch.Tensor([max]).squeeze(0)
 
     @staticmethod
-    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return x.float()
 
-    def invert(self, x: torch.Tensor, group: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -547,7 +564,9 @@ class ContTransformerLog(nn.Module):
     Transformer for Continuous Variables. Transforms to log-scale.
     """
 
-    def __init__(self, x: torch.Tensor, x_id: str, **kwargs):
+    def __init__(
+        self, x_id: str, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ):
         super().__init__()
         if torch.min(x) <= 0:
             raise Exception(
@@ -555,14 +574,14 @@ class ContTransformerLog(nn.Module):
             )
 
     @staticmethod
-    def forward(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(x: torch.Tensor, group: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return torch.log(x.float())
 
     @staticmethod
-    def invert(x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(x: torch.Tensor, group: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -574,17 +593,23 @@ class ContTransformerShift(nn.Module):
     Transformer for Continuous Variables. Shifts by a constant.
     """
 
-    def __init__(self, x: torch.Tensor, shift: float = 1e-8, **kwargs):
+    def __init__(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None, shift: float = 1e-8
+    ):
         super().__init__()
         self.shift = shift
 
-    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise transform for x.
         """
         return x.float() + self.shift
 
-    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Batch-wise inverse transform for x.
         """
@@ -598,28 +623,38 @@ class ContTransformerChain(nn.Module):
     during invert, the order is reversed.
     """
 
-    def __init__(self, x: torch.Tensor, tfms: List[nn.Module], **kwargs):
+    def __init__(
+        self,
+        x_id: str,
+        x: torch.Tensor,
+        tfms: List[nn.Module],
+        group: Optional[torch.Tensor] = None,
+    ):
         super().__init__()
         self.tfms = []
         for tf in tfms:
-            itf = tf(x, **kwargs)
-            x = itf.forward(x, **kwargs)  # test whether forward works
+            itf = tf(x_id=x_id, x=x, group=group)
+            x = itf.forward(x=x, group=group)  # test whether forward works
             self.tfms += [itf]
 
-    def forward(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Chained batch-wise transform for x.
         """
         for tf in self.tfms:
-            x = tf.forward(x, **kwargs)
+            x = tf.forward(x=x, group=group)
         return x
 
-    def invert(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+    def invert(
+        self, x: torch.Tensor, group: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """
         Chained batch-wise inverse transform for x.
         """
         for tf in reversed(self.tfms):
-            x = tf.invert(x, **kwargs)
+            x = tf.invert(x, group=group)
         return x.float()
 
 
@@ -634,6 +669,14 @@ ContTransformerRangeGroupedBoxCoxGroupedRangeGrouped = tfms_chain(
         partial(ContTransformerRangeGrouped, x_range="1-2"),
         ContTransformerBoxCoxGrouped,
         ContTransformerRangeGrouped,
+    ]
+)
+
+ContTransformerRangeGroupedBoxCoxRange = tfms_chain(
+    [
+        partial(ContTransformerRangeGrouped, x_range="1-2"),
+        ContTransformerBoxCox,
+        ContTransformerRange,
     ]
 )
 
