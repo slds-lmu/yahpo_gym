@@ -231,56 +231,56 @@ if __name__ == "__main__":
             "val_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "val_cross_entropy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "val_balanced_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "test_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "test_cross_entropy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "test_balanced_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "time": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "time_increase": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "model_parameters": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=1.00),
                     ContTransformerInt,
-                    ContTransformerRangeBoxCoxStandardizeRange,
+                    ContTransformerStandardizeRange,
                 ]
             ),
             "batch_size": ContTransformerLogRangeExtended,
@@ -296,26 +296,32 @@ if __name__ == "__main__":
             "val_accuracy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeBoxCoxStandardizeRange,
+                    ContTransformerStandardizeRange,
                 ]
             ),
             "val_cross_entropy": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeBoxCoxStandardizeRange,
+                    ContTransformerStandardizeRange,
                 ]
             ),
             "runtime": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeBoxCoxStandardizeRange,
+                    ContTransformerStandardizeRange,
+                ]
+            ),
+            "runtime_increase": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerStandardizeRange,
                 ]
             ),
             "model_parameters": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=1.00),
                     ContTransformerInt,
-                    ContTransformerRangeBoxCoxStandardizeRange,
+                    ContTransformerStandardizeRange,
                 ]
             ),
         }
@@ -328,43 +334,43 @@ if __name__ == "__main__":
             "acc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "bac": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "auc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=1.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "brier": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00, max=2.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "logloss": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "timepredict": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
         }
@@ -452,49 +458,49 @@ if __name__ == "__main__":
             "mmce": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "f1": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "auc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "logloss": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "mec": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "ias": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "nf": tfms_chain(
@@ -505,7 +511,7 @@ if __name__ == "__main__":
                         max=[21, 5, 14, 20],  # 1067, 1489, 40981, 41146
                     ),
                     ContTransformerInt,
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
         }
@@ -569,55 +575,55 @@ if __name__ == "__main__":
             "mmce": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "f1": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "feo": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "facc": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "ftpr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "ffomr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "ffnr": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0, max=1.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "rammodel": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "timetrain": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.0),
-                    ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped,
+                    ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
         }

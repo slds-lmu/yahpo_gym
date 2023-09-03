@@ -183,7 +183,7 @@ class ContTransformerStandardize(nn.Module):
             self.center, self.scale = torch.mean(x[~torch.isnan(x)]), torch.sqrt(
                 torch.var(x[~torch.isnan(x)])
             )
-        if self.scale <= 1e-5:
+        if self.scale <= 1e-8:
             raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(
@@ -259,7 +259,7 @@ class ContTransformerStandardizeGrouped(nn.Module):
                 ]
             )
 
-        if any([scale <= 1e-5 for scale in self.scales]):
+        if any([scale <= 1e-8 for scale in self.scales]):
             raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
@@ -648,19 +648,15 @@ def tfms_chain(
     return partial(ContTransformerChain, tfms=tfms)
 
 
-ContTransformerRangeGroupedBoxCoxGroupedStandardizeGroupedRangeGrouped = tfms_chain(
+ContTransformerStandardizeGroupedRangeGrouped = tfms_chain(
     [
-        partial(ContTransformerRangeGrouped, x_range="1-2"),
-        ContTransformerBoxCoxGrouped,
         ContTransformerStandardizeGrouped,
         ContTransformerRangeGrouped,
     ]
 )
 
-ContTransformerRangeBoxCoxStandardizeRange = tfms_chain(
+ContTransformerStandardizeRange = tfms_chain(
     [
-        partial(ContTransformerRange, x_range="1-2"),
-        ContTransformerBoxCox,
         ContTransformerStandardize,
         ContTransformerRange,
     ]

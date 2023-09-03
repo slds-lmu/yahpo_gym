@@ -420,7 +420,6 @@ class BenchmarkSet:
                 [
                     self._integer_encode(configuration[x], x)
                     for x in self.config.cat_names
-                    if x not in self.config.drop_predict
                 ]
             )
             .reshape(1, -1)

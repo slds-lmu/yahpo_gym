@@ -42,7 +42,6 @@ class Configuration:
             "fidelity_params": [],
             "instance_names": "",
             "runtime_name": "",
-            "drop_predict": [],
             "hierarchical": False,
             "memory_name": "",
             "instances": [],
@@ -83,10 +82,6 @@ class Configuration:
     @property
     def runtime_name(self):
         return self.config["runtime_name"]
-
-    @property
-    def drop_predict(self):
-        return self.config["drop_predict"]
 
     @property
     def hierarchical(self):
