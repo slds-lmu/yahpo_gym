@@ -366,9 +366,9 @@ if __name__ == "__main__":
     tfms_rbv2_svm = tfms_rbv2.copy()
     tfms_rbv2_svm.update(
         {
-            "cost": ContTransformerLogRangeExtended,
-            "gamma": ContTransformerLogRangeExtended,
-            "tolerance": ContTransformerLogRangeExtended,
+            "cost": ContTransformerShiftLogRangeExtended,
+            "gamma": ContTransformerShiftLogRangeExtended,
+            "tolerance": ContTransformerShiftLogRangeExtended,
         }
     )
 
@@ -393,9 +393,9 @@ if __name__ == "__main__":
             "rpart.cp": ContTransformerLogRangeExtended,
             "aknn.ef": ContTransformerLogRangeExtended,
             "aknn.ef_construction": ContTransformerLogRangeExtended,
-            "svm.cost": ContTransformerLogRangeExtended,
-            "svm.gamma": ContTransformerLogRangeExtended,
-            "svm.tolerance": ContTransformerLogRangeExtended,
+            "svm.cost": ContTransformerShiftLogRangeExtended,
+            "svm.gamma": ContTransformerShiftLogRangeExtended,
+            "svm.tolerance": ContTransformerShiftLogRangeExtended,
             "xgboost.nrounds": ContTransformerLogRangeExtended,
             "xgboost.eta": ContTransformerLogRangeExtended,
             "xgboost.gamma": ContTransformerLogRangeExtended,

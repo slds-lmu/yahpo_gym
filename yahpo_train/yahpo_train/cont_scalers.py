@@ -668,3 +668,11 @@ ContTransformerLogRangeExtended = tfms_chain(
         partial(ContTransformerRange, x_range="-1-1"),
     ]
 )
+
+ContTransformerShiftLogRangeExtended = tfms_chain(
+    [
+        ContTransformerShift,
+        ContTransformerLog,
+        partial(ContTransformerRange, x_range="-1-1"),
+    ]
+)
