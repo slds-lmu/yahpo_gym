@@ -290,8 +290,37 @@ if __name__ == "__main__":
     )
     tfms_list.update({"lcbench": tfms_lcbench})
 
-    # tfms_nb301 = {}
-    # tfms_list.update({"nb301": tfms_nb301})
+    tfms_nb301 = {}
+    tfms_nb301.update(
+        {
+            "val_accuracy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerRangeBoxCoxStandardizeRange,
+                ]
+            ),
+            "val_cross_entropy": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerRangeBoxCoxStandardizeRange,
+                ]
+            ),
+            "runtime": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerRangeBoxCoxStandardizeRange,
+                ]
+            ),
+            "model_parameters": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=1.00),
+                    ContTransformerInt,
+                    ContTransformerRangeBoxCoxStandardizeRange,
+                ]
+            ),
+        }
+    )
+    tfms_list.update({"nb301": tfms_nb301})
 
     tfms_rbv2 = {}
     tfms_rbv2.update(
@@ -650,13 +679,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--key",
         type=str,
-        default="rbv2_svm",
+        default="iaml_glmnet
         help="Key of benchmark scenario, e.g., 'iaml_glmnet'",
     )
     parser.add_argument(
         "--name",
         type=str,
-        default="tune_rbv2_svm_resnet",
+        default="tune_iaml_glmnet_resnet",
         help="Name of the optuna study, e.g., 'tune_iaml_glmnet_resnet'",
     )
     parser.add_argument(

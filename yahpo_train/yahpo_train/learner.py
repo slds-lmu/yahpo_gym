@@ -53,7 +53,7 @@ def dl_from_config(
     ):
         chunks.append(chunk)
     df = pd.concat(chunks, axis=0)
-    df = df.sample(frac=1.0, random_state=seed)
+    df = df.sample(frac=1.00, random_state=seed)
 
     gc.collect()
 

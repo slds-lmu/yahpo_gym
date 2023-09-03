@@ -43,7 +43,7 @@ class ContTransformerRange(nn.Module):
         self,
         x_id: str,
         x: torch.Tensor,
-        eps: float = 1e-5,
+        eps: float = 1e-2,
         x_range: str = "0-1",
         group: Optional[torch.Tensor] = None,
     ):
@@ -102,7 +102,7 @@ class ContTransformerRangeGrouped(nn.Module):
         x_id: str,
         x: torch.Tensor,
         group: torch.Tensor,
-        eps: float = 1e-5,
+        eps: float = 1e-2,
         x_range: str = "0-1",
     ):
         super().__init__()
@@ -312,7 +312,7 @@ class ContTransformerBoxCox(nn.Module):
                 )
                 lmbda = 1.0
         self.lmbda_ = torch.tensor(lmbda, dtype=torch.float32)
-        self.lmbda_ = torch.clamp(self.lmbda_, min=-5, max=5)
+        self.lmbda_ = torch.clamp(self.lmbda_, min=-2, max=2)
 
     def forward(
         self, x: torch.Tensor, group: Optional[torch.Tensor] = None
@@ -374,7 +374,7 @@ class ContTransformerBoxCoxGrouped(nn.Module):
                 lmbdas_list.append(lmbda)
 
         self.lmbdas_ = torch.tensor(lmbdas_list, dtype=torch.float32)
-        self.lmbdas_ = torch.clamp(self.lmbdas_, min=-5, max=5)
+        self.lmbdas_ = torch.clamp(self.lmbdas_, min=-2, max=2)
 
     def forward(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
         """

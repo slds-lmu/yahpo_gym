@@ -3,8 +3,8 @@ from yahpo_gym.configuration import config_dict, cfg
 _nb301_dict = {
     "config_id": "nb301",
     "model": "model_v2.onnx",
-    "y_names": ["val_accuracy", "runtime"],
-    "y_minimize": [False, True],
+    "y_names": ["val_accuracy", "val_cross_entropy", "runtime", "model_parameters"],
+    "y_minimize": [False, True, True, True],
     "cont_names": ["epoch"],
     "cat_names": [
         "NetworkSelectorDatasetInfo_COLON_darts_COLON_edge_normal_0",

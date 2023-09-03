@@ -86,7 +86,7 @@ class AbstractSurrogate(nn.Module):
                         f(
                             x_id=cont[0],
                             x=torch.from_numpy(cont[1].values).float(),
-                            group=torch.tensor(),
+                            group=torch.tensor([]),
                         )
                         for cont, f in zip(dls.ys[dls.y_names].items(), embds_tgt)
                     ]
@@ -109,7 +109,7 @@ class AbstractSurrogate(nn.Module):
                         ContTransformerRange(
                             x_id=cont[0],
                             x=torch.from_numpy(cont.values).float(),
-                            group=torch.tensor(),
+                            group=torch.tensor([]),
                         )
                         for name, cont in dls.ys[dls.y_names].items()
                     ]
