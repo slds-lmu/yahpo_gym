@@ -12,7 +12,9 @@ class MultiMaeLoss(nn.Module):
     def forward(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         loss = torch.mean(torch.mean(torch.abs(output - target), axis=0))
         if torch.isnan(loss):
-            loss = torch.tensor(9999999999)  # if loss is nan, set to high value
+            loss = torch.tensor(
+                9999999, dtype=torch.float32
+            )  # if loss is nan, set to high value
         return loss
 
 
@@ -26,5 +28,7 @@ class MultiMseLoss(nn.Module):
     def forward(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         loss = torch.mean(torch.mean(torch.pow(output - target, 2), axis=0))
         if torch.isnan(loss):
-            loss = torch.tensor(9999999999)  # if loss is nan, set to high value
+            loss = torch.tensor(
+                9999999, dtype=torch.float32
+            )  # if loss is nan, set to high value
         return loss

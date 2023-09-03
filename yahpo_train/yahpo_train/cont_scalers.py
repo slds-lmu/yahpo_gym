@@ -43,7 +43,7 @@ class ContTransformerRange(nn.Module):
         self,
         x_id: str,
         x: torch.Tensor,
-        eps: float = 1e-8,
+        eps: float = 1e-5,
         x_range: str = "0-1",
         group: Optional[torch.Tensor] = None,
     ):
@@ -102,7 +102,7 @@ class ContTransformerRangeGrouped(nn.Module):
         x_id: str,
         x: torch.Tensor,
         group: torch.Tensor,
-        eps: float = 1e-8,
+        eps: float = 1e-5,
         x_range: str = "0-1",
     ):
         super().__init__()
@@ -183,7 +183,7 @@ class ContTransformerStandardize(nn.Module):
             self.center, self.scale = torch.mean(x[~torch.isnan(x)]), torch.sqrt(
                 torch.var(x[~torch.isnan(x)])
             )
-        if self.scale <= 1e-12:
+        if self.scale <= 1e-5:
             raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(
@@ -259,7 +259,7 @@ class ContTransformerStandardizeGrouped(nn.Module):
                 ]
             )
 
-        if any([scale <= 1e-12 for scale in self.scales]):
+        if any([scale <= 1e-5 for scale in self.scales]):
             raise Exception(f"Constant variable `{x_id}` detected!")
 
     def forward(self, x: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
@@ -576,7 +576,7 @@ class ContTransformerShift(nn.Module):
         x_id: str,
         x: torch.Tensor,
         group: Optional[torch.Tensor] = None,
-        shift: float = 1e-8,
+        shift: float = 1.0,
     ):
         super().__init__()
         self.shift = shift
@@ -587,7 +587,8 @@ class ContTransformerShift(nn.Module):
         """
         Batch-wise transform for x.
         """
-        return x.float() + self.shift
+        x = x + self.shift
+        return x.float()
 
     def invert(
         self, x: torch.Tensor, group: Optional[torch.Tensor] = None
@@ -595,7 +596,8 @@ class ContTransformerShift(nn.Module):
         """
         Batch-wise inverse transform for x.
         """
-        return x.float() - self.shift
+        x = x - self.shift
+        return x.float()
 
 
 class ContTransformerChain(nn.Module):
