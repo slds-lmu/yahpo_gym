@@ -650,13 +650,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--key",
         type=str,
-        default="lcbench",
+        default="rbv2_svm",
         help="Key of benchmark scenario, e.g., 'iaml_glmnet'",
     )
     parser.add_argument(
         "--name",
         type=str,
-        default="tune_lcbench_resnet",
+        default="tune_rbv2_svm_resnet",
         help="Name of the optuna study, e.g., 'tune_iaml_glmnet_resnet'",
     )
     parser.add_argument(

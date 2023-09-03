@@ -572,7 +572,11 @@ class ContTransformerShift(nn.Module):
     """
 
     def __init__(
-        self, x: torch.Tensor, group: Optional[torch.Tensor] = None, shift: float = 1e-8
+        self,
+        x_id: str,
+        x: torch.Tensor,
+        group: Optional[torch.Tensor] = None,
+        shift: float = 1e-8,
     ):
         super().__init__()
         self.shift = shift
