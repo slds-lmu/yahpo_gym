@@ -267,12 +267,14 @@ if __name__ == "__main__":
             "time": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
                     ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
             "time_increase": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
                     ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
@@ -283,9 +285,9 @@ if __name__ == "__main__":
                     ContTransformerStandardizeRange,
                 ]
             ),
-            "batch_size": ContTransformerLogRangeExtended,
-            "learning_rate": ContTransformerLogRangeExtended,
-            "max_units": ContTransformerLogRangeExtended,
+            "batch_size": ContTransformerShiftLogRangeExtended,
+            "learning_rate": ContTransformerShiftLogRangeExtended,
+            "max_units": ContTransformerShiftLogRangeExtended,
         }
     )
     tfms_list.update({"lcbench": tfms_lcbench})
@@ -308,12 +310,14 @@ if __name__ == "__main__":
             "runtime": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
                     ContTransformerStandardizeRange,
                 ]
             ),
             "runtime_increase": tfms_chain(
                 [
                     partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
                     ContTransformerStandardizeRange,
                 ]
             ),
@@ -379,22 +383,22 @@ if __name__ == "__main__":
     tfms_rbv2_glmnet = tfms_rbv2.copy()
     tfms_rbv2_glmnet.update(
         {
-            "s": ContTransformerLogRangeExtended,
+            "s": ContTransformerShiftLogRangeExtended,
         }
     )
 
     tfms_rbv2_rpart = tfms_rbv2.copy()
     tfms_rbv2_rpart.update(
         {
-            "cp": ContTransformerLogRangeExtended,
+            "cp": ContTransformerShiftLogRangeExtended,
         }
     )
 
     tfms_rbv2_aknn = tfms_rbv2.copy()
     tfms_rbv2_aknn.update(
         {
-            "ef": ContTransformerLogRangeExtended,
-            "ef_construction": ContTransformerLogRangeExtended,
+            "ef": ContTransformerShiftLogRangeExtended,
+            "ef_construction": ContTransformerShiftLogRangeExtended,
         }
     )
 
@@ -412,31 +416,31 @@ if __name__ == "__main__":
     tfms_rbv2_xgboost = tfms_rbv2.copy()
     tfms_rbv2_xgboost.update(
         {
-            "nrounds": ContTransformerLogRangeExtended,
-            "eta": ContTransformerLogRangeExtended,
-            "gamma": ContTransformerLogRangeExtended,
-            "lambda": ContTransformerLogRangeExtended,
-            "alpha": ContTransformerLogRangeExtended,
-            "min_child_weight": ContTransformerLogRangeExtended,
+            "nrounds": ContTransformerShiftLogRangeExtended,
+            "eta": ContTransformerShiftLogRangeExtended,
+            "gamma": ContTransformerShiftLogRangeExtended,
+            "lambda": ContTransformerShiftLogRangeExtended,
+            "alpha": ContTransformerShiftLogRangeExtended,
+            "min_child_weight": ContTransformerShiftLogRangeExtended,
         }
     )
 
     tfms_rbv2_super = tfms_rbv2.copy()
     tfms_rbv2_super.update(
         {
-            "glmnet.s": ContTransformerLogRangeExtended,
-            "rpart.cp": ContTransformerLogRangeExtended,
-            "aknn.ef": ContTransformerLogRangeExtended,
-            "aknn.ef_construction": ContTransformerLogRangeExtended,
+            "glmnet.s": ContTransformerShiftLogRangeExtended,
+            "rpart.cp": ContTransformerShiftLogRangeExtended,
+            "aknn.ef": ContTransformerShiftLogRangeExtended,
+            "aknn.ef_construction": ContTransformerShiftLogRangeExtended,
             "svm.cost": ContTransformerShiftLogRangeExtended,
             "svm.gamma": ContTransformerShiftLogRangeExtended,
             "svm.tolerance": ContTransformerShiftLogRangeExtended,
-            "xgboost.nrounds": ContTransformerLogRangeExtended,
-            "xgboost.eta": ContTransformerLogRangeExtended,
-            "xgboost.gamma": ContTransformerLogRangeExtended,
-            "xgboost.lambda": ContTransformerLogRangeExtended,
-            "xgboost.alpha": ContTransformerLogRangeExtended,
-            "xgboost.min_child_weight": ContTransformerLogRangeExtended,
+            "xgboost.nrounds": ContTransformerShiftLogRangeExtended,
+            "xgboost.eta": ContTransformerShiftLogRangeExtended,
+            "xgboost.gamma": ContTransformerShiftLogRangeExtended,
+            "xgboost.lambda": ContTransformerShiftLogRangeExtended,
+            "xgboost.alpha": ContTransformerShiftLogRangeExtended,
+            "xgboost.min_child_weight": ContTransformerShiftLogRangeExtended,
         }
     )
 
@@ -520,14 +524,14 @@ if __name__ == "__main__":
     tfms_iaml_glmnet = tfms_iaml.copy()
     tfms_iaml_glmnet.update(
         {
-            "s": ContTransformerLogRangeExtended,
+            "s": ContTransformerShiftLogRangeExtended,
         }
     )
 
     tfms_iaml_rpart = tfms_iaml.copy()
     tfms_iaml_rpart.update(
         {
-            "cp": ContTransformerLogRangeExtended,
+            "cp": ContTransformerShiftLogRangeExtended,
         }
     )
 
@@ -536,26 +540,26 @@ if __name__ == "__main__":
     tfms_iaml_xgboost = tfms_iaml.copy()
     tfms_iaml_xgboost.update(
         {
-            "nrounds": ContTransformerLogRangeExtended,
-            "eta": ContTransformerLogRangeExtended,
-            "gamma": ContTransformerLogRangeExtended,
-            "lambda": ContTransformerLogRangeExtended,
-            "alpha": ContTransformerLogRangeExtended,
-            "min_child_weight": ContTransformerLogRangeExtended,
+            "nrounds": ContTransformerShiftLogRangeExtended,
+            "eta": ContTransformerShiftLogRangeExtended,
+            "gamma": ContTransformerShiftLogRangeExtended,
+            "lambda": ContTransformerShiftLogRangeExtended,
+            "alpha": ContTransformerShiftLogRangeExtended,
+            "min_child_weight": ContTransformerShiftLogRangeExtended,
         }
     )
 
     tfms_iaml_super = tfms_iaml.copy()
     tfms_iaml_super.update(
         {
-            "glmnet.s": ContTransformerLogRangeExtended,
-            "rpart.cp": ContTransformerLogRangeExtended,
-            "xgboost.nrounds": ContTransformerLogRangeExtended,
-            "xgboost.eta": ContTransformerLogRangeExtended,
-            "xgboost.gamma": ContTransformerLogRangeExtended,
-            "xgboost.lambda": ContTransformerLogRangeExtended,
-            "xgboost.alpha": ContTransformerLogRangeExtended,
-            "xgboost.min_child_weight": ContTransformerLogRangeExtended,
+            "glmnet.s": ContTransformerShiftLogRangeExtended,
+            "rpart.cp": ContTransformerShiftLogRangeExtended,
+            "xgboost.nrounds": ContTransformerShiftLogRangeExtended,
+            "xgboost.eta": ContTransformerShiftLogRangeExtended,
+            "xgboost.gamma": ContTransformerShiftLogRangeExtended,
+            "xgboost.lambda": ContTransformerShiftLogRangeExtended,
+            "xgboost.alpha": ContTransformerShiftLogRangeExtended,
+            "xgboost.min_child_weight": ContTransformerShiftLogRangeExtended,
         }
     )
 
@@ -632,14 +636,14 @@ if __name__ == "__main__":
     tfms_fair_fgrrm = tfms_fair.copy()
     tfms_fair_fgrrm.update(
         {
-            "lambda": ContTransformerLogRangeExtended,
+            "lambda": ContTransformerShiftLogRangeExtended,
         }
     )
 
     tfms_fair_rpart = tfms_fair.copy()
     tfms_fair_rpart.update(
         {
-            "cp": ContTransformerLogRangeExtended,
+            "cp": ContTransformerShiftLogRangeExtended,
         }
     )
 
@@ -648,26 +652,26 @@ if __name__ == "__main__":
     tfms_fair_xgboost = tfms_fair.copy()
     tfms_fair_xgboost.update(
         {
-            "nrounds": ContTransformerLogRangeExtended,
-            "eta": ContTransformerLogRangeExtended,
-            "gamma": ContTransformerLogRangeExtended,
-            "lambda": ContTransformerLogRangeExtended,
-            "alpha": ContTransformerLogRangeExtended,
-            "min_child_weight": ContTransformerLogRangeExtended,
+            "nrounds": ContTransformerShiftLogRangeExtended,
+            "eta": ContTransformerShiftLogRangeExtended,
+            "gamma": ContTransformerShiftLogRangeExtended,
+            "lambda": ContTransformerShiftLogRangeExtended,
+            "alpha": ContTransformerShiftLogRangeExtended,
+            "min_child_weight": ContTransformerShiftLogRangeExtended,
         }
     )
 
     tfms_fair_super = tfms_fair.copy()
     tfms_fair_super.update(
         {
-            "fgrrm.lambda": ContTransformerLogRangeExtended,
-            "rpart.cp": ContTransformerLogRangeExtended,
-            "xgboost.nrounds": ContTransformerLogRangeExtended,
-            "xgboost.eta": ContTransformerLogRangeExtended,
-            "xgboost.gamma": ContTransformerLogRangeExtended,
-            "xgboost.lambda": ContTransformerLogRangeExtended,
-            "xgboost.alpha": ContTransformerLogRangeExtended,
-            "xgboost.min_child_weight": ContTransformerLogRangeExtended,
+            "fgrrm.lambda": ContTransformerShiftLogRangeExtended,
+            "rpart.cp": ContTransformerShiftLogRangeExtended,
+            "xgboost.nrounds": ContTransformerShiftLogRangeExtended,
+            "xgboost.eta": ContTransformerShiftLogRangeExtended,
+            "xgboost.gamma": ContTransformerShiftLogRangeExtended,
+            "xgboost.lambda": ContTransformerShiftLogRangeExtended,
+            "xgboost.alpha": ContTransformerShiftLogRangeExtended,
+            "xgboost.min_child_weight": ContTransformerShiftLogRangeExtended,
         }
     )
 
