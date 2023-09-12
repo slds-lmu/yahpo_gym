@@ -365,11 +365,12 @@ class BenchmarkSet:
         List of properties of the benchmark scenario:
         Describes the type of the search space: ('continuous', 'mixed', 'categorical', 'hierarchical')
         and availability of metadata (e.g. 'memory': memory measurements are available).
+        Note that the instance name or id variable is not counted as a categorical hyperparameter.
         """
         props = []
 
-        cat = length(self.config.cat_names) > 1
-        cont = length(self.config.cont_names) >= 1
+        cat = len(self.config.cat_names) > 1  # not >=1 because for all benchmarks expecept nb301 there is at least the categorical instance id
+        cont = len(self.config.cont_names) >= 1
         props += ["mixed" if cat & cont else "categorical" if cat else "continuous"]
         if self.config.hierarchical:
             props += ["hierarchical"]
