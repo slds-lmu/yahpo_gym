@@ -11,9 +11,10 @@ _lcbench_dict = {
         "test_balanced_accuracy",
         "time",
         "time_increase",
-        "model_parameters",
+        #"model_parameters",
     ],
-    "y_minimize": [False, True, False, False, True, False, True, True, True],
+    #"y_minimize": [False, True, False, False, True, False, True, True, True],
+    "y_minimize": [False, True, False, False, True, False, True, True],
     "cont_names": [
         "epoch",
         "batch_size",
