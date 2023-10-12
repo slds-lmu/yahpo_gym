@@ -1,10 +1,9 @@
+import pandas as pd
 from fastai.tabular.all import *
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import mean_absolute_error, r2_score
 
 from yahpo_train.learner import SurrogateTabularLearner
-
-import pandas as pd
 
 
 class AvgTfedMetric(Metric):
@@ -19,9 +18,15 @@ class AvgTfedMetric(Metric):
         self.count = 0
 
     def reset(self) -> None:
+        """
+        Reset the metric.
+        """
         self.total, self.count = 0.0, 0
 
     def accumulate(self, learner: SurrogateTabularLearner) -> None:
+        """
+        Accumulate the predictions and the targets.
+        """
         bs = find_bs(learner.tfyb)
         if torch.isnan(learner.tfpred).any():
             raise ValueError("NaNs in predictions.")
@@ -32,10 +37,16 @@ class AvgTfedMetric(Metric):
 
     @property
     def value(self) -> float:
+        """
+        Value of the metric.
+        """
         return self.total / self.count if self.count != 0 else None
 
     @property
     def name(self) -> str:
+        """
+        Name of the metric.
+        """
         return (
             self.func.func.__name__
             if hasattr(self.func, "func")
@@ -44,6 +55,9 @@ class AvgTfedMetric(Metric):
 
 
 def mae(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
+    """
+    MAE
+    """
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
@@ -51,6 +65,7 @@ def mae(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray
 
 
 def r2(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
+    """R2"""
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
@@ -58,6 +73,9 @@ def r2(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
 
 
 def spearman(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
+    """
+    Spearman
+    """
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
@@ -72,15 +90,16 @@ def spearman(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.nd
     y = np.array(y.cpu())
 
     rho = [
-        spearmanr(xs, b=ys)[0]
-        if not ((xs[0] == xs).all() or (ys[0] == ys).all())
-        else 0.0
+        spearmanr(xs, b=ys)[0] if not (all(xs[0] == xs) or all(ys[0] == ys)) else 0.0
         for xs, ys in zip(np.rollaxis(x, 1), np.rollaxis(y, 1))
     ]
     return np.array(rho)
 
 
 def pearson(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
+    """
+    Pearson
+    """
     if impute_nan:
         x = torch.nan_to_num(x)
         y = torch.nan_to_num(y)
@@ -95,13 +114,14 @@ def pearson(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.nda
     y = np.array(y.cpu())
 
     r = [
-        pearsonr(xs, y=ys)[0]
-        if not ((xs[0] == xs).all() or (ys[0] == ys).all())
-        else 0.0
+        pearsonr(xs, y=ys)[0] if not (all(xs[0] == xs) or all(ys[0] == ys)) else 0.0
         for xs, ys in zip(np.rollaxis(x, 1), np.rollaxis(y, 1))
     ]
     return np.array(r)
 
 
 def napct(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
+    """
+    Percentage of NaNs
+    """
     return torch.mean(torch.isnan(y.cpu()).float()).numpy()

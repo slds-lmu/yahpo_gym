@@ -8,28 +8,51 @@ from fastai.torch_basics import *
 
 # Repurposed and adapted from https://github.com/yandex-research/rtdl under Apache License 2.0
 def reglu(x: torch.Tensor) -> torch.Tensor:
+    """
+    ReGLU activation function.
+    """
     a, b = x.chunk(2, dim=-1)
     return a * F.relu(b)
 
 
 def geglu(x: torch.Tensor) -> torch.Tensor:
+    """
+    GeGLU activation function.
+    """
     a, b = x.chunk(2, dim=-1)
     return a * F.gelu(b)
 
 
 class ReGLU(nn.Module):
+    """
+    ReGLU activation function class.
+    """
+
     @staticmethod
     def forward(x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass through ReGLU activation function.
+        """
         return reglu(x)
 
 
 class GeGLU(nn.Module):
+    """
+    GeGLU activation function class.
+    """
+
     @staticmethod
     def forward(x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass through GeGLU activation function.
+        """
         return geglu(x)
 
 
 def get_activation_fn(name: str) -> typing.Callable[[torch.Tensor], torch.Tensor]:
+    """
+    Get activation function by name.
+    """
     return (
         reglu
         if name == "reglu"
@@ -44,6 +67,9 @@ def get_activation_fn(name: str) -> typing.Callable[[torch.Tensor], torch.Tensor
 def get_nonglu_activation_fn(
     name: str,
 ) -> typing.Callable[[torch.Tensor], torch.Tensor]:
+    """
+    Get activation function by name.
+    """
     return (
         F.relu
         if name == "reglu"

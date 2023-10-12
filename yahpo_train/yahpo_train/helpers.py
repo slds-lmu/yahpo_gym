@@ -108,12 +108,12 @@ def generate_all_test_set_metrics(
     test_set_metrics = pd.DataFrame.from_dict(get_set_metrics(key, model=model))
     test_set_metrics["instance"] = "all"
     if bench.config.instance_names is not None:
-      for instance in bench.instances:
-          tmp = pd.DataFrame.from_dict(
-              get_set_metrics(key, model=model, instance=instance)
-          )
-          tmp["instance"] = instance
-          test_set_metrics = pd.concat([test_set_metrics, tmp])
+        for instance in bench.instances:
+            tmp = pd.DataFrame.from_dict(
+                get_set_metrics(key, model=model, instance=instance)
+            )
+            tmp["instance"] = instance
+            test_set_metrics = pd.concat([test_set_metrics, tmp])
     if save_to_csv:
         test_set_metrics.to_csv(
             Path(bench.config.config_path, "test_set_metrics_" + model + ".csv"),

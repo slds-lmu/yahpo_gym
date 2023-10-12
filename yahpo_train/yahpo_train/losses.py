@@ -10,6 +10,9 @@ class MultiMaeLoss(nn.Module):
 
     @staticmethod
     def forward(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass through multi-target MAE loss.
+        """
         loss = torch.mean(torch.mean(torch.abs(output - target), axis=0))
         if torch.isnan(loss):
             loss = torch.tensor(999999999, dtype=torch.float32)
@@ -24,6 +27,9 @@ class MultiMseLoss(nn.Module):
 
     @staticmethod
     def forward(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass through multi-target MSE loss.
+        """
         loss = torch.mean(torch.mean(torch.pow(output - target, 2), axis=0))
         if torch.isnan(loss):
             loss = torch.tensor(999999999, dtype=torch.float32)

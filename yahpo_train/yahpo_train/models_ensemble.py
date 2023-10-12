@@ -22,6 +22,10 @@ def sample_from_simplex(n: int, device: torch.device) -> torch.Tensor:
 
 
 class Ensemble(AbstractSurrogate):
+    """
+    Abstract class for ensemble models.
+    """
+
     def __init__(self, base_model: Type[AbstractSurrogate], n_models: int, **kwargs):
         super().__init__()
         self.models = ModuleList([base_model(**kwargs) for _ in range(n_models)])
@@ -30,6 +34,9 @@ class Ensemble(AbstractSurrogate):
     def forward(
         self, x_cat: torch.Tensor, x_cont: torch.Tensor, invert_ytrafo: bool = True
     ) -> torch.Tensor:
+        """
+        Forward pass through the ensemble.
+        """
         ys = torch.stack(
             [model(x_cat, x_cont, invert_ytrafo) for model in self.models], dim=0
         )
@@ -42,7 +49,7 @@ class Ensemble(AbstractSurrogate):
 
 class SurrogateEnsembleLearner(SurrogateTabularLearner):
     """
-    `Ensemble Learner` for tabular data.
+    Learner for ensemble models.
     """
 
     def __init__(
@@ -78,6 +85,9 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
         reset_opt: bool = False,
         start_epoch: int = 0,
     ) -> None:
+        """
+        Fit each `self.learner` for `n_epoch` using the 1cycle policy.
+        """
         for i in range(self.n_models):
             self._before_ens_fit(i)
             print(
@@ -109,6 +119,9 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
         reset_opt: bool = False,
         start_epoch: int = 0,
     ) -> None:
+        """
+        Fit each `self.learner` for `n_epoch` using the flat cos policy.
+        """
         for i in range(self.n_models):
             self._before_ens_fit(i)
             print(
@@ -128,6 +141,9 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
             self._after_ens_fit(i)
 
     def _before_ens_fit(self, i: int) -> None:
+        """
+        Add callbacks to the learner and set the RNG for the dataloader.
+        """
         # avoid duplicate callbacks
         self.learners[i].remove_cbs(self.learners[i].cbs)
         self.learners[i].add_cbs(self.cbs)
@@ -135,6 +151,9 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
         self.dls.rng = self.dls_rng
 
     def _after_ens_fit(self, i: int) -> None:
+        """
+        Remove callbacks from the learner.
+        """
         self.learners[i].remove_cbs(self.cbs)
 
 

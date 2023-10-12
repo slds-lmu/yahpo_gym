@@ -1,4 +1,3 @@
-
 import typing as ty
 
 import torch
@@ -25,7 +24,7 @@ class Tokenizer(nn.Module):
         else:
             d_bias = d_numerical + len(categories)
             category_offsets = torch.tensor([0] + categories[:-1]).cumsum(0)
-            self.register_buffer('category_offsets', category_offsets)
+            self.register_buffer("category_offsets", category_offsets)
             self.category_embeddings = nn.Embedding(sum(categories), d_token)
             nn_init.kaiming_uniform_(self.category_embeddings.weight, a=math.sqrt(5))
 
@@ -67,13 +66,14 @@ class Tokenizer(nn.Module):
             x = x + bias[None]
         return x
 
+
 class MultiheadAttention(nn.Module):
     def __init__(
         self, d: int, n_heads: int, dropout: float, initialization: str
     ) -> None:
         if n_heads > 1:
             assert d % n_heads == 0
-        assert initialization in ['xavier', 'kaiming']
+        assert initialization in ["xavier", "kaiming"]
 
         super().__init__()
         self.W_q = nn.Linear(d, d)
@@ -84,7 +84,7 @@ class MultiheadAttention(nn.Module):
         self.dropout = nn.Dropout(dropout) if dropout else None
 
         for m in [self.W_q, self.W_k, self.W_v]:
-            if initialization == 'xavier' and (n_heads > 1 or m is not self.W_v):
+            if initialization == "xavier" and (n_heads > 1 or m is not self.W_v):
                 # gain is needed since W_qkv is represented with 3 separate layers
                 nn_init.xavier_uniform_(m.weight, gain=1 / math.sqrt(2))
             nn_init.zeros_(m.bias)
@@ -150,24 +150,22 @@ class Transformer(AbstractSurrogate):
     def __init__(
         self,
         dls,
-        embds_dbl:typing.List=None,
-        embds_tgt:typing.List=None,
-        d_token:int = 192,
-        final_act = nn.Sigmoid(),
+        embds_dbl: typing.List = None,
+        embds_tgt: typing.List = None,
+        d_token: int = 192,
+        final_act=nn.Sigmoid(),
         # Tokenizer
         token_bias: bool = True,
         # transformer
         n_layers: int = 3,
-
         n_heads: int = 8,
-        d_ffn_factor: float = 4/3,
+        d_ffn_factor: float = 4 / 3,
         attention_dropout: float = 0.2,
         ffn_dropout: float = 0.1,
         residual_dropout: float = 0.0,
-        activation: str = 'reglu',
+        activation: str = "reglu",
         prenormalization: bool = True,
-        initialization: str = 'kaiming',
-
+        initialization: str = "kaiming",
         # linformer
         kv_compression: ty.Optional[float] = None,
         kv_compression_sharing: ty.Optional[str] = None,
@@ -177,7 +175,12 @@ class Transformer(AbstractSurrogate):
         super().__init__()
 
         self._build_embeddings_xcont(dls, embds_dbl)
-        self.tokenizer = Tokenizer(len(dls.cont_names), [len(dls.train.classes[n]) for n in dls.train.cat_names], d_token, token_bias)
+        self.tokenizer = Tokenizer(
+            len(dls.cont_names),
+            [len(dls.train.classes[n]) for n in dls.train.cat_names],
+            d_token,
+            token_bias,
+        )
         n_tokens = self.tokenizer.n_tokens
 
         self.final_act = final_act
@@ -188,13 +191,13 @@ class Transformer(AbstractSurrogate):
             compression = nn.Linear(
                 n_tokens, int(n_tokens * kv_compression), bias=False
             )
-            if initialization == 'xavier':
+            if initialization == "xavier":
                 nn_init.xavier_uniform_(compression.weight)
             return compression
 
         self.shared_kv_compression = (
             make_kv_compression()
-            if kv_compression and kv_compression_sharing == 'layerwise'
+            if kv_compression and kv_compression_sharing == "layerwise"
             else None
         )
 
@@ -206,24 +209,24 @@ class Transformer(AbstractSurrogate):
         for layer_idx in range(n_layers):
             layer = nn.ModuleDict(
                 {
-                    'attention': MultiheadAttention(
+                    "attention": MultiheadAttention(
                         d_token, n_heads, attention_dropout, initialization
                     ),
-                    'linear0': nn.Linear(
-                        d_token, d_hidden * (2 if activation.endswith('glu') else 1)
+                    "linear0": nn.Linear(
+                        d_token, d_hidden * (2 if activation.endswith("glu") else 1)
                     ),
-                    'linear1': nn.Linear(d_hidden, d_token),
-                    'norm1': make_normalization(),
+                    "linear1": nn.Linear(d_hidden, d_token),
+                    "norm1": make_normalization(),
                 }
             )
             if not prenormalization or layer_idx:
-                layer['norm0'] = make_normalization()
+                layer["norm0"] = make_normalization()
             if kv_compression and self.shared_kv_compression is None:
-                layer['key_compression'] = make_kv_compression()
-                if kv_compression_sharing == 'headwise':
-                    layer['value_compression'] = make_kv_compression()
+                layer["key_compression"] = make_kv_compression()
+                if kv_compression_sharing == "headwise":
+                    layer["value_compression"] = make_kv_compression()
                 else:
-                    assert kv_compression_sharing == 'key-value'
+                    assert kv_compression_sharing == "key-value"
             self.layers.append(layer)
 
         self.activation = get_activation_fn(activation)
@@ -238,17 +241,17 @@ class Transformer(AbstractSurrogate):
         return (
             (self.shared_kv_compression, self.shared_kv_compression)
             if self.shared_kv_compression is not None
-            else (layer['key_compression'], layer['value_compression'])
-            if 'key_compression' in layer and 'value_compression' in layer
-            else (layer['key_compression'], layer['key_compression'])
-            if 'key_compression' in layer
+            else (layer["key_compression"], layer["value_compression"])
+            if "key_compression" in layer and "value_compression" in layer
+            else (layer["key_compression"], layer["key_compression"])
+            if "key_compression" in layer
             else (None, None)
         )
 
     def _start_residual(self, x, layer, norm_idx):
         x_residual = x
         if self.prenormalization:
-            norm_key = f'norm{norm_idx}'
+            norm_key = f"norm{norm_idx}"
             if norm_key in layer:
                 x_residual = layer[norm_key](x_residual)
         return x_residual
@@ -258,14 +261,18 @@ class Transformer(AbstractSurrogate):
             x_residual = F.dropout(x_residual, self.residual_dropout, self.training)
         x = x + x_residual
         if not self.prenormalization:
-            x = layer[f'norm{norm_idx}'](x)
+            x = layer[f"norm{norm_idx}"](x)
         return x
 
-    def forward(self, x_cat: ty.Optional[Tensor], x_cont: Tensor =None, invert_ytrafo: bool = True) -> Tensor:
-        
+    def forward(
+        self,
+        x_cat: ty.Optional[Tensor],
+        x_cont: Tensor = None,
+        invert_ytrafo: bool = True,
+    ) -> Tensor:
         # Transform continuous features
         if self.n_cont != 0:
-            xcont = [e(x_cont[:,i]).unsqueeze(1) for i,e in enumerate(self.embds_dbl)]
+            xcont = [e(x_cont[:, i]).unsqueeze(1) for i, e in enumerate(self.embds_dbl)]
             xcont = torch.cat(xcont, 1)
 
         x = self.tokenizer(x_cat, x_cont)
@@ -275,7 +282,7 @@ class Transformer(AbstractSurrogate):
             layer = ty.cast(ty.Dict[str, nn.Module], layer)
 
             x_residual = self._start_residual(x, layer, 0)
-            x_residual = layer['attention'](
+            x_residual = layer["attention"](
                 # for the last attention, it is enough to process only [CLS]
                 (x_residual[:, :1] if is_last_layer else x_residual),
                 x_residual,
@@ -286,11 +293,11 @@ class Transformer(AbstractSurrogate):
             x = self._end_residual(x, x_residual, layer, 0)
 
             x_residual = self._start_residual(x, layer, 1)
-            x_residual = layer['linear0'](x_residual)
+            x_residual = layer["linear0"](x_residual)
             x_residual = self.activation(x_residual)
             if self.ffn_dropout:
                 x_residual = F.dropout(x_residual, self.ffn_dropout, self.training)
-            x_residual = layer['linear1'](x_residual)
+            x_residual = layer["linear1"](x_residual)
             x = self._end_residual(x, x_residual, layer, 1)
 
         assert x.shape[1] == 1
@@ -299,10 +306,9 @@ class Transformer(AbstractSurrogate):
             x = self.last_normalization(x)
         x = self.last_activation(x)
         x = self.head(x)
-        
+
         y = self.final_act(x)
         if invert_ytrafo:
             return self.inv_trafo_ys(y)
         else:
             return y
-

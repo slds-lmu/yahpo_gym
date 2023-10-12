@@ -1,5 +1,4 @@
 if __name__ == "__main__":
-
     import json
     import random
     from functools import partial

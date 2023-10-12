@@ -11,13 +11,19 @@ def test_cont_norm():
     xss = [
         torch.rand(100, 1),
         (torch.rand(1000, 1) * 3) ** 2,
-        -  5 * (torch.rand(500, 1) - .5),
+        -5 * (torch.rand(500, 1) - 0.5),
         (torch.rand(500, 1) + 2) ** 3,
-        torch.cat((torch.rand(500, 1), torch.rand(1, 1) + torch.Tensor([1000.]))),
-        torch.Tensor([1., 2., -1., 1000.]),
-        torch.cat((torch.rand(800, 1), torch.rand(1, 1) - torch.Tensor([1000.]))),
+        torch.cat((torch.rand(500, 1), torch.rand(1, 1) + torch.Tensor([1000.0]))),
+        torch.Tensor([1.0, 2.0, -1.0, 1000.0]),
+        torch.cat((torch.rand(800, 1), torch.rand(1, 1) - torch.Tensor([1000.0]))),
     ]
-    xs2 = torch.cat((torch.rand(50, 1), torch.rand(1, 1) + torch.Tensor([10000.]), torch.Tensor([-1000.]).unsqueeze(1)))
+    xs2 = torch.cat(
+        (
+            torch.rand(50, 1),
+            torch.rand(1, 1) + torch.Tensor([10000.0]),
+            torch.Tensor([-1000.0]).unsqueeze(1),
+        )
+    )
     for xs in xss:
         for normalize in ["scale", "range", None]:
             lim = 1e-3
@@ -39,8 +45,8 @@ def test_cont_norm():
 def test_cont_with_nan():
     xss = [
         torch.cat((torch.rand(50, 1), torch.Tensor(np.array([np.nan]).reshape(1, 1)))),
-        torch.Tensor([1., 2., -1., 1000, np.nan]),
-        torch.Tensor([1., np.nan, -1., 1000, np.nan])
+        torch.Tensor([1.0, 2.0, -1.0, 1000, np.nan]),
+        torch.Tensor([1.0, np.nan, -1.0, 1000, np.nan]),
     ]
     for xs in xss:
         for normalize in ["scale", "range", None]:
@@ -56,8 +62,8 @@ def test_cont_with_nan():
 
 def test_cont_with_log():
     xss = [
-        - torch.log(torch.rand(150, 1)),
-        torch.float_power(torch.rand(150, 1) * 2, 10.)
+        -torch.log(torch.rand(150, 1)),
+        torch.float_power(torch.rand(150, 1) * 2, 10.0),
     ]
     for xs in xss:
         for normalize in ["scale", "range", None]:
@@ -74,8 +80,8 @@ def test_cont_with_log():
 def test_cont_norm_pd():
     nrows = 1000000
     file = cfg("lcbench").get_path("dataset")
-    df2 = pd.read_csv(file, nrows=nrows).sample(frac=.01)
-    df = pd.read_csv(file, nrows=nrows).sample(frac=.3)
+    df2 = pd.read_csv(file, nrows=nrows).sample(frac=0.01)
+    df = pd.read_csv(file, nrows=nrows).sample(frac=0.3)
     for nm in df.columns[1:]:
         lim = 1e-3
         for normalize in ["scale", "range", None]:
@@ -93,7 +99,7 @@ def test_cont_norm_pd():
             assert xsn.shape == xs.shape
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_cont_norm()
     test_cont_with_nan()
     test_cont_with_log()

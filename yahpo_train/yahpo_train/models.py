@@ -15,6 +15,10 @@ from yahpo_train.models_utils import *
 
 
 class AbstractSurrogate(nn.Module):
+    """
+    Abstract class for surrogates.
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -26,6 +30,9 @@ class AbstractSurrogate(nn.Module):
         emb_szs: Optional[Union[List[Tuple[int, int]], List[int]]] = None,
         instance_names: Optional[str] = None,
     ) -> None:
+        """
+        Build the embeddings.
+        """
         self._build_embeddings_xcont(dls=dls, embds_dbl=embds_dbl)
         self._build_embeddings_y(
             dls=dls, embds_tgt=embds_tgt, instance_names=instance_names
@@ -38,6 +45,9 @@ class AbstractSurrogate(nn.Module):
         dls: TabularDataLoaders,
         embds_dbl: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
     ) -> None:
+        """
+        Build the embeddings for the numeric/continuous features.
+        """
         if embds_dbl is not None:
             self.embds_dbl = nn.ModuleList(
                 [
@@ -68,6 +78,9 @@ class AbstractSurrogate(nn.Module):
         embds_tgt: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
         instance_names: Optional[str] = None,
     ) -> None:
+        """
+        Build the embeddings for the target variables.
+        """
         if embds_tgt is not None:
             if instance_names is not None:
                 self.embds_tgt = nn.ModuleList(
@@ -118,6 +131,9 @@ class AbstractSurrogate(nn.Module):
     def _build_embeddings_xcat(
         self, dls: TabularDataLoaders, emb_szs: Union[List[Tuple[int, int]], List[int]]
     ) -> None:
+        """
+        Build the embeddings for the categorical features.
+        """
         # Categorical Embeddings
         emb_szs = get_emb_sz(dls.train_ds, {} if emb_szs is None else emb_szs)
         self.embds_fct = nn.ModuleList([Embedding(ni, nf) for ni, nf in emb_szs])
@@ -131,6 +147,9 @@ class AbstractSurrogate(nn.Module):
     def _embed_features(
         self, x_cat: torch.Tensor, x_cont: torch.Tensor
     ) -> torch.Tensor:
+        """
+        Embed the features.
+        """
         if self.n_emb != 0:
             x = [e(x_cat[:, i]) for i, e in enumerate(self.embds_fct)]
             x = torch.cat(x, 1)
@@ -143,6 +162,9 @@ class AbstractSurrogate(nn.Module):
     def trafo_ys(
         self, ys: torch.Tensor, group: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
+        """
+        Transform the target variables.
+        """
         ys = [
             e(ys[:, i], group=group).unsqueeze(1) for i, e in enumerate(self.embds_tgt)
         ]
@@ -152,6 +174,9 @@ class AbstractSurrogate(nn.Module):
     def inv_trafo_ys(
         self, ys: torch.Tensor, group: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
+        """
+        Invert the transformation of the target variables.
+        """
         ys = [
             e.invert(ys[:, i], group=group).unsqueeze(1)
             for i, e in enumerate(self.embds_tgt)
@@ -162,6 +187,9 @@ class AbstractSurrogate(nn.Module):
     def forward(
         self, x_cat: torch.Tensor, x_cont: torch.Tensor, invert_ytrafo: bool = True
     ) -> torch.Tensor:
+        """
+        Forward pass.
+        """
         raise NotImplementedError
 
     def export_onnx(
@@ -213,6 +241,24 @@ class AbstractSurrogate(nn.Module):
 
 # ResNet
 class ResNet(AbstractSurrogate):
+    """
+    ResNet model.
+    Repurposed and adapted from https://github.com/yandex-research/rtdl under Apache License 2.0
+    dls :: DatasetLoader
+    embds_dbl :: Numeric Embeddings
+    embds_tgt :: Target Embeddings
+    embd_szs :: Embedding sizes
+    instance_names :: names of the instances id
+    d :: dimensionality of the hidden space
+    d_hidden_factor :: factor by which the hidden dimension is reduced
+    n_layers :: number of layers
+    activation :: activation function
+    normalization :: normalization function
+    hidden_dropout :: dropout rate for hidden layers
+    residual_dropout :: dropout rate for residual connections
+    final_act :: final activation function
+    """
+
     def __init__(
         self,
         dls: TabularDataLoaders,
@@ -229,23 +275,6 @@ class ResNet(AbstractSurrogate):
         residual_dropout: float = 0.2,
         final_act: torch.nn.modules.activation = nn.Sigmoid(),
     ):
-        """
-        ResNet model.
-        Repurposed and adapted from https://github.com/yandex-research/rtdl under Apache License 2.0
-        dls :: DatasetLoader
-        embds_dbl :: Numeric Embeddings
-        embds_tgt :: Target Embeddings
-        embd_szs :: Embedding sizes
-        instance_names :: names of the instances id
-        d :: dimensionality of the hidden space
-        d_hidden_factor :: factor by which the hidden dimension is reduced
-        n_layers :: number of layers
-        activation :: activation function
-        normalization :: normalization function
-        hidden_dropout :: dropout rate for hidden layers
-        residual_dropout :: dropout rate for residual connections
-        final_act :: final activation function
-        """
         super().__init__()
 
         self.instance_names = instance_names
@@ -286,6 +315,9 @@ class ResNet(AbstractSurrogate):
     def forward(
         self, x_cat: torch.Tensor, x_cont: torch.Tensor, invert_ytrafo: bool = True
     ) -> torch.Tensor:
+        """
+        Forward pass.
+        """
         x = self._embed_features(x_cat, x_cont)
         x = self.first_layer(x)
         for layer in self.layers:
@@ -316,6 +348,9 @@ class ResNet(AbstractSurrogate):
 
     @staticmethod
     def _make_normalization(normalization: str) -> nn.Module:
+        """
+        Get normalization function by name.
+        """
         if normalization == "batchnorm":
             normalization = nn.BatchNorm1d
         else:

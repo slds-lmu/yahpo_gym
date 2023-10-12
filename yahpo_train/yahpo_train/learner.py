@@ -178,6 +178,9 @@ class SurrogateTabularLearner(Learner):
     """Learner for tabular data"""
 
     def _do_one_batch(self) -> None:
+        """
+        Do one batch of training/validation/prediction.
+        """
         if not self.training:
             self.tfpred = self.model(*self.xb, invert_ytrafo=True)
             self.tfyb = self.yb
@@ -206,6 +209,9 @@ class SurrogateTabularLearner(Learner):
         self.opt.zero_grad()
 
     def _end_cleanup(self) -> None:
+        """
+        Clean up after the end of a training/validation/prediction.
+        """
         self.dl, self.xb, self.yb, self.pred, self.loss, self.tfpred, self.tfyb = (
             None,
             (None,),
@@ -219,4 +225,7 @@ class SurrogateTabularLearner(Learner):
     def export_onnx(
         self, config: Configuration, device: torch.device, suffix: str = ""
     ) -> None:
+        """
+        Export the model to ONNX.
+        """
         return self.model.export_onnx(config, device, suffix)

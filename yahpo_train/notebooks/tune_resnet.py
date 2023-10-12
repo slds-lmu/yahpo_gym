@@ -174,29 +174,31 @@ def tune_config_resnet(
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
     # except for wd and moms
     def objective(trial):
-        d = trial.suggest_int("d", 64, 512, step=64)  # layer size
+        d = trial.suggest_int("d", low=64, high=512, step=64)  # layer size
         d_hidden_factor = trial.suggest_float(
             "d_hidden_factor", 1.0, 4.0
         )  # hidden factor
-        n_layers = trial.suggest_int("n_layers", 1, 8)  # number of layers
+        n_layers = trial.suggest_int("n_layers", low=1, high=8)  # number of layers
         hidden_dropout = trial.suggest_float(
-            "hidden_dropout", 0.0, 0.5
+            "hidden_dropout", low=0.0, high=0.5
         )  # hidden dropout
         use_residual_dropout = trial.suggest_categorical(
-            "use_residual_dropout", [True, False]
+            "use_residual_dropout", choices=[True, False]
         )
         if use_residual_dropout:
-            residual_dropout = trial.suggest_float("residual_dropout", 1e-2, 0.5)
+            residual_dropout = trial.suggest_float(
+                "residual_dropout", low=1e-2, high=0.5
+            )
         else:
             residual_dropout = 0.0
-        lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
-        use_wd = trial.suggest_categorical("use_wd", [True, False])
+        lr = trial.suggest_float("lr", low=1e-5, high=1e-2, log=True)
+        use_wd = trial.suggest_categorical("use_wd", choices=[True, False])
         if use_wd:
-            wd = trial.suggest_float("wd", 1e-7, 1e-2, log=True)
+            wd = trial.suggest_float("wd", low=1e-7, high=1e-2, log=True)
         else:
             wd = 0.0
-        mom1 = trial.suggest_float("mom1", 0.85, 0.99)
-        mom2 = trial.suggest_float("mom2", 0.85, 0.99)
+        mom1 = trial.suggest_float("mom1", low=0.85, high=0.99)
+        mom2 = trial.suggest_float("mom2", low=0.85, high=0.99)
         moms = (mom1, mom2)
         cbs = [FastAIPruningCallback(trial=trial, monitor="valid_loss")]
 
@@ -278,13 +280,13 @@ if __name__ == "__main__":
                     ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
-            "model_parameters": tfms_chain(
-                [
-                    partial(ContTransformerClamp, min=1.00),
-                    ContTransformerInt,
-                    ContTransformerStandardizeRange,
-                ]
-            ),
+            # "model_parameters": tfms_chain(
+            #     [
+            #         partial(ContTransformerClamp, min=1.00),
+            #         ContTransformerInt,
+            #         ContTransformerStandardizeRange,
+            #     ]
+            # ),
             "batch_size": ContTransformerShiftLogRangeExtended,
             "learning_rate": ContTransformerShiftLogRangeExtended,
             "max_units": ContTransformerShiftLogRangeExtended,
@@ -321,13 +323,13 @@ if __name__ == "__main__":
                     ContTransformerStandardizeRange,
                 ]
             ),
-            "model_parameters": tfms_chain(
-                [
-                    partial(ContTransformerClamp, min=1.00),
-                    ContTransformerInt,
-                    ContTransformerStandardizeRange,
-                ]
-            ),
+            # "model_parameters": tfms_chain(
+            #     [
+            #         partial(ContTransformerClamp, min=1.00),
+            #         ContTransformerInt,
+            #         ContTransformerStandardizeRange,
+            #     ]
+            # ),
         }
     )
     tfms_list.update({"nb301": tfms_nb301})
@@ -355,7 +357,7 @@ if __name__ == "__main__":
             ),
             "brier": tfms_chain(
                 [
-                    partial(ContTransformerClamp, min=0.00, max=2.00),
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
                     ContTransformerStandardizeGroupedRangeGrouped,
                 ]
             ),
