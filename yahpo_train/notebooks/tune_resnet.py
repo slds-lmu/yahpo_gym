@@ -133,10 +133,11 @@ def fit_config_resnet(
         ]
 
     # fit
-    if moms[0] < moms[1]:
-        moms = (moms[1], moms[0], moms[1])
-    else:
-        moms = (moms[0], moms[1], moms[0])
+    if moms is not None:
+        if moms[0] < moms[1]:
+            moms = (moms[1], moms[0], moms[1])
+        else:
+            moms = (moms[0], moms[1], moms[0])
     surrogate.fit_one_cycle(epochs, lr_max=lr, wd=wd, moms=moms, cbs=fit_cbs)
 
     return surrogate
@@ -169,6 +170,23 @@ def tune_config_resnet(
         study_name=name,
         direction="minimize",
         load_if_exists=True,
+    )
+
+    # default configuration that should work well on the larger datasets
+    study.enqueue_trial(
+        {
+            "d": 256,
+            "d_hidden_factor": 3,
+            "n_layers": 5,
+            "hidden_dropout": 0.3,
+            "use_residual_dropout": False,
+            "residual_dropout": 0.0,
+            "lr": 1e-3,
+            "use_wd": True,
+            "wd": 1e-6,
+            "mom1": 0.9,
+            "mom2": 0.85,
+        }
     )
 
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
