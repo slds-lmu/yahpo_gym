@@ -804,16 +804,16 @@ if __name__ == "__main__":
         args.key, model=config.config.get("model"), save_to_csv=True
     )
 
-    # warnings.filterwarnings(
-    #    "ignore", category=UserWarning
-    # )  # ignore warnings due to empty validation set
-    # surrogate_noisy = fit_config_resnet(
-    #    args.key,
-    #    dl_train=dl_refit,
-    #    tfms=tfms_list.get(args.key),
-    #    **best_params,
-    #    noisy=True,
-    # )
-    # warnings.filterwarnings("default", category=UserWarning)  # reset warnings
+    warnings.filterwarnings(
+       "ignore", category=UserWarning
+    )  # ignore warnings due to empty validation set
+    surrogate_noisy = fit_config_resnet(
+       args.key,
+       dl_train=dl_refit,
+       tfms=tfms_list.get(args.key),
+       **best_params,
+       noisy=True,
+    )
+    warnings.filterwarnings("default", category=UserWarning)  # reset warnings
 
-    # surrogate_noisy.export_onnx(config, device=device, suffix="noisy")
+    surrogate_noisy.export_onnx(config, device=device, suffix="noisy")
