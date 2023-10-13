@@ -30,6 +30,7 @@ def test_benchmarkset_abstract(
 
     # Properties
     assert (type(b.instances) == list) & (len(b.instances) > 0)
+    b.properties
 
     if b.instance is not None:
         assert b.instance == test_instance
