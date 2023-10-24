@@ -131,7 +131,6 @@ _rbv2_dict = {
         "41162": False,
         "41163": True,
         "41164": True,
-        "41212": True,
         "41278": True,
     },
     "citation": [
