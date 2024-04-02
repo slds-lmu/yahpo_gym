@@ -1,8 +1,8 @@
-import pandas as pd
-import yahpo_gym
-from yahpo_gym.local_config import local_config
-from pathlib import Path
 from typing import Dict
+
+import pandas as pd
+
+from yahpo_gym.local_config import local_config
 
 
 class Configuration:
@@ -164,9 +164,9 @@ class ConfigDict:
         return out
 
 
-def cfg(key: str = None, **kwargs):
+def cfg(key: str|None=None, **kwargs):
     """
-    Shorthand acces to 'ConfigDict'.
+    Shorthand access to 'ConfigDict'.
 
     Parameters
     ----------

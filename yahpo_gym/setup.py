@@ -43,7 +43,7 @@ setup(
     entry_points={
         "console_scripts": ["setup-yahpo = yahpo_gym.scripts.setup_yahpo:main"]
     },
-    keywords=["module", "train", "yahpo"],
+    keywords=["module", "inference", "yahpo"],
     url="https://github.com/slds-lmu/yahpo_gym",
     classifiers=[
         "Operating System :: OS Independent",
