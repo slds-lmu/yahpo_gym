@@ -45,7 +45,7 @@ class ContTransformerRange(nn.Module):
         x: torch.Tensor,
         eps: float = 1e-2,
         x_range: str = "0-1",
-        group: Optional[torch.Tensor] = None,
+        group: torch.Tensor|None = None,
     ):
         super().__init__()
         self.eps = eps

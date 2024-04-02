@@ -1,5 +1,7 @@
 import typing
+import math
 import warnings
+from functools import partial
 from typing import List, Optional, Tuple, Union
 
 import torch
@@ -7,11 +9,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as nn_init
 from fastai.tabular.all import *
+from fastai.tabular.all import get_emb_sz, Embedding
 from fastai.tabular.data import TabularDataLoaders
 from yahpo_gym.configuration import Configuration
 
-from yahpo_train.cont_scalers import *
-from yahpo_train.models_utils import *
+from yahpo_train.cont_scalers import (
+    ContTransformerRange,
+    ContTransformerRangeGrouped,
+    ContTransformerRangeExtended,
+)
+from yahpo_train.models_utils import get_activation_fn, get_nonglu_activation_fn
 
 
 class AbstractSurrogate(nn.Module):
@@ -25,9 +32,9 @@ class AbstractSurrogate(nn.Module):
     def _build_embeddings(
         self,
         dls: TabularDataLoaders,
-        embds_dbl: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
-        embds_tgt: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
-        emb_szs: Optional[Union[List[Tuple[int, int]], List[int]]] = None,
+        embds_dbl: Union[List[nn.Module], List[partial]] | None = None,
+        embds_tgt: Union[List[nn.Module], List[partial]] | None = None,
+        emb_szs: Union[List[Tuple[int, int]], List[int]] | None = None,
         instance_names: Optional[str] = None,
     ) -> None:
         """
@@ -43,39 +50,29 @@ class AbstractSurrogate(nn.Module):
     def _build_embeddings_xcont(
         self,
         dls: TabularDataLoaders,
-        embds_dbl: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
+        embds_dbl: Union[List[nn.Module], List[partial]] | None = None,
     ) -> None:
         """
         Build the embeddings for the numeric/continuous features.
         """
-        if embds_dbl is not None:
-            self.embds_dbl = nn.ModuleList(
-                [
-                    f(
-                        x_id=cont[0],
-                        x=torch.from_numpy(cont[1].values).float(),
-                        group=torch.Tensor(),
-                    )
-                    for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
-                ]
-            )
-        else:
-            self.embds_dbl = nn.ModuleList(
-                [
-                    ContTransformerRangeExtended(
-                        x_id=cont[0],
-                        x=torch.from_numpy(cont.values).float(),
-                        group=torch.Tensor(),
-                    )
-                    for _, cont in dls.all_cols[dls.cont_names].items()
-                ]
-            )
+        if embds_dbl is None:
+            embds_dbl = ContTransformerRangeExtended
+        self.embds_dbl = nn.ModuleList(
+            [
+                f(
+                    x_id=cont[0],
+                    x=torch.from_numpy(cont[1].values).float(),
+                    group=torch.Tensor(),
+                )
+                for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
+            ]
+        )
         self.n_cont = len(dls.cont_names)
 
     def _build_embeddings_y(
         self,
         dls: TabularDataLoaders,
-        embds_tgt: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
+        embds_tgt: Union[List[nn.Module], List[partial]] | None = None,
         instance_names: Optional[str] = None,
     ) -> None:
         """
@@ -262,10 +259,11 @@ class ResNet(AbstractSurrogate):
     def __init__(
         self,
         dls: TabularDataLoaders,
-        embds_dbl: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
-        embds_tgt: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
-        emb_szs: Optional[Union[List[Tuple[int, int]], List[int]]] = None,
-        instance_names: Optional[str] = None,
+        embds_dbl: Union[List[nn.Module], List[partial]] | None = None,
+        embds_tgt: Union[List[nn.Module], List[partial]] | None = None,
+        emb_szs: Union[List[Tuple[int, int]], List[int]] | None = None,
+        embed_plr: bool = False,
+        instance_names: str | None = None,
         d: int = 256,
         d_hidden_factor: float = 2.0,
         n_layers: int = 4,
@@ -359,11 +357,10 @@ class ResNet(AbstractSurrogate):
 
 
 if __name__ == "__main__":
-    from yahpo_gym.benchmarks import iaml
     from yahpo_gym.configuration import cfg
 
     from yahpo_train.learner import SurrogateTabularLearner, dl_from_config
-    from yahpo_train.losses import *
+    from yahpo_train.losses import MultiMseLoss
 
     device = torch.device("cpu")
 

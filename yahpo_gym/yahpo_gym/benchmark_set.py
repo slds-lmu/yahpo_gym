@@ -1,33 +1,34 @@
-from yahpo_gym.configuration import cfg
-import onnxruntime as rt
-import time
-import json
 import copy
+import json
 import os
-
+import time
 from pathlib import Path
-from typing import Union, Dict, List
-import numpy as np
-from ConfigSpace.read_and_write import json as CS_json
+from typing import Dict, List, Union
+
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
+import numpy as np
+import onnxruntime as rt
 import pandas as pd
+from ConfigSpace.read_and_write import json as CS_json
+
+from yahpo_gym.configuration import cfg
 
 
 class BenchmarkSet:
     def __init__(
         self,
-        scenario: str = None,
-        instance: str = None,
+        scenario: str | None = None,
+        instance: str | None = None,
         active_session: bool = True,
-        session: Union[rt.InferenceSession, None] = None,
+        session: rt.InferenceSession | None = None,
         multithread: bool = True,
         check: bool = True,
         noisy: bool = False,
     ):
         """
         Interface for a benchmark scenario.
-        Initialized with a valid key for a valid scenario and optinally an `onnxruntime.InferenceSession`.
+        Initialized with a valid key for a valid scenario and optionally an `onnxruntime.InferenceSession`.
 
         Parameters
         ----------
@@ -37,7 +38,7 @@ class BenchmarkSet:
             (Optional) A key for `ConfigDict` pertaining to a valid instance (e.g. `3945`).
             See `BenchmarkSet(<key>).instances` for a list of available instances.
         active_session: bool
-            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `Trtue`.
+            Should the benchmark run in an active `onnxruntime.InferenceSession`? Initialized to `True`.
         session: onnx.Session
             A ONNX session to use for inference. Overwrite `active_session` and sets the provided `onnxruntime.InferenceSession` as the active session.
             Initialized to `None`.
@@ -77,7 +78,7 @@ class BenchmarkSet:
     def objective_function(
         self,
         configuration: Union[Dict, List[Dict]],
-        seed: int = None,
+        seed: int | None = None,
         logging: bool = False,
         multithread: bool = True,
     ):
@@ -145,7 +146,7 @@ class BenchmarkSet:
     def objective_function_timed(
         self,
         configuration: Union[Dict, List[Dict]],
-        seed: int = None,
+        seed: int | None = None,
         logging: bool = False,
         multithread: bool = True,
     ):
@@ -300,7 +301,9 @@ class BenchmarkSet:
             if not multithread:
                 options.inter_op_num_threads = 1
                 options.intra_op_num_threads = 1
-            self.session = rt.InferenceSession(model_path, sess_options=options, providers=["CPUExecutionProvider"])
+            self.session = rt.InferenceSession(
+                model_path, sess_options=options, providers=["CPUExecutionProvider"]
+            )
 
     @property
     def instances(self):
@@ -480,7 +483,6 @@ class BenchmarkSet:
 
 if __name__ == "__main__":
     from yahpo_gym import benchmark_set
-    import yahpo_gym.benchmarks.lcbench
 
     bench = benchmark_set.BenchmarkSet("iaml_super")
     bench.instances

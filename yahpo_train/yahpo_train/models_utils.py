@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.onnx
+from typing import Callable
 from fastai.tabular.all import *
 from fastai.torch_basics import *
 
@@ -49,33 +50,31 @@ class GeGLU(nn.Module):
         return geglu(x)
 
 
-def get_activation_fn(name: str) -> typing.Callable[[torch.Tensor], torch.Tensor]:
+def get_activation_fn(name: str) -> Callable[[torch.Tensor], torch.Tensor]:
     """
     Get activation function by name.
     """
     return (
         reglu
         if name == "reglu"
-        else geglu
-        if name == "geglu"
-        else torch.sigmoid
-        if name == "sigmoid"
-        else getattr(F, name)
+        else (
+            geglu
+            if name == "geglu"
+            else torch.sigmoid if name == "sigmoid" else getattr(F, name)
+        )
     )
 
 
 def get_nonglu_activation_fn(
     name: str,
-) -> typing.Callable[[torch.Tensor], torch.Tensor]:
+) -> Callable[[torch.Tensor], torch.Tensor]:
     """
     Get activation function by name.
     """
     return (
         F.relu
         if name == "reglu"
-        else F.gelu
-        if name == "geglu"
-        else get_activation_fn(name)
+        else F.gelu if name == "geglu" else get_activation_fn(name)
     )
 
 
