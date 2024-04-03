@@ -1,4 +1,5 @@
 import gc
+import json
 import random
 from pathlib import Path
 from typing import Optional, Tuple
@@ -11,6 +12,7 @@ from fastai.tabular.all import (
     Categorify,
     FillMissing,
     FillStrategy,
+    Learner,
     df_shrink,
 )
 from fastai.tabular.data import TabularDataLoaders
@@ -63,13 +65,6 @@ def dl_from_config(
     df = df.sample(frac=1.00, random_state=seed)
 
     gc.collect()
-
-    # df = pd.read_csv(
-    #    config.get_path("dataset"),
-    #    skipinitialspace=skipinitialspace,
-    #    usecols=list(dtypes.keys()),
-    #    dtype=dtypes,
-    # ).sample(frac=1.0, random_state=seed)
 
     # get rid of irrelevant columns
     # if config.instance_names is not None we can be sure that it is the first element of config.cat_names

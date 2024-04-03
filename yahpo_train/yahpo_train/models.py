@@ -1,5 +1,5 @@
-import typing
 import math
+import typing
 import warnings
 from functools import partial
 from typing import List, Optional, Tuple, Union
@@ -9,15 +9,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as nn_init
 from fastai.tabular.all import *
-from fastai.tabular.all import get_emb_sz, Embedding
+from fastai.tabular.all import Embedding, get_emb_sz
 from fastai.tabular.data import TabularDataLoaders
 from yahpo_gym.configuration import Configuration
 
 from yahpo_train.cont_scalers import (
     ContTransformerRange,
-    ContTransformerRangeGrouped,
     ContTransformerRangeExtended,
+    ContTransformerRangeGrouped,
 )
+from yahpo_train.cont_embeddings import PeriodicEmbeddings
 from yahpo_train.models_utils import get_activation_fn, get_nonglu_activation_fn
 
 
@@ -36,11 +37,12 @@ class AbstractSurrogate(nn.Module):
         embds_tgt: Union[List[nn.Module], List[partial]] | None = None,
         emb_szs: Union[List[Tuple[int, int]], List[int]] | None = None,
         instance_names: Optional[str] = None,
+        emb_plr: nn.Module | None = None,
     ) -> None:
         """
         Build the embeddings.
         """
-        self._build_embeddings_xcont(dls=dls, embds_dbl=embds_dbl)
+        self._build_embeddings_xcont(dls=dls, embds_dbl=embds_dbl, emb_plr=emb_plr)
         self._build_embeddings_y(
             dls=dls, embds_tgt=embds_tgt, instance_names=instance_names
         )
@@ -51,6 +53,7 @@ class AbstractSurrogate(nn.Module):
         self,
         dls: TabularDataLoaders,
         embds_dbl: Union[List[nn.Module], List[partial]] | None = None,
+        emb_plr: nn.Module | None = None,
     ) -> None:
         """
         Build the embeddings for the numeric/continuous features.
@@ -67,6 +70,8 @@ class AbstractSurrogate(nn.Module):
                 for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
             ]
         )
+        if emb_plr is not None:
+            self.plr = emb_plr(len(dls.cont_names))
         self.n_cont = len(dls.cont_names)
 
     def _build_embeddings_y(
@@ -153,6 +158,8 @@ class AbstractSurrogate(nn.Module):
         if self.n_cont != 0:
             xd = [e(x_cont[:, i]).unsqueeze(1) for i, e in enumerate(self.embds_dbl)]
             xd = torch.cat(xd, 1)
+            if self.plr is not None:
+                xd = self.plr(xd)
             x = torch.cat([x, xd], 1) if self.n_emb > 0 else xd
         return x
 
@@ -259,10 +266,10 @@ class ResNet(AbstractSurrogate):
     def __init__(
         self,
         dls: TabularDataLoaders,
-        embds_dbl: Union[List[nn.Module], List[partial]] | None = None,
-        embds_tgt: Union[List[nn.Module], List[partial]] | None = None,
-        emb_szs: Union[List[Tuple[int, int]], List[int]] | None = None,
-        embed_plr: bool = False,
+        embds_dbl: List[nn.Module] | List[partial] | None = None,
+        embds_tgt: List[nn.Module] | List[partial] | None = None,
+        emb_szs: List[Tuple[int, int]] | List[int] | None = None,
+        emb_plr: nn.Module | None = None,
         instance_names: str | None = None,
         d: int = 256,
         d_hidden_factor: float = 2.0,
@@ -283,6 +290,7 @@ class ResNet(AbstractSurrogate):
             embds_tgt=embds_tgt,
             emb_szs=emb_szs,
             instance_names=instance_names,
+            emb_plr=emb_plr,
         )
 
         self.main_activation = get_activation_fn(activation)

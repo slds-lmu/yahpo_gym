@@ -1,10 +1,10 @@
+from typing import Callable, Dict, List, Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.onnx
-from typing import Callable
-from fastai.tabular.all import *
-from fastai.torch_basics import *
+from fastai.tabular.all import TabularPandas, ifnone
 
 
 # Repurposed and adapted from https://github.com/yandex-research/rtdl under Apache License 2.0
@@ -87,7 +87,7 @@ def emb_sz_rule(n_cat: int) -> int:
 
 
 def _one_emb_sz(
-    classes: Dict[str, List[str]], n: str, sz_dict: Optional[Dict] = None
+    classes: Dict[str, List[str]], n: str, sz_dict: Dict | None = None
 ) -> Tuple[int, int]:
     """
     Pick an embedding size for `n` depending on `classes` if not given in `sz_dict`.
@@ -99,7 +99,7 @@ def _one_emb_sz(
 
 
 def get_emb_sz(
-    to: TabularPandas, sz_dict: Optional[Dict[str, int]] = None
+    to: TabularPandas, sz_dict: Dict[str, int] | None = None
 ) -> List[Tuple[int, int]]:
     """
     Get default embedding size from `TabularPreprocessor` `proc` or the ones in `sz_dict`.
