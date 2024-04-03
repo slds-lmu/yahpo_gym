@@ -1,8 +1,11 @@
 # PLR Embeddings from https://github.com/yandex-research/rtdl-num-embeddings/ available via Apache 2.0 LICENSE
+# Code was adapted per requirements
 import math
+from functools import partial
 from typing import Union
 
 import torch
+import torch.functional as F
 import torch.nn as nn
 from torch import Tensor
 from torch.nn.parameter import Parameter
@@ -144,4 +147,28 @@ class PeriodicEmbeddings(nn.Module):
         x = self.linear(x)
         if self.activation is not None:
             x = self.activation(x)
+        x = F.flatten(x)
         return x
+
+
+if __name__ == "__main__":
+    from yahpo_gym.configuration import cfg
+
+    from yahpo_train.learner import SurrogateTabularLearner, dl_from_config
+    from yahpo_train.losses import MultiMseLoss
+    from yahpo_train.models import ResNet
+
+    device = torch.device("cpu")
+
+    cfg = cfg("iaml_glmnet")
+    dl_train, dl_refit = dl_from_config(cfg, pin_memory=True, device=device)
+
+    model = ResNet(
+        dl_train,
+        instance_names=cfg.instance_names,
+        emb_plr=partial(PeriodicEmbeddings, lite=True),
+    )
+    surrogate = SurrogateTabularLearner(
+        dl_train, model, loss_func=MultiMseLoss(), metrics=None
+    )
+    surrogate.fit_one_cycle(5, 1e-4)
