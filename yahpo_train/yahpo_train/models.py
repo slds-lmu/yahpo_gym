@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as nn_init
-from fastai.tabular.all import *
 from fastai.tabular.all import Embedding, get_emb_sz
 from fastai.tabular.data import TabularDataLoaders
 from yahpo_gym.configuration import Configuration
@@ -18,7 +17,6 @@ from yahpo_train.cont_scalers import (
     ContTransformerRangeExtended,
     ContTransformerRangeGrouped,
 )
-from yahpo_train.cont_embeddings import PeriodicEmbeddings
 from yahpo_train.models_utils import get_activation_fn, get_nonglu_activation_fn
 
 
