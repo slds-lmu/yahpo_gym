@@ -1,4 +1,4 @@
-from yahpo_gym.configuration import config_dict, cfg
+from yahpo_gym.configuration import config_dict
 
 _task_set_dict = {
     "config_id": "task_set",
