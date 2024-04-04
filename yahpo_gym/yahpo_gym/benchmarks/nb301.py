@@ -1,11 +1,11 @@
-from yahpo_gym.configuration import config_dict, cfg
+from yahpo_gym.configuration import config_dict
 
 _nb301_dict = {
     "config_id": "nb301",
     "model": "model_v2.onnx",
-    #"y_names": ["val_accuracy", "val_cross_entropy", "runtime", "runtime_increase", "model_parameters"],
+    # "y_names": ["val_accuracy", "val_cross_entropy", "runtime", "runtime_increase", "model_parameters"],
     "y_names": ["val_accuracy", "val_cross_entropy", "runtime", "runtime_increase"],
-    #"y_minimize": [False, True, True, True, True],
+    # "y_minimize": [False, True, True, True, True],
     "y_minimize": [False, True, True, True],
     "cont_names": ["epoch"],
     "cat_names": [

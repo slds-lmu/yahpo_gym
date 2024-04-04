@@ -1,4 +1,4 @@
-from yahpo_gym.configuration import config_dict, cfg
+from yahpo_gym.configuration import config_dict
 
 _fcnet_dict = {
     "config_id": "fcnet",
