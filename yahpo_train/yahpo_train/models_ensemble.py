@@ -7,7 +7,6 @@ from torch.nn import ModuleList
 
 from yahpo_train.learner import SurrogateTabularLearner
 from yahpo_train.models import AbstractSurrogate
-from yahpo_train.models_utils import *
 
 
 def sample_from_simplex(n: int, device: torch.device) -> torch.Tensor:
