@@ -6,6 +6,7 @@ from fastai.tabular.data import TabularDataLoaders
 from torch.nn import ModuleList
 
 from yahpo_train.learner import SurrogateTabularLearner
+from yahpo_train.losses import MultiMseLoss
 from yahpo_train.models import AbstractSurrogate
 
 
@@ -161,7 +162,6 @@ if __name__ == "__main__":
     from yahpo_gym.configuration import cfg
 
     from yahpo_train.learner import SurrogateTabularLearner, dl_from_config
-    from yahpo_train.losses import *
     from yahpo_train.models import ResNet
 
     device = torch.device("cpu")

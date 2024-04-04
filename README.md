@@ -8,7 +8,7 @@
 
 ### What is YAHPO Gym?
 
-**YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://arxiv.org/abs/2109.03670).
+**YAHPO Gym** (Yet Another Hyperparameter Optimization Gym) is a collection of interesting problem sets for benchmark hyperparameter optimization / black-box optimization methods described in [this paper](https://proceedings.mlr.press/v188/pfisterer22a.html).
 The underlying software with additional documentation and background can be found [here](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 See the [module Documentation](https://slds-lmu.github.io/yahpo_gym/) for more info.
 
@@ -29,7 +29,7 @@ We also maintain a list of [frequently asked questions](https://slds-lmu.github.
 
 **NEWS:**
 
-- The [paper](https://arxiv.org/abs/2109.03670) accompanying `YAHPO Gym` was accepted at the 1st International Conference on Automated Machine Learning!
+- The [paper](https://proceedings.mlr.press/v188/pfisterer22a.html) accompanying `YAHPO Gym` was accepted at the 1st International Conference on Automated Machine Learning!
 - YAHPO (Python) can now be installed via `pip install yahpo-gym`
 - YAHPO is now available in [HPOBench](https://github.com/automl/HPOBench/)
 - We are working on integrating YAHPO Gym with [syne-tune](https://github.com/awslabs/syne-tune) for asynchronous benchmarking!
