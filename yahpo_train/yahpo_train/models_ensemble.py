@@ -1,12 +1,13 @@
-from typing import Callable, List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 
+import torch
 from fastai.callback.core import Callback
 from fastai.tabular.data import TabularDataLoaders
-from torch.nn import Module, ModuleList
+from torch.nn import ModuleList
 
 from yahpo_train.learner import SurrogateTabularLearner
+from yahpo_train.losses import MultiMseLoss
 from yahpo_train.models import AbstractSurrogate
-from yahpo_train.models_utils import *
 
 
 def sample_from_simplex(n: int, device: torch.device) -> torch.Tensor:
@@ -158,11 +159,9 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
 
 
 if __name__ == "__main__":
-    from yahpo_gym.benchmarks import iaml
     from yahpo_gym.configuration import cfg
 
     from yahpo_train.learner import SurrogateTabularLearner, dl_from_config
-    from yahpo_train.losses import *
     from yahpo_train.models import ResNet
 
     device = torch.device("cpu")

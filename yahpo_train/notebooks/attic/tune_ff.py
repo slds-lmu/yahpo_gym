@@ -1,10 +1,7 @@
 import argparse
-from functools import partial
 
 import wandb
 from fastai.callback.wandb import *
-from yahpo_gym import benchmark_set
-from yahpo_gym.benchmarks import fcnet, iaml, lcbench, nasbench_301, rbv2, taskset
 from yahpo_gym.configuration import cfg
 
 from yahpo_train.cont_scalers import *
@@ -143,7 +140,6 @@ def tune_config(key, name, tfms_fixed={}, trials=1000, walltime=86400, **kwargs)
 
     import optuna
     from optuna.integration import FastAIPruningCallback
-    from optuna.visualization import plot_optimization_history
 
     if trials == 0:
         trials = None

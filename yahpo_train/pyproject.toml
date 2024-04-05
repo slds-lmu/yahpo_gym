@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yahpo-train"
+dynamic = ["version", "license"]
+description = "Train surrogate models for the YAHPO Gym"
+readme = "README.md"
+authors = [
+    { name = "Florian Pfisterer" },
+    { name = "Lennart Schneider" },
+]
+keywords = [
+    "module",
+    "train",
+    "yahpo",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "fastai",
+    "numpy",
+    "onnx>=1.14.0",
+    "optuna",
+    "pandas",
+    "scikit-learn",
+    "scipy",
+    "torch>=1.0.0",
+    "yahpo_gym @ git+https://github.com/slds-lmu/yahpo_gym#egg=yahpo_gym&subdirectory=yahpo_gym",
+]
+
+[project.urls]
+repository = "https://github.com/slds-lmu/yahpo_gym"
+homepage = "https://slds-lmu.github.io/yahpo_gym/"
+documentation = "https://slds-lmu.github.io/yahpo_gym/"
+
+[tool.ruff]
+line-length = 200
+include = ["pyproject.toml", "yahpo_train/*.py"]
+indent-width = 4
+target-version = "py310"
+fix = true
+unsafe-fixes = true
+
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "PLC", "PLE", "PLW", "I"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.isort]
+profile = "black"

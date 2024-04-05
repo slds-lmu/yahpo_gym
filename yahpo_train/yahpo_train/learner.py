@@ -1,11 +1,20 @@
 import gc
+import json
 import random
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import torch
-from fastai.tabular.all import *
+from fastai.tabular.all import (
+    CancelStepException,
+    Categorify,
+    FillMissing,
+    FillStrategy,
+    Learner,
+    df_shrink,
+)
 from fastai.tabular.data import TabularDataLoaders
 from pandas.core.frame import DataFrame
 from yahpo_gym.configuration import Configuration
@@ -56,13 +65,6 @@ def dl_from_config(
     df = df.sample(frac=1.00, random_state=seed)
 
     gc.collect()
-
-    # df = pd.read_csv(
-    #    config.get_path("dataset"),
-    #    skipinitialspace=skipinitialspace,
-    #    usecols=list(dtypes.keys()),
-    #    dtype=dtypes,
-    # ).sample(frac=1.0, random_state=seed)
 
     # get rid of irrelevant columns
     # if config.instance_names is not None we can be sure that it is the first element of config.cat_names

@@ -1,9 +1,10 @@
+from typing import Callable, Dict, List, Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.onnx
-from fastai.tabular.all import *
-from fastai.torch_basics import *
+from fastai.tabular.all import TabularPandas, ifnone
 
 
 # Repurposed and adapted from https://github.com/yandex-research/rtdl under Apache License 2.0
@@ -49,33 +50,31 @@ class GeGLU(nn.Module):
         return geglu(x)
 
 
-def get_activation_fn(name: str) -> typing.Callable[[torch.Tensor], torch.Tensor]:
+def get_activation_fn(name: str) -> Callable[[torch.Tensor], torch.Tensor]:
     """
     Get activation function by name.
     """
     return (
         reglu
         if name == "reglu"
-        else geglu
-        if name == "geglu"
-        else torch.sigmoid
-        if name == "sigmoid"
-        else getattr(F, name)
+        else (
+            geglu
+            if name == "geglu"
+            else torch.sigmoid if name == "sigmoid" else getattr(F, name)
+        )
     )
 
 
 def get_nonglu_activation_fn(
     name: str,
-) -> typing.Callable[[torch.Tensor], torch.Tensor]:
+) -> Callable[[torch.Tensor], torch.Tensor]:
     """
     Get activation function by name.
     """
     return (
         F.relu
         if name == "reglu"
-        else F.gelu
-        if name == "geglu"
-        else get_activation_fn(name)
+        else F.gelu if name == "geglu" else get_activation_fn(name)
     )
 
 
@@ -88,7 +87,7 @@ def emb_sz_rule(n_cat: int) -> int:
 
 
 def _one_emb_sz(
-    classes: Dict[str, List[str]], n: str, sz_dict: Optional[Dict] = None
+    classes: Dict[str, List[str]], n: str, sz_dict: Dict | None = None
 ) -> Tuple[int, int]:
     """
     Pick an embedding size for `n` depending on `classes` if not given in `sz_dict`.
@@ -100,7 +99,7 @@ def _one_emb_sz(
 
 
 def get_emb_sz(
-    to: TabularPandas, sz_dict: Optional[Dict[str, int]] = None
+    to: TabularPandas, sz_dict: Dict[str, int] | None = None
 ) -> List[Tuple[int, int]]:
     """
     Get default embedding size from `TabularPreprocessor` `proc` or the ones in `sz_dict`.

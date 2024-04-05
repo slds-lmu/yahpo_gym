@@ -40,7 +40,5 @@ setup(
             "pandas",
         ],
     },
-    keywords=["module", "train", "yahpo"],
-    url="https://github.com/slds-lmu/yahpo_gym",
-    classifiers=["Development Status :: 3 - Alpha"],
+    keywords=["module", "inference", "yahpo"],
 )

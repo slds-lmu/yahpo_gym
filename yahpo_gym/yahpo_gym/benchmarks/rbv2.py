@@ -1,4 +1,4 @@
-from yahpo_gym.configuration import config_dict, cfg
+from yahpo_gym.configuration import config_dict
 
 # Default dict, holds for all 'rbv2_' benchmarks
 _rbv2_dict = {

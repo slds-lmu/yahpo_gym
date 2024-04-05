@@ -1,5 +1,8 @@
-import pandas as pd
-from fastai.tabular.all import *
+from typing import Callable
+
+import numpy as np
+import torch
+from fastai.tabular.all import Metric, find_bs
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import mean_absolute_error, r2_score
 
