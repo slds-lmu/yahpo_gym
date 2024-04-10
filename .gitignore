@@ -136,7 +136,6 @@ Pipfile.lock
 notes
 
 *.db
-*.toml
 
 experiments/
 

@@ -45,6 +45,14 @@ setup(
     },
     keywords=["module", "train", "yahpo"],
     url="https://github.com/slds-lmu/yahpo_gym",
-    classifiers=["Development Status :: 3 - Alpha"],
+    classifiers=[
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Development Status :: 3 - Alpha",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Natural Language :: English",
+    ],
     scripts=["scripts/setup_yahpo.py"],
 )
