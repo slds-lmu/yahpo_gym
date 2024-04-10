@@ -3,15 +3,19 @@ import argparse
 import subprocess
 from pathlib import Path
 from yahpo_gym import benchmark_set
-from yahpo_gym import local_config
-import yahpo_gym.benchmarks.lcbench  # noqa: F401
+from yahpo_gym.local_config import local_config
+import yahpo_gym.benchmarks.lcbench  # noqa: F401#
 
 
 def setup(dest_dir: Path | str):
+    """
+    Clone yahpo data into <dest_dir>/yahpo_data
+    """
     # Define the repository URL
-    yahpo_data_url = "https://github.com/slds-lmu/yahpo_data.git"
+    yahpo_data_url = "https://github.com/slds-lmu/yahpo_data.git@v2"
 
     # Run the git clone command
+    dest_dir = Path(dest_dir).joinpath("yahpo_data")
     subprocess.run(["git", "clone", yahpo_data_url, dest_dir])
 
     local_config.init_config()
@@ -29,13 +33,23 @@ def test():
         print("Setup successfull!")
 
 
-if __name__ == "__main__":
+def parse_args():
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="Setup script for yahpo-gym.")
     parser.add_argument(
         "dest_dir",
         help="Destination directory for cloning meta-data required for yahpo-gym.",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    setup(args.destination_directory)
+
+def main():
+    """Main function."""
+    args = parse_args()
+    print(args)
+    setup(args.dest_dir)
     test()
+
+
+if __name__ == "__main__":
+    main()
