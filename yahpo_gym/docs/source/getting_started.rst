@@ -6,7 +6,15 @@ Getting Started
 Installation (Python)
 =======================
 
+
 `YAHPO Gym` can be installed from **PyPy** using `pip`:
+
+
+.. code-block:: bash
+
+    pip install yahpo-gym
+
+or the latest version directly from GitHub:
 
 .. code-block:: bash
 
