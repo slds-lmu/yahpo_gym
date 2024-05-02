@@ -59,7 +59,7 @@ Using F1 scores for rbv2_*
 
 `F1` scores in the `rbv2_*` scenarios are only available for binary classification datasets. 
 On multiclass datasets, the corresponding `F1` score is imputed with `0` and returned by the surrogate model.
-The information on which `id` corresponds to a multiclass dataset can be obtained from the entry `is_multicrit` in `BenchmarkSet.config.config`.
+The information on which `id` corresponds to a multiclass dataset can be obtained from the entry `is_multiclass` in `BenchmarkSet.config.config`.
 
 Memory Estimation for rbv2_*
 =======================

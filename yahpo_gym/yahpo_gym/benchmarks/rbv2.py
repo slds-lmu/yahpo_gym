@@ -28,7 +28,7 @@ _rbv2_dict = {
     "instance_names": "task_id",
     "runtime_name": "timetrain",
     # "memory_name": "memory",
-    "is_multicrit": {
+    "is_multiclass": {
         "3": False,
         "11": True,
         "12": True,
