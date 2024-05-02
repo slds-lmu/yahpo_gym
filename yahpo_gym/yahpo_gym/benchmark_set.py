@@ -25,6 +25,7 @@ class BenchmarkSet:
         multithread: bool = True,
         check: bool = True,
         noisy: bool = False,
+        data_path = None,
     ):
         """
         Interface for a benchmark scenario.
@@ -50,10 +51,14 @@ class BenchmarkSet:
             Should input to objective_function be checked for validity? Initialized to `True`, but can be disabled for speedups.
         noisy: bool
             Use stochastic surrogate models? Initialized to `False`.
+        data_path: str
+            Optional path to the data directory. If not provided, the default data path as indicated by the local config is used.
         """
 
         assert scenario is not None, "Please provide a valid scenario."
         self.config = cfg(scenario)
+        if data_path is not None:
+            self.config.config["basedir"] = data_path  # override the default path
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
