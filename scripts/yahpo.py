@@ -1,5 +1,6 @@
-from yahpo_gym import benchmark_set
 import argparse
+
+from yahpo_gym import benchmark_set
 
 
 class ParseKwargs(argparse.Action):

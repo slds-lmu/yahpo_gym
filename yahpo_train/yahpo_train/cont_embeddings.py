@@ -5,7 +5,6 @@ from functools import partial
 from typing import Union
 
 import torch
-import torch.functional as F
 import torch.nn as nn
 from torch import Tensor
 from torch.nn.parameter import Parameter
@@ -147,11 +146,14 @@ class PeriodicEmbeddings(nn.Module):
         x = self.linear(x)
         if self.activation is not None:
             x = self.activation(x)
-        x = F.flatten(x)
+        # x = F.flatten(x)
+        # x = torch.flatten(x, 1)  # or adjust in _embed_features in models.py
+
         return x
 
 
 if __name__ == "__main__":
+    from yahpo_gym.benchmarks import iaml  # noqa: F401
     from yahpo_gym.configuration import cfg
 
     from yahpo_train.learner import SurrogateTabularLearner, dl_from_config
@@ -165,8 +167,8 @@ if __name__ == "__main__":
 
     model = ResNet(
         dl_train,
-        instance_names=cfg.instance_names,
         emb_plr=partial(PeriodicEmbeddings, lite=True),
+        instance_names=cfg.instance_names,
     )
     surrogate = SurrogateTabularLearner(
         dl_train, model, loss_func=MultiMseLoss(), metrics=None

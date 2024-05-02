@@ -13,7 +13,6 @@ def chunk(n: int, size: int) -> List[List[int]]:
     """Split the range [0, n) into chunks of size as specified by `size`."""
     m = n // size
     result = []
-    lower = 0
     upper = 0
     for i in range(0, m - 1):
         lower = upper

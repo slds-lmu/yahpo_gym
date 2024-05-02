@@ -1,1 +1,1 @@
-from yahpo_gym.benchmarks import lcbench, nb301, rbv2, iaml, fair  # noqa: F401
+from yahpo_gym.benchmarks import fair, iaml, lcbench, nb301, rbv2  # noqa: F401

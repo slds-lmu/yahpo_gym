@@ -90,6 +90,8 @@ class BenchmarkSet:
         configuration: Dict
             A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
+        seed: int
+            Seed for the random number generator. Initialized to `None`.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
         multithread: bool
@@ -161,6 +163,8 @@ class BenchmarkSet:
         configuration: Dict
             A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
+        seed: int
+            Seed for the random number generator. Initialized to `None`.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
         multithread: bool
@@ -347,7 +351,7 @@ class BenchmarkSet:
             * statistic :: min or max
             * value :: value of minimum/maximum
             * scenario :: the scenario
-            " instance :: the instance
+            * instance :: the instance
         If no instance is set, all instances for a given scenario are returned.
         """
         df = pd.read_csv(
@@ -461,7 +465,7 @@ class BenchmarkSet:
     def _infer_quant(self):
         offsets = []
         runtimes = []
-        for i in range(15):
+        for _ in range(15):
             start_time = time.time()
             results = self._eval_random()
             runtimes += [results[self.config.runtime_name]]
@@ -485,7 +489,6 @@ if __name__ == "__main__":
     from yahpo_gym import benchmark_set
 
     bench = benchmark_set.BenchmarkSet("iaml_super")
-    bench.instances
     bench.set_instance("1067")
     config = {
         "task_id": "1067",

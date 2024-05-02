@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 import torch
-from yahpo_gym.configuration import cfg
 
+from yahpo_gym.configuration import cfg
 from yahpo_train.cont_normalization import ContNormalization
 
 

@@ -24,7 +24,8 @@ class Configuration:
     def get_path(self, key: str):
         return f"{self.config_path}/{self.config[key]}"
 
-    def _get_default_dict(self):
+    @staticmethod
+    def _get_default_dict():
         return {
             "basedir": local_config.data_path,
             "config_id": "",
@@ -164,7 +165,7 @@ class ConfigDict:
         return out
 
 
-def cfg(key: str|None=None, **kwargs):
+def cfg(key: str | None = None, **kwargs):
     """
     Shorthand access to 'ConfigDict'.
 

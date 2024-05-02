@@ -2,8 +2,8 @@ import argparse
 
 import wandb
 from fastai.callback.wandb import *
-from yahpo_gym.configuration import cfg
 
+from yahpo_gym.configuration import cfg
 from yahpo_train.cont_scalers import *
 from yahpo_train.learner import *
 from yahpo_train.metrics import *

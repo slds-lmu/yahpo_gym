@@ -1,5 +1,6 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 import yaml
 
 
@@ -31,13 +32,12 @@ class LocalConfiguration:
         Initialize a new local configuration.
 
         This writes a local configuration file to the specified 'settings_path'.
-        The
         It is currently used to globally store the following information
         'data_path': A path to the metadata required for inference.
 
         Parameters
         ----------
-        settings_path: str
+        data_path : str
             Path to the directory where surrogate models and metadata are saved.
         """
         os.makedirs(os.path.dirname(self.settings_path), exist_ok=True)
@@ -62,13 +62,12 @@ class LocalConfiguration:
             yaml.dump(config, fh)
 
     def _load_config(self):
-        config = {"data_path": ""}
         try:
             with self.settings_path.open("r") as fh:
                 config = yaml.load(fh, Loader=yaml.FullLoader)
         except yaml.parser.ParserError:
             raise yaml.parser.ParserError("Could not load config! (Invalid YAML?)")
-        except:
+        except Exception:
             raise Exception(
                 "Could not load local_config! Please run LocalConfiguration.init_config() and restart."
             )

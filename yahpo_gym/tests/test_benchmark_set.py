@@ -1,8 +1,8 @@
 import random
 import time
-import pytest
 
 import ConfigSpace
+import pytest
 
 import yahpo_gym
 from yahpo_gym.benchmark_set import BenchmarkSet

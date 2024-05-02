@@ -1,6 +1,7 @@
-import pytest
 import time
+
 import ConfigSpace
+import pytest
 
 import yahpo_gym
 from yahpo_gym.benchmark_set import BenchmarkSet

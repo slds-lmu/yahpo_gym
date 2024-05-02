@@ -12,11 +12,7 @@ from fastai.tabular.all import Embedding, get_emb_sz
 from fastai.tabular.data import TabularDataLoaders
 from yahpo_gym.configuration import Configuration
 
-from yahpo_train.cont_scalers import (
-    ContTransformerRange,
-    ContTransformerRangeExtended,
-    ContTransformerRangeGrouped,
-)
+from yahpo_train.cont_scalers import ContTransformerRange, ContTransformerRangeExtended, ContTransformerRangeGrouped
 from yahpo_train.models_utils import get_activation_fn, get_nonglu_activation_fn
 
 
@@ -34,8 +30,8 @@ class AbstractSurrogate(nn.Module):
         embds_dbl: Union[List[nn.Module], List[partial]] | None = None,
         embds_tgt: Union[List[nn.Module], List[partial]] | None = None,
         emb_szs: Union[List[Tuple[int, int]], List[int]] | None = None,
-        instance_names: Optional[str] = None,
         emb_plr: nn.Module | None = None,
+        instance_names: Optional[str] = None,
     ) -> None:
         """
         Build the embeddings.
@@ -45,7 +41,11 @@ class AbstractSurrogate(nn.Module):
             dls=dls, embds_tgt=embds_tgt, instance_names=instance_names
         )
         self._build_embeddings_xcat(dls=dls, emb_szs=emb_szs)
-        self.n_inputs = self.n_emb + self.n_cont
+        self.n_inputs = (
+            self.n_emb + self.n_cont
+            if self.plr is None
+            else self.n_emb + self.n_cont * self.plr.linear.out_features
+        )  # FIXME: introduce field for the output features of the PLR and use this
 
     def _build_embeddings_xcont(
         self,
@@ -56,20 +56,44 @@ class AbstractSurrogate(nn.Module):
         """
         Build the embeddings for the numeric/continuous features.
         """
-        if embds_dbl is None:
-            embds_dbl = ContTransformerRangeExtended
-        self.embds_dbl = nn.ModuleList(
-            [
-                f(
-                    x_id=cont[0],
-                    x=torch.from_numpy(cont[1].values).float(),
-                    group=torch.Tensor(),
-                )
-                for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
-            ]
-        )
+        # if embds_dbl is None:
+        #    embds_dbl = ContTransformerRangeExtended
+        # self.embds_dbl = nn.ModuleList(
+        #    [
+        #        f(
+        #            x_id=cont[0],
+        #            x=torch.from_numpy(cont[1].values).float(),
+        #            group=torch.Tensor(),
+        #        )
+        #        for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
+        #    ]
+        # )
+        if embds_dbl is not None:
+            self.embds_dbl = nn.ModuleList(
+                [
+                    f(
+                        x_id=cont[0],
+                        x=torch.from_numpy(cont[1].values).float(),
+                        group=torch.Tensor(),
+                    )
+                    for cont, f in zip(dls.all_cols[dls.cont_names].items(), embds_dbl)
+                ]
+            )
+        else:
+            self.embds_dbl = nn.ModuleList(
+                [
+                    ContTransformerRangeExtended(
+                        x_id=cont[0],
+                        x=torch.from_numpy(cont.values).float(),
+                        group=torch.Tensor(),
+                    )
+                    for _, cont in dls.all_cols[dls.cont_names].items()
+                ]
+            )
         if emb_plr is not None:
             self.plr = emb_plr(len(dls.cont_names))
+        else:
+            self.plr = None
         self.n_cont = len(dls.cont_names)
 
     def _build_embeddings_y(
@@ -158,6 +182,7 @@ class AbstractSurrogate(nn.Module):
             xd = torch.cat(xd, 1)
             if self.plr is not None:
                 xd = self.plr(xd)
+                xd = torch.flatten(xd, 1)
             x = torch.cat([x, xd], 1) if self.n_emb > 0 else xd
         return x
 
@@ -250,6 +275,7 @@ class ResNet(AbstractSurrogate):
     embds_dbl :: Numeric Embeddings
     embds_tgt :: Target Embeddings
     embd_szs :: Embedding sizes
+    emb_plr :: PLR Embeddings for continuous features that are employed prior to the numeric embeddings
     instance_names :: names of the instances id
     d :: dimensionality of the hidden space
     d_hidden_factor :: factor by which the hidden dimension is reduced
@@ -287,8 +313,8 @@ class ResNet(AbstractSurrogate):
             embds_dbl=embds_dbl,
             embds_tgt=embds_tgt,
             emb_szs=emb_szs,
-            instance_names=instance_names,
             emb_plr=emb_plr,
+            instance_names=instance_names,
         )
 
         self.main_activation = get_activation_fn(activation)
@@ -363,6 +389,7 @@ class ResNet(AbstractSurrogate):
 
 
 if __name__ == "__main__":
+    from yahpo_gym.benchmarks import iaml  # noqa: F401
     from yahpo_gym.configuration import cfg
 
     from yahpo_train.learner import SurrogateTabularLearner, dl_from_config

@@ -1,6 +1,8 @@
 import argparse
+import functools
 import logging
 import random
+import sys
 import warnings
 from typing import Callable, List, Optional, Tuple, Union
 
@@ -10,8 +12,10 @@ import torch
 from fastai.tabular.data import TabularDataLoaders
 from optuna.integration import FastAIPruningCallback
 from optuna.study import Study
-from yahpo_gym.configuration import cfg
 
+from yahpo_gym.benchmarks import *
+from yahpo_gym.configuration import cfg
+from yahpo_train.cont_embeddings import *
 from yahpo_train.cont_scalers import *
 from yahpo_train.helpers import generate_all_test_set_metrics
 from yahpo_train.learner import *
@@ -39,6 +43,7 @@ def fit_config_resnet(
     embds_dbl: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
     embds_tgt: Optional[Union[List[nn.Module], List[functools.partial]]] = None,
     tfms: Optional[Dict[str, Callable]] = None,
+    use_emb_plr: bool = False,
     lr: float = 1e-4,
     wd: Optional[float] = None,
     moms: Optional[Tuple[float, float]] = None,
@@ -59,21 +64,30 @@ def fit_config_resnet(
     # tfms overwrites emdbs_dbl, embds_tgt
     if tfms is not None:
         embds_dbl = [
-            tfms.get(name)
-            if tfms.get(name) is not None
-            else ContTransformerRangeExtended
+            (
+                tfms.get(name)
+                if tfms.get(name) is not None
+                else ContTransformerRangeExtended
+            )
             for name, cont in dl_train.all_cols[dl_train.cont_names].items()
         ]
         embds_tgt = [
-            tfms.get(name)
-            if tfms.get(name) is not None
-            else (
-                ContTransformerRangeGrouped
-                if config.instance_names is not None
-                else ContTransformerRange
+            (
+                tfms.get(name)
+                if tfms.get(name) is not None
+                else (
+                    ContTransformerRangeGrouped
+                    if config.instance_names is not None
+                    else ContTransformerRange
+                )
             )
             for name, cont in dl_train.ys.items()
         ]
+
+    if use_emb_plr:
+        emb_plr = partial(PeriodicEmbeddings, lite=True)
+    else:
+        emb_plr = None
 
     # instantiate learner
     if noisy:
@@ -83,6 +97,7 @@ def fit_config_resnet(
             dls=dl_train,
             embds_dbl=embds_dbl,
             embds_tgt=embds_tgt,
+            emb_plr=emb_plr,
             instance_names=config.instance_names,
             d=d,
             d_hidden_factor=d_hidden_factor,
@@ -114,6 +129,7 @@ def fit_config_resnet(
             dl_train,
             embds_dbl=embds_dbl,
             embds_tgt=embds_tgt,
+            emb_plr=emb_plr,
             instance_names=config.instance_names,
             d=d,
             d_hidden_factor=d_hidden_factor,
@@ -175,6 +191,7 @@ def tune_config_resnet(
     # default configuration that should work well on the larger datasets
     study.enqueue_trial(
         {
+            "use_emb_plr": False,
             "d": 256,
             "d_hidden_factor": 3,
             "n_layers": 5,
@@ -192,6 +209,9 @@ def tune_config_resnet(
     # for the search space see https://arxiv.org/pdf/2106.11959.pdf
     # except for wd and moms
     def objective(trial):
+        use_emb_plr = trial.suggest_categorical(
+            "use_emb_plr", choices=[True, False]
+        )  # turn PLR embeddings on or off
         d = trial.suggest_int("d", low=64, high=512, step=64)  # layer size
         d_hidden_factor = trial.suggest_float(
             "d_hidden_factor", 1.0, 4.0
@@ -224,6 +244,7 @@ def tune_config_resnet(
             key=key,
             dl_train=dl_train,
             tfms=tfms_fixed,
+            use_emb_plr=use_emb_plr,
             lr=lr,
             wd=wd,
             moms=moms,
@@ -723,13 +744,13 @@ if __name__ == "__main__":
         type=int,
         default=0,
         help="Number of optuna trials",
-    )  # by default we run until terminated externally
+    )  # by default, we run until terminated externally
     parser.add_argument(
         "--walltime",
         type=int,
         default=0,
         help="Walltime for optuna timeout in seconds",
-    )  # by default we run until terminated externally
+    )  # by default, we run until terminated externally
     args = parser.parse_args()
 
     cuda_available = torch.cuda.is_available()
@@ -771,7 +792,7 @@ if __name__ == "__main__":
     with open(Path(config.config_path, config.config.get("best_params")), "w") as f:
         json.dump(best_params, f)
 
-    # fix some parameters
+    # fix residual_dropout and wd if not used
     if not best_params.get("use_residual_dropout"):
         best_params.update({"residual_dropout": 0})
 
@@ -805,14 +826,14 @@ if __name__ == "__main__":
     )
 
     warnings.filterwarnings(
-       "ignore", category=UserWarning
+        "ignore", category=UserWarning
     )  # ignore warnings due to empty validation set
     surrogate_noisy = fit_config_resnet(
-       args.key,
-       dl_train=dl_refit,
-       tfms=tfms_list.get(args.key),
-       **best_params,
-       noisy=True,
+        args.key,
+        dl_train=dl_refit,
+        tfms=tfms_list.get(args.key),
+        **best_params,
+        noisy=True,
     )
     warnings.filterwarnings("default", category=UserWarning)  # reset warnings
 
