@@ -166,7 +166,7 @@ def tune_config_resnet(
     tfms_fixed: Dict[str, Callable] = {},
     trials: int = 0,
     walltime: float = 0,
-    **kwargs
+    **kwargs,
 ) -> optuna.study.Study:
     if trials == 0:
         trials = None
@@ -240,24 +240,31 @@ def tune_config_resnet(
         moms = (mom1, mom2)
         cbs = [FastAIPruningCallback(trial=trial, monitor="valid_loss")]
 
-        surrogate = fit_config_resnet(
-            key=key,
-            dl_train=dl_train,
-            tfms=tfms_fixed,
-            use_emb_plr=use_emb_plr,
-            lr=lr,
-            wd=wd,
-            moms=moms,
-            d=d,
-            d_hidden_factor=d_hidden_factor,
-            n_layers=n_layers,
-            hidden_dropout=hidden_dropout,
-            residual_dropout=residual_dropout,
-            fit_cbs=cbs,
-            **kwargs,
-        )
-        loss = surrogate.validate()[0]
-        return loss
+        # try to fit the model
+        try:
+            surrogate = fit_config_resnet(
+                key=key,
+                dl_train=dl_train,
+                tfms=tfms_fixed,
+                use_emb_plr=use_emb_plr,
+                lr=lr,
+                wd=wd,
+                moms=moms,
+                d=d,
+                d_hidden_factor=d_hidden_factor,
+                n_layers=n_layers,
+                hidden_dropout=hidden_dropout,
+                residual_dropout=residual_dropout,
+                fit_cbs=cbs,
+                **kwargs,
+            )
+            loss = surrogate.validate()[0]
+            return loss
+        except Exception as e:
+            warnings.warn(
+                f"Error during training: {e}. Returning high loss for trial {trial.number}."
+            )
+            return 999999.0  # return a high loss in case of an error
 
     study.optimize(objective, n_trials=trials, timeout=walltime)
     return study

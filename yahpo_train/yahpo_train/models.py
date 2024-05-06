@@ -12,7 +12,11 @@ from fastai.tabular.all import Embedding, get_emb_sz
 from fastai.tabular.data import TabularDataLoaders
 from yahpo_gym.configuration import Configuration
 
-from yahpo_train.cont_scalers import ContTransformerRange, ContTransformerRangeExtended, ContTransformerRangeGrouped
+from yahpo_train.cont_scalers import (
+    ContTransformerRange,
+    ContTransformerRangeExtended,
+    ContTransformerRangeGrouped,
+)
 from yahpo_train.models_utils import get_activation_fn, get_nonglu_activation_fn
 
 

@@ -25,7 +25,7 @@ class BenchmarkSet:
         multithread: bool = True,
         check: bool = True,
         noisy: bool = False,
-        data_path = None,
+        data_path=None,
     ):
         """
         Interface for a benchmark scenario.
