@@ -14,7 +14,7 @@ def get_suite(type: str, version: float = 1.0):
     type: str
         The type of benchmark to be used. Can be either 'single' (single-objective) or 'multi' (multi-objective).
     version: float
-        The version of the benchmark to be used.
+        The version of the benchmark to be used. Defaults to 1.0.
     """
     assert type in ["single", "multi"], "type must be either 'single' or 'multi'"
     assert _data_has_version(

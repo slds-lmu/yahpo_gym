@@ -30,7 +30,8 @@ Original data sources are given by:
 * [5] Zimmer, L. (2020). data_2k_lw.zip. figshare. Dataset. https://doi.org/10.6084/m9.figshare.11662422.v1, Apache License, Version 2.0.
 * [6] None, simply cite Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.
 
-Please make sure to always also cite the original data sources as YAHPO Gym would not have been possible without them!
+Please make sure to always also **cite** the original data sources as YAHPO Gym would not have been possible without them!
+
 
 In `yahpo_gym`, there is a `Configuration` object for each **scenario**. 
 

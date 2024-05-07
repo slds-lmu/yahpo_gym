@@ -12,3 +12,5 @@ We provide several examples for using `YAHPO Gym`:
 - `Paper Examples <https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/code_sample.ipynb>`_
 
 - `Paper Experiments <https://github.com/slds-lmu/yahpo_exps/tree/main/paper>`_
+
+- `Using YAHPO with syne-tune <https://github.com/awslabs/syne-tune/blob/main/examples/launch_asha_yahpo.py>`_

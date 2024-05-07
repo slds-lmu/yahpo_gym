@@ -30,7 +30,7 @@ YAHPO Gym consists of several `scenarios`. A scenario (e.g. `lcbench`) is a coll
 
 The **full, up-to-date overview** can be obtained from the [Documentation](https://slds-lmu.github.io/yahpo_gym/scenarios.html).
 The fidelity is given either as the dataset fraction `fraction` or the number of epochs `epoch`.
-Search spaces can be numeric, mixed and have dependencies (as indicated in the `H` column).
+Search spaces can be numeric, mixed and have hierarchical dependencies (as indicated in the `H` column).
 
 Original data sources are given by:
 
@@ -46,12 +46,12 @@ Original data sources are given by:
 ### Installation
 
 ```console
-pip install yahpo-gym==1.0.1
+pip install yahpo-gym==2.0
 ```
 
 ### Setup
 
-To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`).
+To run a benchmark you need to obatin the ONNX model (`new_model.onnx`), [ConfigSpace](https://automl.github.io/ConfigSpace/) (`config_space.json`) and some encoding info (`encoding.json`) for the respective benchmark.
 
 You can download these [here (Github)](https://github.com/slds-lmu/yahpo_data) or [here (Syncshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
 
@@ -63,6 +63,7 @@ from yahpo_gym import local_config
 local_config.init_config()
 local_config.set_data_path("path-to-data")
 ```
+
 You can test whether the setup was successful by instantiating the object as documented in the **Usage** section below.
 
 ### Usage
@@ -98,8 +99,8 @@ result_dict = b.objective_function(configuration=config, fidelity={"epoch": 50},
 
 #### Using YAHPO with `syne-tune`
 
-We are currently working on integrating `yahpo_gym` with `syne-tune`.
-See [here](https://github.com/awslabs/syne-tune/pull/337) for progress on this issue.
+`yahpo-gym` is also integrated in [`syne-tune`](https://github.com/awslabs/syne-tune).
+See [syne-tune docs](https://github.com/awslabs/syne-tune/blob/main/examples/launch_asha_yahpo.py) for an extensive example.
 
 ### A note on OpenML Task IDs
 
@@ -111,7 +112,7 @@ To query meta information, use https://www.openml.org/t/<task_id>.
 
 ### Example: Tuning an instance using HPBandSter
 
-We include a full example for optimization using **BOHB** on a YAHPO Gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
+We include a full example for optimization using **BOHB** from [HPBandSter](https://github.com/automl/HpBandSter) on a YAHPO Gym instance in a [jupyter notebook](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb).
 
 ### All Examples
 
@@ -126,11 +127,7 @@ We include a full example for optimization using **BOHB** on a YAHPO Gym instanc
 If you use YAHPO Gym, please cite the following paper:
 
 - Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.
-
-Moreover, certain `scenarios` built upon previous work, e.g., the `lcbench` scenario uses data from:
-
-- Zimmer, L., Lindauer, M., & Hutter, F. (2021). Auto-Pytorch: Multi-Fidelity Metalearning for Efficient and Robust AutoDL. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(9), 3079-3090.
-- Zimmer, L. (2020). data_2k_lw.zip. figshare. Dataset. https://doi.org/10.6084/m9.figshare.11662422.v1, Apache License, Version 2.0.
+In addition, YAHPO contains `scenarios` built upon previous work, see the *Source* column in the table above for citation info.
 
 **Please make sure to always also cite the original data sources as YAHPO Gym would not have been possible without them!**
 
