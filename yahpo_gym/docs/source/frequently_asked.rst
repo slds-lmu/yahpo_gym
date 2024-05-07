@@ -8,9 +8,9 @@ Citation
 
 If you use YAHPO Gym, please cite the following paper:
 
-* Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In First International Conference on Automated Machine Learning.
+* Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. Proceedings of the First International Conference on Automated Machine Learning, in Proceedings of Machine Learning Research 188:3/1-39
 
-In addition, please cite `Scenarios table <https://slds-lmu.github.io/yahpo_gym/scenarios.html>`_.
+In addition, please cite the scenarios used, see the `Scenarios table <https://slds-lmu.github.io/yahpo_gym/scenarios.html>`_.
 
 OpenML task_id and dataset_id
 =======================
@@ -96,6 +96,13 @@ While XGBoost can be considered state-of-the art on tabular data and very good p
 
 We are looking into this issue and will try to address it in upcoming versions of `YAHPO Gym`.
 
+Replications and the **repl** parameter (rbv2_, iaml_)
+=======================
+Metrics obtained from the *rbv2_*, and *iaml_* benchmarks include a **repl** hyperparameter. 
+Surrogate models here model the individual folds of a 10-fold CV run (as defined in the OpenML tasks) which allows for evaluating scenarios *multi-fidelity* scenarios such as running only a subset of cross-validation folds.
+Replications here model the `cummulative mean` of the previous folds, i.e. fold 3 is the mean performance in the first three folds.
+By default, the **repl** parameter is fixed to the 10th cv fold.
+
 Noisy Surrogates
 =======================
 
@@ -108,3 +115,4 @@ This internally works as follows:
 While this works well in theory, this was not tested thoroughly and the use of noisy surrogates is therefore discouraged at the moment.
 Furthermore, we have not extensively tested whether all noisy surrogates indeed correctly return noisy predictions.
 We will improve this in upcoming versions of `YAHPO Gym`.
+

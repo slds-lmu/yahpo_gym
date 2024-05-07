@@ -12,7 +12,7 @@ def setup(dest_dir: Path | str):
     Clone yahpo data into <dest_dir>/yahpo_data
     """
     # Define the repository URL
-    yahpo_data_url = "https://github.com/slds-lmu/yahpo_data.git@v2"
+    yahpo_data_url = "https://github.com/slds-lmu/yahpo_data.git@v2_final"
 
     # Run the git clone command
     dest_dir = Path(dest_dir).joinpath("yahpo_data")
