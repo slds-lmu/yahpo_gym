@@ -45,7 +45,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       }
 
       if (length(fidelity_params)) {
-        cst_fidelity = domain$subset(fidelity_params)
+        cst_fidelity = domain$subset(ids = fidelity_params)
         cst_fidelity$set_values(.values = as.list(cst_fidelity$upper))
       }
 

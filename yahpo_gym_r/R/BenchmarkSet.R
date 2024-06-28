@@ -162,21 +162,15 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'  A [`paradox::ParamSet`] containing the search space to optimize over.
     get_search_space = function(drop_instance_param = TRUE, drop_fidelity_params = FALSE) {
       search_space = private$.load_r_domains()$search_space
-      params = search_space$params
+      discard = character(0)
       if (drop_instance_param) {
-        params[self$py_instance$config$instance_names] = NULL
+        discard = c(discard, self$py_instance$config$instance_names)
       }
       if (drop_fidelity_params) {
-        params[self$py_instance$config$fidelity_params] = NULL
+        discard = c(discard, self$py_instance$config$fidelity_params)
       }
-      search_space_new = ParamSet$new(params)
-      if (search_space$has_trafo) {
-        search_space_new$trafo = search_space$trafo
-      }
-      if (search_space$has_deps) {
-        search_space_new$deps = search_space$deps
-      }
-      search_space_new
+
+      search_space$subset(ids = setdiff(search_space$ids(), discard))
     },
 
     #' @description
