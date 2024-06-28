@@ -25,26 +25,31 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       instance_param = self$py_instance$config$instance_names
       fidelity_params = if (!multifidelity) self$py_instance$config$fidelity_params else NULL
       pars = setdiff(domain$ids(), c(instance_param, fidelity_params))
-      domain_new = ParamSet$new(domain$params[pars])
-      if (domain$has_trafo) {
-        domain_new$trafo = domain$trafo
-      }
-      if (domain$has_deps) {
-        domain_new$deps = domain$deps
-      }
+
+      domain_new = domain$subset(ids = pars)
+      # if (domain$has_trafo) {
+      #   domain_new$trafo = domain$trafo
+      # }
+      # if (domain$has_deps) {
+      #   domain_new$deps = domain$deps
+      # }
 
       # define constants param_set
-      cst = ps()
+
+      cst_instance = ps()
+      cst_fidelity = ps()
+
       if (length(instance_param)) {
-        cst$add(domain$params[[instance_param]])
-        cst$values = insert_named(cst$values, y = setNames(list(instance), nm = instance_param))
+        cst_instance = domain$subset(ids = instance_param)
+        cst_instance$set_values(.values = setNames(list(instance), nm = instance_param))
       }
+
       if (length(fidelity_params)) {
-        for (fidelity_param in fidelity_params) {
-          cst$add(domain$params[[fidelity_param]])
-          cst$values = insert_named(cst$values, y = setNames(list(domain$params[[fidelity_param]]$upper), nm = fidelity_param))
-        }
+        cst_fidelity = domain$subset(fidelity_params)
+        cst_fidelity$set_values(.values = as.list(cst_fidelity$upper))
       }
+
+      cst = c(cst_instance, cst_fidelity)
 
       noise = ifelse(py_instance_args$noisy, "noisy", "deterministic")
       # asserts id, domain, codomain, properties
