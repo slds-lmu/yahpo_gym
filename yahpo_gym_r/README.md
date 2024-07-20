@@ -106,7 +106,7 @@ and run our search procedure.
 ```r
 library("bbotk")
 p = opt("random_search")
-ois = OptimInstanceMultiCrit$new(obj, search_space = b$get_search_space(drop_fidelity_params = TRUE), terminator = trm("evals", n_evals = 10))
+ois = OptimInstanceBatchMultiCrit$new(obj, search_space = b$get_search_space(drop_fidelity_params = TRUE), terminator = trm("evals", n_evals = 10))
 p$optimize(ois)
 ```
 
@@ -118,7 +118,7 @@ to specify `drop_fidelity_params = TRUE` when getting the search space via `$get
 ```r
 library(mlr3hyperband)
 obj = b$get_objective("40981", multifidelity = TRUE)
-ois = OptimInstanceMultiCrit$new(obj, search_space = b$get_search_space(), terminator = trm("none"))
+ois = OptimInstanceBatchMultiCrit$new(obj, search_space = b$get_search_space(), terminator = trm("none"))
 p = opt("hyperband")
 p$optimize(ois)
 ```

@@ -50,7 +50,7 @@ test_that("subsetting works", {
   reticulate::use_condaenv("yahpo_gym", required=TRUE)
   b = BenchmarkSet$new("lcbench", active_session = TRUE)
   b$subset_codomain("val_accuracy")
-  expect_true(names(b$codomain$params) == "val_accuracy")
+  expect_true(b$codomain$ids() == "val_accuracy")
 })
 
 test_that("Parallel", {
@@ -63,7 +63,7 @@ test_that("Parallel", {
   xdt = generate_design_random(b$get_search_space(), 1)$data
   xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
   objective$eval_many(xss_trafoed)
-  
+
   future::plan("multisession")
   pss = replicate(2, {
     xdt = generate_design_random(b$get_search_space(), 1)$data

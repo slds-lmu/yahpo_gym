@@ -25,25 +25,21 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
       instance_param = self$py_instance$config$instance_names
       fidelity_params = if (!multifidelity) self$py_instance$config$fidelity_params else NULL
       pars = setdiff(domain$ids(), c(instance_param, fidelity_params))
-      domain_new = ParamSet$new(domain$params[pars])
-      if (domain$has_trafo) {
-        domain_new$trafo = domain$trafo
-      }
-      if (domain$has_deps) {
-        domain_new$deps = domain$deps
-      }
+      domain_new = domain$subset(pars)  # this also handles trafo and dependencies
 
       # define constants param_set
       cst = ps()
       if (length(instance_param)) {
-        cst$add(domain$params[[instance_param]])
-        cst$values = insert_named(cst$values, y = setNames(list(instance), nm = instance_param))
+        cst = ps_union(list(cst,
+          domain$subset(instance_param)
+        ))
+        cst$set_values(.values = structure(list(instance), names = instance_param))
       }
       if (length(fidelity_params)) {
-        for (fidelity_param in fidelity_params) {
-          cst$add(domain$params[[fidelity_param]])
-          cst$values = insert_named(cst$values, y = setNames(list(domain$params[[fidelity_param]]$upper), nm = fidelity_param))
-        }
+        cst = ps_union(list(cst,
+          domain$subset(fidelity_params)
+        ))
+        cst$set_values(.values = structure(as.list(domain$upper[fidelity_params]), names = fidelity_params))
       }
 
       noise = ifelse(py_instance_args$noisy, "noisy", "deterministic")
@@ -95,7 +91,7 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
           self$py_instance$objective_function(
             preproc_xs(xs, ...), seed = self$seed,
             logging = self$logging, multithread = self$multithread
-          )  
+          )
         }
       }
     },
