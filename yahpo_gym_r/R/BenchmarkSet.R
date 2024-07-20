@@ -51,7 +51,7 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #' @field check_codomain `logical` \cr
     #'   Check whether returned values coincide with `codomain`.
     check_codomain = NULL,
-    
+
     #' @field noisy `logical` \cr
     #'   Whether noisy surrogates should be used.
     noisy = NULL,
@@ -130,10 +130,10 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
         instance,
         multifidelity,
         list(
-          scenario = self$id, 
+          scenario = self$id,
           session = self$onnx_session,
-          active_session = self$active_session, 
-          check = self$check, 
+          active_session = self$active_session,
+          check = self$check,
           multithread = self$multithread,
           noisy = self$noisy
         ),
@@ -162,20 +162,15 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
     #'  A [`paradox::ParamSet`] containing the search space to optimize over.
     get_search_space = function(drop_instance_param = TRUE, drop_fidelity_params = FALSE) {
       search_space = private$.load_r_domains()$search_space
-      params = search_space$params
+      params = search_space$ids()
       if (drop_instance_param) {
-        params[self$py_instance$config$instance_names] = NULL
+        params = setdiff(params, self$py_instance$config$instance_names)
       }
       if (drop_fidelity_params) {
-        params[self$py_instance$config$fidelity_params] = NULL
+        params = setdiff(params, self$py_instance$config$fidelity_params)
       }
-      search_space_new = ParamSet$new(params)
-      if (search_space$has_trafo) {
-        search_space_new$trafo = search_space$trafo
-      }
-      if (search_space$has_deps) {
-        search_space_new$deps = search_space$deps
-      }
+      search_space_new = search_space$subset(params)  # subset() handles trafo & dependencies
+
       search_space_new
     },
 
@@ -192,15 +187,15 @@ BenchmarkSet = R6::R6Class("BenchmarkSet",
 
     #' @description
     #' Subset the codomain. Sets a new domain.
-    #' 
+    #'
     #' @param keep (`character`) \cr
     #'   Vector of co-domain target names to keep.
     #' @return
     #'  A [`paradox::ParamSet`] containing the output space (codomain).
     subset_codomain = function(keep) {
       codomain = self$codomain
-      assert_subset(keep, names(codomain$params))
-      new_codomain = ParamSet$new(codomain$params[names(codomain$params) %in% keep])
+      assert_subset(keep, codomain$ids())
+      new_codomain = codomain$subset(keep)
       private$.domains$codomain = new_codomain
     }
   ),

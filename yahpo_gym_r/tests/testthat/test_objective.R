@@ -1,9 +1,9 @@
 test_that("Objective eval and eval_many", {
-  skip("Tested locally")
-  reticulate::use_condaenv("yahpo_gym", required=TRUE)
+  skip_on_ci()
+  reticulate::use_condaenv("yahpo_gym", required = TRUE)
   b = BenchmarkSet$new("lcbench", active_session = TRUE)
   obj = b$get_objective("34539")
-  des = paradox::generate_design_random(obj$domain, 10)
+  des = paradox::generate_design_random(obj$domain, n = 10L)
   res1 = obj$eval_dt(des$data)
   expect_data_table(res1)
   ll = transpose_list(des$data)
