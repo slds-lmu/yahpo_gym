@@ -23,7 +23,7 @@ Encoding: UTF-8
 Depends:
     R (>= 3.5)
 Imports:
-    bbotk,
+    bbotk (>= 1.0.0),
     checkmate (>= 2.0.0),
     mlr3misc (>= 0.1.1),
     paradox (>= 1.0.0),
@@ -32,11 +32,8 @@ Imports:
     R6
 Suggests:
     testthat,
-    covr,
-    knitr,
-    rmarkdown,
+    withr,
     future
 RoxygenNote: 7.3.2
-VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/testthat/parallel: true
