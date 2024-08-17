@@ -1,6 +1,6 @@
-test_that("benchmarkset can be instantiated", {
-  skip("Tested locally")
-  reticulate::use_condaenv("yahpo_gym", required=TRUE)
+test_that("BenchmarkSet can be instantiated", {
+  skip_on_ci()
+  reticulate::use_condaenv("yahpo_gym", required = TRUE)
   b = BenchmarkSet$new("lcbench", instance = "3945", active_session = TRUE)
   id = reticulate::py_id(b$session)
   expect_r6(b, "BenchmarkSet")
@@ -16,7 +16,7 @@ test_that("benchmarkset can be instantiated", {
   expect_r6(obj$codomain, "ParamSet")
   # Can be optimized
   p = opt("random_search")
-  ois = OptimInstanceMultiCrit$new(obj, terminator = trm("evals", n_evals = 10), check_values = FALSE)
+  ois = OptimInstanceBatchMultiCrit$new(obj, terminator = trm("evals", n_evals = 10L), check_values = FALSE)
   p$optimize(ois)
   expect_true(nrow(ois$archive$data) == 10L)
   # We stay in the same session
@@ -39,40 +39,44 @@ test_that("benchmarkset can be instantiated", {
   expect_r6(obj2$codomain, "ParamSet")
   # Can be optimized
   p = opt("random_search")
-  ois2 = OptimInstanceMultiCrit$new(obj2, terminator = trm("evals", n_evals = 10), check_values = FALSE)
+  ois2 = OptimInstanceBatchMultiCrit$new(obj2, terminator = trm("evals", n_evals = 10L), check_values = FALSE)
   p$optimize(ois2)
   expect_true(nrow(ois2$archive$data) == 10L)
   expect_true(id == reticulate::py_id(b2$session))
 })
 
-test_that("subsetting works", {
-  skip("Tested locally")
-  reticulate::use_condaenv("yahpo_gym", required=TRUE)
+test_that("Subsetting works", {
+  skip_on_ci()
+  reticulate::use_condaenv("yahpo_gym", required = TRUE)
   b = BenchmarkSet$new("lcbench", active_session = TRUE)
   b$subset_codomain("val_accuracy")
   expect_true(b$codomain$ids() == "val_accuracy")
 })
 
 test_that("Parallel", {
-  skip("Tested locally")
-  options(future.globals.onReference = "string")
-  reticulate::use_condaenv("yahpo_gym", required=TRUE)
-  b = BenchmarkSet$new("lcbench")
-  objective = b$get_objective("3945", timed = FALSE, check_values = FALSE)
+  skip_on_ci()
+  withr::with_envvar(
+    new = c(RETICULATE_PYTHON = Sys.getenv("RETICULATE_PYTHON_YAHPO")),
+    {
+      options(future.globals.onReference = "string")
+      reticulate::use_condaenv("yahpo_gym", required = TRUE)
+      b = BenchmarkSet$new("lcbench")
+      objective = b$get_objective("3945", timed = FALSE, check_values = FALSE)
 
-  xdt = generate_design_random(b$get_search_space(), 1)$data
-  xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
-  objective$eval_many(xss_trafoed)
+      xdt = generate_design_random(b$get_search_space(), n = 1L)$data
+      xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
+      expect_true(nrow(objective$eval_many(xss_trafoed)) == 1L)
 
-  future::plan("multisession")
-  pss = replicate(2, {
-    xdt = generate_design_random(b$get_search_space(), 1)$data
-    xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
-    promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL, lazy = TRUE)
-  })
-  map(pss, future::value)
+      future::plan("multisession")
+      pss = replicate(2L, {
+        xdt = generate_design_random(b$get_search_space(), n = 1L)$data
+        xss_trafoed = transform_xdt_to_xss(xdt, b$get_search_space())
+        promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL, lazy = TRUE)
+      })
+      expect_true(length(map(pss, future::value)) == 2L)
 
-  promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
-  future::value(promise)
+      promise = future::future(objective$eval_many(xss_trafoed), packages = "yahpogym", seed = NULL)
+      expect_true(nrow(future::value(promise)) == 1L)
+    })
 })
 

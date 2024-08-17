@@ -104,7 +104,7 @@ obj = b$get_objective("40981", multifidelity = FALSE)
 and run our search procedure.
 
 ```r
-library("bbotk")
+library(bbotk)
 p = opt("random_search")
 ois = OptimInstanceBatchMultiCrit$new(obj, search_space = b$get_search_space(drop_fidelity_params = TRUE), terminator = trm("evals", n_evals = 10))
 p$optimize(ois)
@@ -126,7 +126,7 @@ p$optimize(ois)
 We can list all available benchmark problems:
 
 ```r
-list_benchmarks()
+str(list_benchmarks())
 ```
 
 and available instances in a `Benchmark`:
