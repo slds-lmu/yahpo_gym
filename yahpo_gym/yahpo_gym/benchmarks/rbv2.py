@@ -1,6 +1,6 @@
 from yahpo_gym.configuration import config_dict
 
-# Default dict, holds for all 'rbv2_' benchmarks
+# Default dict, holds for all "rbv2_" benchmarks
 _rbv2_dict = {
     "y_names": [
         "acc",
@@ -237,7 +237,6 @@ _rbv2_aknn.update(
     }
 )
 config_dict.update({"rbv2_aknn": _rbv2_aknn})
-
 
 # Superset Model Multiplexer
 _rbv2_super = _rbv2_dict.copy()

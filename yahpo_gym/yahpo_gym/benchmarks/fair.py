@@ -1,7 +1,7 @@
 from yahpo_gym.configuration import config_dict
 
-# Default dict, holds for all 'fair_' benchmarks
-# Note fpp (Calders-Wevers gap) exlcuded for now
+# Default dict, holds for all "fair_" benchmarks
+# Note fpp (Calders-Wevers gap) excluded for now
 _fair_dict = {
     "y_names": [
         "mmce",
@@ -32,7 +32,7 @@ _fair_dict = {
     "memory_name": "rammodel",
 }
 
-## Fgrrm
+# Fgrrm
 _fair_fgrrm = _fair_dict.copy()
 _fair_fgrrm.update(
     {
@@ -43,7 +43,7 @@ _fair_fgrrm.update(
 )
 config_dict.update({"fair_fgrrm": _fair_fgrrm})
 
-## Decision Trees
+# Decision Trees
 _fair_rpart = _fair_dict.copy()
 _fair_rpart.update(
     {
@@ -63,7 +63,7 @@ _fair_rpart.update(
 )
 config_dict.update({"fair_rpart": _fair_rpart})
 
-## Ranger (Random Forest)
+# Ranger (Random Forest)
 _fair_ranger = _fair_dict.copy()
 _fair_ranger.update(
     {
@@ -90,7 +90,7 @@ _fair_ranger.update(
 )
 config_dict.update({"fair_ranger": _fair_ranger})
 
-## XGBOOST
+# XGBOOST
 _fair_xgboost = _fair_dict.copy()
 _fair_xgboost.update(
     {
@@ -116,7 +116,7 @@ _fair_xgboost.update(
 )
 config_dict.update({"fair_xgboost": _fair_xgboost})
 
-## Superset Model Multiplexer
+# Superset Model Multiplexer
 _fair_super = _fair_dict.copy()
 _fair_super.update(
     {

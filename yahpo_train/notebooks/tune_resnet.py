@@ -733,6 +733,69 @@ if __name__ == "__main__":
         }
     )
 
+    tfms_fcnet = {}
+    tfms_fcnet.update(
+        {
+            "valid_mse": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerStandardizeGroupedRangeGrouped,
+                ]
+            ),
+            "runtime": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
+                    ContTransformerStandardizeGroupedRangeGrouped,
+                ]
+            ),
+            "runtime_increase": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
+                    ContTransformerStandardizeGroupedRangeGrouped,
+                ]
+            ),
+            "init_lr": ContTransformerShiftLogRangeExtended,
+        }
+    )
+    tfms_list.update({"fcnet": tfms_fcnet})
+
+    tfms_pd1 = {}
+    tfms_pd1.update(
+        {
+            "valid_error": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerStandardizeGroupedRangeGrouped,
+                ]
+            ),
+            "test_error": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00, max=1.00),
+                    ContTransformerStandardizeGroupedRangeGrouped,
+                ]
+            ),
+            "eval_time": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
+                    ContTransformerStandardizeGroupedRangeGrouped,
+                ]
+            ),
+            "eval_time_increase": tfms_chain(
+                [
+                    partial(ContTransformerClamp, min=0.00),
+                    ContTransformerLog,
+                    ContTransformerStandardizeGroupedRangeGrouped,
+                ]
+            ),
+            "lr_initial_value": ContTransformerShiftLogRangeExtended,
+            "one_minus_momentum": ContTransformerShiftLogRangeExtended,
+        }
+    )
+    tfms_list.update({"pd1": tfms_pd1})
+
     parser = argparse.ArgumentParser(description="Args for resnet tuning")
     parser.add_argument(
         "--key",
