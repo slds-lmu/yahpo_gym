@@ -29,7 +29,7 @@ setup(
     license="Apache-2.0",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     include_package_data=True,
-    install_requires=["onnxruntime>=1.10.0", "pyyaml", "configspace<=0.6.1", "pandas"],
+    install_requires=["onnxruntime>=1.10.0", "pyyaml", "configspace<=0.6.1", "numpy<2.0.0", "pandas"],
     extras_require={
         "test": ["pytest>=4.6", "mypy", "pre-commit", "pytest-cov"],
         "docs": [
