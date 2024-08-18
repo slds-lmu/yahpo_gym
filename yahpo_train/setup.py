@@ -20,7 +20,7 @@ if __version__ is None:
 setup(name='yahpo_train',
       version=__version__,
       author='Florian Pfisterer, Lennart Schneider',
-      description='Train surrogate models for the yahpo gym',
+      description='Train surrogate models for YAHPO Gym',
       long_description=long_description,
       license='Apache-2.0',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),

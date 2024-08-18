@@ -24,7 +24,7 @@ setup(
     name="yahpo_gym",
     version=__version__,
     author="Florian Pfisterer, Lennart Schneider",
-    description="Inference module for the yahpo gym",
+    description="Inference module for YAHPO Gym",
     long_description=long_description,
     license="Apache-2.0",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),

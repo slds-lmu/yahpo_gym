@@ -4,7 +4,7 @@ RUN \
   apt update -y && \
   apt install build-essential git wget -y && \
   /usr/local/bin/python -m pip install --upgrade pip && \
-  pip install yahpo-gym==1.0.1 && \
+  pip install yahpo-gym && \
   git clone --depth 1 -b main https://github.com/slds-lmu/yahpo_data.git && \
   chown -R root yahpo_data && \
   mkdir ~/.config/ && \

@@ -1,3 +1,8 @@
+# Version 1.0.2
+* set ONNX provider explicitly
+* require ConfigSpace <= 0.6.1
+* updated documentation and examples and citations of data sources
+
 # Version 1.0.1
 * BenchmarkSet got two new properties
     * instance : returns the selected instance if available
