@@ -46,7 +46,7 @@ Original data sources are given by:
 ### Installation
 
 ```console
-pip install yahpo-gym==1.0.1
+pip install yahpo-gym
 ```
 
 ### Setup
