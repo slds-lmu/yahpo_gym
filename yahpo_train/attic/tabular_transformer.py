@@ -241,11 +241,15 @@ class Transformer(AbstractSurrogate):
         return (
             (self.shared_kv_compression, self.shared_kv_compression)
             if self.shared_kv_compression is not None
-            else (layer["key_compression"], layer["value_compression"])
-            if "key_compression" in layer and "value_compression" in layer
-            else (layer["key_compression"], layer["key_compression"])
-            if "key_compression" in layer
-            else (None, None)
+            else (
+                (layer["key_compression"], layer["value_compression"])
+                if "key_compression" in layer and "value_compression" in layer
+                else (
+                    (layer["key_compression"], layer["key_compression"])
+                    if "key_compression" in layer
+                    else (None, None)
+                )
+            )
         )
 
     def _start_residual(self, x, layer, norm_idx):

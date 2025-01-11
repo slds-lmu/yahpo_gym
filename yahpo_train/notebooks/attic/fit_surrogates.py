@@ -1,10 +1,10 @@
 from functools import partial
 
 from fastai.callback.wandb import *
+
 from yahpo_gym import benchmark_set
 from yahpo_gym.benchmarks import fcnet, iaml, lcbench, nb301, rbv2, taskset
 from yahpo_gym.configuration import cfg
-
 from yahpo_train.cont_scalers import *
 from yahpo_train.learner import *
 from yahpo_train.metrics import *

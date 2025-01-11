@@ -123,7 +123,7 @@ def pearson(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.nda
     return np.array(r)
 
 
-def napct(x: torch.Tensor, y: torch.Tensor, impute_nan: bool = True) -> np.ndarray:
+def napct(x: torch.Tensor, y: torch.Tensor) -> np.ndarray:
     """
     Percentage of NaNs
     """

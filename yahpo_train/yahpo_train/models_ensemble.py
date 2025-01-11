@@ -159,6 +159,7 @@ class SurrogateEnsembleLearner(SurrogateTabularLearner):
 
 
 if __name__ == "__main__":
+    from yahpo_gym.benchmarks import iaml  # noqa: F401
     from yahpo_gym.configuration import cfg
 
     from yahpo_train.learner import SurrogateTabularLearner, dl_from_config

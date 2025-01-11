@@ -8,8 +8,8 @@ import optuna
 import torch
 from fastai.callback.tracker import *
 from optuna.integration import FastAIPruningCallback
-from yahpo_gym.configuration import cfg
 
+from yahpo_gym.configuration import cfg
 from yahpo_train.cont_scalers import *
 from yahpo_train.helpers import generate_all_test_set_metrics
 from yahpo_train.learner import *
@@ -125,12 +125,14 @@ def fit_config_resnet(
             for name, cont in dl_train.all_cols[dl_train.cont_names].items()
         ]
         embds_tgt = [
-            tfms.get(name)
-            if tfms.get(name) is not None
-            else (
-                ContTransformerStandardizeGroupedRange
-                if config.instance_names is not None
-                else ContTransformerStandardizeRange
+            (
+                tfms.get(name)
+                if tfms.get(name) is not None
+                else (
+                    ContTransformerStandardizeGroupedRange
+                    if config.instance_names is not None
+                    else ContTransformerStandardizeRange
+                )
             )
             for name, cont in dl_train.ys.items()
         ]

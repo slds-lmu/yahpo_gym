@@ -7,8 +7,8 @@ if __name__ == "__main__":
     import optuna
     import torch
     from tune_resnet import *
-    from yahpo_gym import benchmark_set
 
+    from yahpo_gym import benchmark_set
     from yahpo_train.cont_scalers import *
     from yahpo_train.helpers import generate_all_test_set_metrics
 

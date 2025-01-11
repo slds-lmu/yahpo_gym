@@ -25,6 +25,7 @@ class BenchmarkSet:
         multithread: bool = True,
         check: bool = True,
         noisy: bool = False,
+        data_path=None,
     ):
         """
         Interface for a benchmark scenario.
@@ -50,10 +51,14 @@ class BenchmarkSet:
             Should input to objective_function be checked for validity? Initialized to `True`, but can be disabled for speedups.
         noisy: bool
             Use stochastic surrogate models? Initialized to `False`.
+        data_path: str
+            Optional path to the data directory. If not provided, the default data path as indicated by the local config is used.
         """
 
         assert scenario is not None, "Please provide a valid scenario."
         self.config = cfg(scenario)
+        if data_path is not None:
+            self.config.config["basedir"] = data_path  # override the default path
         self.encoding = self._get_encoding()
         self.config_space = self._get_config_space()
         self.active_session = active_session
@@ -90,6 +95,8 @@ class BenchmarkSet:
         configuration: Dict
             A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
+        seed: int
+            Seed for the random number generator. Initialized to `None`.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
         multithread: bool
@@ -162,6 +169,8 @@ class BenchmarkSet:
         configuration: Dict
             A valid dict or list of dicts containing hyperparameters to be evaluated.
             Attention: `configuration` is not checked for internal validity for speed purposes.
+        seed: int
+            Seed for the random number generator. Initialized to `None`.
         logging: bool
             Should the evaluation be logged in the `archive`? Initialized to `False`.
         multithread: bool
@@ -348,7 +357,7 @@ class BenchmarkSet:
             * statistic :: min or max
             * value :: value of minimum/maximum
             * scenario :: the scenario
-            " instance :: the instance
+            * instance :: the instance
         If no instance is set, all instances for a given scenario are returned.
         """
         df = pd.read_csv(
@@ -462,7 +471,7 @@ class BenchmarkSet:
     def _infer_quant(self):
         offsets = []
         runtimes = []
-        for i in range(15):
+        for _ in range(15):
             start_time = time.time()
             results = self._eval_random()
             runtimes += [results[self.config.runtime_name]]
@@ -486,7 +495,6 @@ if __name__ == "__main__":
     from yahpo_gym import benchmark_set
 
     bench = benchmark_set.BenchmarkSet("iaml_super")
-    bench.instances
     bench.set_instance("1067")
     config = {
         "task_id": "1067",
