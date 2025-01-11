@@ -1,4 +1,4 @@
-from pandas import read_json
+import pandas as pd
 from yahpo_gym.local_config import local_config
 
 
@@ -27,7 +27,7 @@ def get_suite(type: str, version: float = 1.0):
     )
     # Read json
     with open(fp, "r") as f:
-        data = read_json(f, orient="records")
+        data = pd.read_json(f, orient="records")
     return data
 
 
