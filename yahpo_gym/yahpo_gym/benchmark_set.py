@@ -118,6 +118,7 @@ class BenchmarkSet:
             for cf in configuration
         ]
 
+        assert self.session is not None, "Session is not set"
         input_names = [x.name for x in self.session.get_inputs()]
         output_name = self.session.get_outputs()[0].name
 

@@ -5,7 +5,7 @@ import yaml
 
 
 class LocalConfiguration:
-    def __init__(self, settings_path: str = None):
+    def __init__(self, settings_path: str | None = None):
         """
         Interface for setting up a local configuration.
         This reads from and writes to a configuration file in the YAML format,
@@ -46,13 +46,13 @@ class LocalConfiguration:
             yaml.dump(config, fh)
         return None
 
-    def set_data_path(self, data_path: str):
+    def set_data_path(self, data_path: str | Path):
         """
         Set path to directory where required models and metadata are stored.
 
         Parameters
         ----------
-        data_path: str
+        data_path: str | Path
             Path to the directory where surrogate models and metadata are saved.
         """
         config = self.config
@@ -67,10 +67,10 @@ class LocalConfiguration:
                 config = yaml.load(fh, Loader=yaml.FullLoader)
         except yaml.parser.ParserError:
             raise yaml.parser.ParserError("Could not load config! (Invalid YAML?)")
-        except Exception:
+        except (FileNotFoundError, PermissionError) as e:
             raise Exception(
                 "Could not load local_config! Please run LocalConfiguration.init_config() and restart."
-            )
+            ) from e
         return config
 
     @property

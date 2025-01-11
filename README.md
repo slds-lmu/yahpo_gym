@@ -124,6 +124,7 @@ We want to add several features to **yahpo_gym** in future versions:
 - [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_*` in a real setting.
 - [iaml](https://github.com/sumny/iaml) (R-Package) can be used to reproduce runs from all `iaml_*` in a real setting.
 - [HPOBench](https://github.com/automl/HPOBench) can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
+- [SyneTune](https://github.com/awslabs/syne-tune) offers additional benchmarks and helpful tuning. `SyneTune`can be used with yahpo gym instances!
 
 ### Citation
 
@@ -131,10 +132,7 @@ If you use YAHPO Gym, please cite the following paper:
 
 - Pfisterer, F., Schneider, L., Moosbauer, J., Binder, M., & Bischl, B. (2022). YAHPO Gym - An Efficient Multi-Objective Multi-Fidelity Benchmark for Hyperparameter Optimization. In International Conference on Automated Machine Learning.
 
-Moreover, certain `scenarios` built upon previous work, e.g., the `lcbench` scenario uses data from:
-
-- Zimmer, L., Lindauer, M., & Hutter, F. (2021). Auto-Pytorch: Multi-Fidelity Metalearning for Efficient and Robust AutoDL. IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(9), 3079-3090.
-- Zimmer, L. (2020). data_2k_lw.zip. figshare. Dataset. https://doi.org/10.6084/m9.figshare.11662422.v1, Apache License, Version 2.0.
+Moreover, depending on which scenarios you use, see the **Overview over benchmark instances** above.
 
 **Please make sure to always also cite the original data sources as YAHPO Gym would not have been possible without them!**
 

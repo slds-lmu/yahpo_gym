@@ -42,4 +42,5 @@ setup(
         ],
     },
     keywords=["module", "inference", "yahpo"],
+    url="https://github.com/slds-lmu/yahpo_gym",
 )
