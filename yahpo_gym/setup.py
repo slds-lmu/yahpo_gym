@@ -27,6 +27,7 @@ setup(
     description="Inference module for YAHPO Gym",
     long_description=long_description,
     license="Apache-2.0",
+    python_requires="<=3.11.9",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     include_package_data=True,
     install_requires=["onnxruntime>=1.10.0", "pyyaml", "configspace<=0.6.1", "numpy<2.0.0", "pandas"],
