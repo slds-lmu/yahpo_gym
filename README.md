@@ -17,7 +17,7 @@ See the [module Documentation](https://slds-lmu.github.io/yahpo_gym/) for more i
 - **Multi-Objective**: Benchmarks usually contain multiple objectives: performance metrics, runtime and memory consumption allowing for multi-objective and resource aware HPO.
 
 YAHPO Gym distinguishes between `scenarios` and `instances`.
-A `scenario` is a collection of `instances` that share the same hyperparameter space. In practice, a `scenario` usually consists of a single algorithm fitted on a variety of datasets (= `instances`).
+A `scenario` is a collection of `instances` that share the same hyperparameter space. In practice, a `scenario` usually consists of a single algorithm optimized on a variety of datasets (= `instances`).
 
 This repository contains three modules/packages:
 
@@ -30,9 +30,10 @@ We also maintain a list of [frequently asked questions](https://slds-lmu.github.
 **NEWS:**
 
 - The [paper](https://proceedings.mlr.press/v188/pfisterer22a.html) accompanying `YAHPO Gym` was accepted at the 1st International Conference on Automated Machine Learning!
-- YAHPO (Python) can now be installed via `pip install yahpo-gym`
-- YAHPO is now available in [HPOBench](https://github.com/automl/HPOBench/)
-- We are working on integrating YAHPO Gym with [syne-tune](https://github.com/awslabs/syne-tune) for asynchronous benchmarking!
+- YAHPO Gym (python) can now be installed via `pip install yahpo-gym`
+- YAHPO Gym is now available in [HPOBench](https://github.com/automl/HPOBench/)
+- YAHPO Gym is now available in [syne-tune](https://github.com/awslabs/syne-tune)
+>>>>>>> origin/main
 
 ### Why should I use it?
 
@@ -86,7 +87,7 @@ we also provide the full reproducible codebase used to generate the underlying s
 
 YAHPO Gym is the module for inference and allows for evaluating a HPC configuration on a given benchmark instance.
 
-Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtained [here (Github)](https://github.com/slds-lmu/yahpo_data) or [here (Syncshare)](https://syncandshare.lrz.de/getlink/fiCMkzqj1bv1LfCUyvZKmLvd/).
+Surrogate models (ONNX files), configspaces and metadata (encoding) can be obtained [here (Github)](https://github.com/slds-lmu/yahpo_data).
 
 An example for evaluation and running HPO methods is given in the README of the [YAHPO Gym module](https://github.com/slds-lmu/yahpo_gym/tree/main/yahpo_gym).
 
@@ -100,8 +101,8 @@ YAHPO Train is still in a preliminary state but can already be used to reproduce
 
 #### Docker
 
-A `docker` image that allows accessing `yahpo-gym` is available from `DockerHub` at [pfistfl/yahpo](https://hub.docker.com/repository/docker/pfistfl/yahpo/general). This adds additional overhead but simplifies use and installation. 
-The corresponding Dockerfile to get you started can be found in `docker/`.
+A `docker` image that allows accessing `yahpo_gym` is available from `DockerHub` at [pfistfl/yahpo](https://hub.docker.com/repository/docker/pfistfl/yahpo/general). This adds additional overhead but simplifies use and installation. 
+The corresponding dockerfile to get you started can be found in `docker/`.
 
 #### Roadmap
 
@@ -112,8 +113,6 @@ We want to add several features to **yahpo_gym** in future versions:
 - **Noisy Surrogate Models**
   We would like to allow for surrogates that more closely reflect the underlying (noisy) nature of real HPO experiments. Currently, noisy evaluation are available using `noisy = True` during instantiation, but this feature is considered experimental and
   requires additional evaluation for release.
-- **Integration with HPO-Bench**
-  HPO-Bench is a robust and mature library for benchmarking HPO Problems. Due to similarity in structure and scope, it would make sense to integrate YAHPO Gym with HPO, extending the number of scenarios available in HPO-Bench.
 - **Additional Scenarios**
   We are always happy to include additional (interesting) scenarios. If you know of (or want to add) an additional scenario, get in touch!
 
@@ -123,7 +122,6 @@ We want to add several features to **yahpo_gym** in future versions:
 
 - [rbv2](https://github.com/pfistfl/rbv2) (R-Package) can be used to reproduce runs from all `rbv2_*` in a real setting.
 - [iaml](https://github.com/sumny/iaml) (R-Package) can be used to reproduce runs from all `iaml_*` in a real setting.
-- [HPOBench](https://github.com/automl/HPOBench) can be used to reproduce several other scenarios in a real setting. Furthermore, we soon hope to integrate our surrogates with **HPOBench** in order to provide a single, common API.
 
 ### Citation
 

@@ -46,7 +46,7 @@ Original data sources are given by:
 ### Installation
 
 ```console
-pip install yahpo-gym==1.0.1
+pip install yahpo-gym
 ```
 
 ### Setup
@@ -85,22 +85,6 @@ config = bench.get_opt_space().sample_configuration(1).get_dictionary()
 print(bench.objective_function(config))
 ```
 
-#### Using YAHPO with `HPOBench`
-
-`yahpo_gym` is now integrated into `HPOBench`'s `development` branch.
-
-```py
-from hpobench.container.benchmarks.surrogates.yahpo_gym import YAHPOGymMOBenchmark
-b = YAHPOGymMOBenchmark(scenario="lcbench", rng=1)
-config = b.get_configuration_space(seed=1).sample_configuration()
-result_dict = b.objective_function(configuration=config, fidelity={"epoch": 50}, rng=1)
-```
-
-#### Using YAHPO with `syne-tune`
-
-We are currently working on integrating `yahpo_gym` with `syne-tune`.
-See [here](https://github.com/awslabs/syne-tune/pull/337) for progress on this issue.
-
 ### A note on OpenML Task IDs
 
 Currently, the `rbv2_*`, `lcbench`, and `iaml_*` scenarios contain instances based on OpenML datasets.
@@ -117,7 +101,7 @@ We include a full example for optimization using **BOHB** on a YAHPO Gym instanc
 
 - [General Usage](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
 - [Code Samples](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/code_sample.ipynb)
-- [Tuning with HpBandSter on Yahpo Gym](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb)
+- [Tuning with HpBandSter on YAHPO Gym](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/tuning_hpandster_on_yahpo.ipynb)
 - [Transfer HPO](https://github.com/slds-lmu/yahpo_gym/blob/main/yahpo_gym/notebooks/using_yahpo_gym.ipynb)
 - [Paper Experiments](https://github.com/slds-lmu/yahpo_exps/tree/main/paper)
 
