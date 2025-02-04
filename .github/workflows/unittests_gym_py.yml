@@ -23,10 +23,11 @@ jobs:
     - name: Run yahpo_gym tests [python]
       run: |
         pytest -sv yahpo_gym/tests/
-    - name: "Prepare [R]"
+    - name: Prepare [R]
       run: |
         cd ~/work/yahpo_gym/yahpo_gym/yahpo_gym_r
-        sudo apt install libcurl4-openssl-dev libgit2-dev libharfbuzz-dev libfribidi-dev
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libgit2-dev libharfbuzz-dev libfribidi-dev libfontconfig1-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
         Rscript -e "if (!requireNamespace('remotes')) install.packages('remotes', type = 'source')"
         Rscript -e "if (getRversion() < '3.2' && !requireNamespace('curl')) install.packages('curl', type = 'source')"
         Rscript -e "install.packages('devtools')"
