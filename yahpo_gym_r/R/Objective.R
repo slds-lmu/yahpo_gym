@@ -95,11 +95,11 @@ ObjectiveYAHPO = R6::R6Class("ObjectiveYAHPO",
         }
       }
     },
-    .eval_many = function(xs, ...) {
+    .eval_many = function(xss, ...) {
       if (is.null(private$.fun)) {
         private$.set_fun()
       }
-      res = invoke(private$.fun, xs = xs, .args = self$constants$values)
+      res = invoke(private$.fun, xs = xss, .args = self$constants$values)
       data.table::rbindlist(res)[, self$codomain$ids(), with = FALSE]
     }
   ),
